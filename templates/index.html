@@ -12,6 +12,7 @@
         <h1 class="text-4xl font-bold text-blue-600">Hello, World!!!!!!</h1>
         <button id="incrementButton" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Click me</button>
         <p id="counter" class="mt-2 text-2xl">0</p>
+        <img src="{{ url_for('static', filename='images/welcome.jpg') }}" alt="Thumbnail" class="mt-4">
     </div>
     <script>
         let count = 0;
