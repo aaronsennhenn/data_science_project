@@ -4,8 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hello, World!</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Hello, World!!!!!!</h1>
+
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold text-blue-600">Hello, World!!!!!!</h1>
+        <button id="incrementButton" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Click me</button>
+        <p id="counter" class="mt-2 text-2xl">0</p>
+    </div>
+    <script>
+        let count = 0;
+        document.getElementById('incrementButton').addEventListener('click', () => {
+            count++;
+            document.getElementById('counter').innerText = count;
+        });
+    </script>
 </body>
 </html>
