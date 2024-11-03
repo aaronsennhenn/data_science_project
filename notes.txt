@@ -1,0 +1,28 @@
+# for working
+
+# allow port
+sudo ufw allow 1200
+
+# disallow port
+sudo ufw delete allow 1200
+
+
+# start service datascienceproject.service
+sudo systemctl start datascienceproject 
+
+#alternative
+./update.sh
+
+# create symlink for nginx
+sudo ln -s /etc/nginx/sites-available/datascienceproject /etc/nginx/sites-enabled
+
+
+# Making a change
+# 1. 
+git pull
+
+# 2.
+./update.sh
+
+# check if no errors
+
