@@ -13,40 +13,40 @@
     </style>
 </head>
 
-<body class="bg-yellow-50 flex flex-col items-center justify-center min-h-screen p-2">
-    <div class="w-full max-w-8xl">
+<body class="bg-yellow-50 flex items-center justify-center min-h-screen p-2">
+    <div class="w-full max-w-8xl flex flex-col h-screen">
         <!-- First Row -->
-        <div class="text-center mb-8">
-            <h1 style="font-size: 48px;" class="text-3xl font-semibold text-gray-800 mb-4 font-script">Choose your Favourite Menu</h1>
-            <p class="text-gray-600 mb-6">
-                Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
-            </p>
-            <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">DINING FACILITIES</button>
+        <div class="flex-1 flex items-center justify-center">
+            <div class="text-center">
+                <h1 style="font-size: 48px;" class="text-3xl font-semibold text-gray-800 mb-4 font-script">Choose your Favourite Menu</h1>
+                <p class="text-gray-600 mb-6">
+                    Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
+                </p>
+                <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">DINING FACILITIES</button>
+            </div>
         </div>
 
         <!-- Second Row -->
-        <div class="grid grid-cols-3 gap-4">
+        <div class="flex-1 grid grid-cols-3 gap-4">
             <!-- Left Column (Image) -->
             <div class="col-span-1">
-                <div class="bg-gray-300 h-full flex items-center justify-center">
-                    <img src="{{ url_for('static', filename='images/menu_1.png') }}" alt="Menu 1" class="w-full h-full object-cover">
-                </div>
+                <img src="{{ url_for('static', filename='images/menu_1.png') }}" alt="Menu 1" class="w-full h-full object-cover">
             </div>
 
             <!-- Middle Column (Content) -->
-            <div class="col-span-1 text-center">
-                <h2 class="text-xl font-bold text-gray-800">Menu Matchmaker</h2>
-                <p class="text-gray-600 mt-2">Why waiting - start exploring!</p>
-                <p class="text-gray-600 mt-1">Uncover your personal taste and find the menu that best suits your preferences!</p>
-                <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Login</button>
-                <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Sign up</button>
+            <div class="col-span-1 flex items-center justify-center">
+                <div class="text-center">
+                    <h2 class="text-xl font-bold text-gray-800">Menu Matchmaker</h2>
+                    <p class="text-gray-600 mt-2">Why waiting - start exploring!</p>
+                    <p class="text-gray-600 mt-1">Uncover your personal taste and find the menu that best suits your preferences!</p>
+                    <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Login</button>
+                    <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Sign up</button>
+                </div>
             </div>
 
             <!-- Right Column (Image) -->
             <div class="col-span-1">
-                <div class="bg-gray-300 h-full flex items-center justify-center">
-                    <img src="{{ url_for('static', filename='images/menu_2.png') }}" alt="Menu 2" class="w-full h-full object-cover">
-                </div>
+                <img src="{{ url_for('static', filename='images/menu_2.png') }}" alt="Menu 2" class="w-full h-full object-cover">
             </div>
         </div>
     </div>
