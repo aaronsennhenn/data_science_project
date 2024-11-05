@@ -4,9 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dining Facilities</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Hello World</h1>
-    <p>This is the Dining Facilities page.</p>
+<body class="h-screen">
+    <div class="flex h-full">
+        <!-- Left side with image -->
+        <div class="w-1/2 bg-gray-900">
+            <img src="cafeteria.jpeg" alt="Dining Facility" class="w-full h-full object-cover">
+        </div>
+        
+        <!-- Right side with yellow background and content -->
+        <div class="w-1/2 bg-yellow-50 p-8 flex flex-col justify-center">
+            <h1 class="text-4xl font-bold mb-6">Dining Facilities</h1>
+            <a href="cafeteria_mensa_pkl" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">Cafeteria and Mensa Prinz Karl</a>
+            <a href="cafeteria_mst" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">Cafeteria Morgenstelle</a>
+            <a href="mensa_mst" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">Mensa Morgenstelle</a>
+            <a href="cafeteria_wil" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">Cafeteria Wilhelmstraße</a>
+            <a href="mensa_wil" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">Mensa Wilhelmstraße</a>           
+        </div>
+    </div>
 </body>
 </html>
