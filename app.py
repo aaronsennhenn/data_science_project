@@ -7,7 +7,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/dining_facilities')
-def about():
+def dining_facilities():
    return render_template('dining_facilities.html')
 
 if __name__ == "__main__":
