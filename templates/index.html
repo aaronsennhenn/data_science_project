@@ -13,31 +13,42 @@
     </style>
 </head>
 
-<body class="bg-yellow-50 flex items-center justify-center h-screen">
-    <div class="text-center">
-        <h1 style="font-size: 48px;" class="text-3xl font-semibold text-gray-800 mb-4 font-script">Choose your Favourite Menu</h1>
-        <p class="text-gray-600 mb-6">
-            Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
-        </p>
-        <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">DINING FACILITIES</button>
-        <div class="mb-6">
-               <p class="font-medium text-gray-700">Mensa Morgenstelle - Cafeteria Morgenstelle - Mensa & Cafeteria Prinz Karl - Mensa Wilhelmstraße - Cafeteria Wilhelmstraße</p>
+<body class="bg-yellow-50 flex flex-col items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-4xl">
+        <!-- First Row -->
+        <div class="text-center mb-8">
+            <h1 style="font-size: 48px;" class="text-3xl font-semibold text-gray-800 mb-4 font-script">Choose your Favourite Menu</h1>
+            <p class="text-gray-600 mb-6">
+                Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
+            </p>
+            <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">DINING FACILITIES</button>
         </div>
-        <div class="bg-yellow-50 p-4 rounded-lg mb-6">
-            <h2 class="text-xl font-bold text-gray-800">Menu Matchmaker</h2>
-            <p class="text-gray-600 mt-2">Why waiting - start exploring</p>
-            <p class="text-gray-600 mt-1">Uncover your personal taste and find the menu that best suits your preferences!</p>
-            <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Login</button>
-            <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Sign up</button>
-        </div>  
+
+        <!-- Second Row -->
+        <div class="grid grid-cols-3 gap-4">
+            <!-- Left Column (Image) -->
+            <div class="col-span-1">
+                <div class="bg-gray-300 h-full flex items-center justify-center">
+                    <p>Left Image Placeholder</p>
+                </div>
+            </div>
+
+            <!-- Middle Column (Content) -->
+            <div class="col-span-1 text-center">
+                <h2 class="text-xl font-bold text-gray-800">Menu Matchmaker</h2>
+                <p class="text-gray-600 mt-2">Why waiting - start exploring</p>
+                <p class="text-gray-600 mt-1">Uncover your personal taste and find the menu that best suits your preferences!</p>
+                <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Login</button>
+                <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Sign up</button>
+            </div>
+
+            <!-- Right Column (Image) -->
+            <div class="col-span-1">
+                <div class="bg-gray-300 h-full flex items-center justify-center">
+                    <p>Right Image Placeholder</p>
+                </div>
+            </div>
+        </div>
     </div>
-    <img src="{{ url_for('static', filename='images/welcome.jpeg') }}" alt="Thumbnail" class="mt-4 w-24 h-24">
-    <script>
-        let count = 0;
-        document.getElementById('incrementButton').addEventListener('click', () => {
-            count++;
-            document.getElementById('counter').innerText = count;
-        });
-    </script>
 </body>
 </html>
