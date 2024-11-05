@@ -8,7 +8,7 @@ def index():
 
 @app.route('/dining_facilities')
 def dining_facilities():
-   return render_template('dining_facilities.html')
+   return render_template('dining_facilities')
 
 if __name__ == "__main__":
     # hier wird nix verändert
