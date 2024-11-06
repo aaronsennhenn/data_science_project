@@ -10,32 +10,51 @@
         .font-script {
             font-family: 'Dancing Script', cursive;
         }
+        .bg-custom-beige {
+            background-color: #D2BD96;
+        }
     </style>
 </head>
 
-<body class="bg-yellow-50 min-h-screen">
-    <div class="flex h-screen">
-        <!-- Left side with image -->
-        <div class="w-1/2">
-            <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Dining Facility" class="w-full h-full object-cover">
-        </div>
-        
-        <!-- Right side with content -->
-        <div class="w-1/2 flex items-center justify-center p-8">
-            <div class="text-center">
-                <h1 style="font-size: 52px;" class="font-script text-3xl font-semibold text-gray-800 mb-4">Dining Facilities</h1>
-                <p class="text-gray-600 mb-6">
-                    Explore our various dining facilities across Tübingen.
-                </p>
-                <div class="flex flex-col space-y-4">
-                    <a href="{{ url_for('cafeteria_mensa_pkl') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Cafeteria and Mensa Prinz Karl</a>
-                    <a href="{{ url_for('cafeteria_mst') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Cafeteria Morgenstelle</a>
-                    <a href="{{ url_for('mensa_mst') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Mensa Morgenstelle</a>
-                    <a href="{{ url_for('cafeteria_wil') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Cafeteria Wilhelmstraße</a>
-                    <a href="{{ url_for('mensa_wil') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Mensa Wilhelmstraße</a>   
+<body class="bg-custom-beige min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="w-full bg-white shadow-md py-4 px-8">
+        <nav class="flex justify-between items-center">
+            <div class="text-xl font-bold text-gray-800">Savor.</div>
+            <div class="space-x-4">
+                <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Home</a>
+                <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">About</a>
+                <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Review</a>
+                <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex">
+        <div class="flex w-full">
+            <!-- Left side with image -->
+            <div class="w-1/2">
+                <img src="{{ url_for('static', filename='images/background.jpg') }}" alt="Dining Facility" class="w-full h-full object-cover">
+            </div>
+            
+            <!-- Right side with content -->
+            <div class="w-1/2 flex items-center justify-center p-8">
+                <div class="text-center">
+                    <h1 style="font-size: 52px;" class="font-script text-3xl font-semibold text-gray-800 mb-4">Dining Facilities</h1>
+                    <p class="text-gray-600 mb-6">
+                        Explore our various dining facilities across Tübingen.
+                    </p>
+                    <div class="flex flex-col space-y-4">
+                        <a href="{{ url_for('cafeteria_mensa_pkl') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Cafeteria and Mensa Prinz Karl</a>
+                        <a href="{{ url_for('cafeteria_mst') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Cafeteria Morgenstelle</a>
+                        <a href="{{ url_for('mensa_mst') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Mensa Morgenstelle</a>
+                        <a href="{{ url_for('cafeteria_wil') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Cafeteria Wilhelmstraße</a>
+                        <a href="{{ url_for('mensa_wil') }}" class="px-4 py-2 bg-gray-900 text-white rounded inline-block">Mensa Wilhelmstraße</a>   
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 </body>
 </html>
