@@ -19,8 +19,22 @@
     </style>
 </head>
 
-<body class="bg-yellow-50 flex items-center justify-center min-h-screen p-2">
-    <div class="w-full max-w-8xl flex flex-col h-screen">
+<body class="bg-yellow-50 min-h-screen">
+    <!-- Navigation Bar -->
+    <header class="w-full bg-white shadow-md py-4 px-8">
+        <nav class="flex justify-between items-center">
+            <div class="text-xl font-bold text-gray-800">Savor.</div>
+            <div class="space-x-4">
+                <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded">Home</a>
+                <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded">About</a>
+                <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded">Review</a>
+                <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="w-full max-w-8xl flex flex-col h-[calc(100vh-4rem)]">
         <!-- First Row with Background Image -->
         <div class="flex-1 relative flex items-center justify-center">
             <div class="bg-image absolute inset-0 opacity-30"></div>
@@ -30,7 +44,7 @@
                     <p class="text-gray-600 mb-6">
                         Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
                     </p>
-                    <a href="dining_facilities" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">DINING FACILITIES</a>
+                    <a href="dining_facilities" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">Dining facilities</a>
                     <p class="text-gray-600 mb-6">
                         Cafeteria Morgenstelle - Mensa Morgenstelle - Cafeteria Wilhelmstraße - Mensa Wilhelmstraße - Mensa and Cafeteria Prinz Karl
                     </p>
@@ -52,7 +66,6 @@
                     <p class="text-gray-600 mt-2">Why waiting - start exploring!</p>
                     <p class="text-gray-600 mt-1">Uncover your personal taste and find the menu that best suits your preferences!</p>
                     <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Login</button>
-                    <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Sign up</button>
                 </div>
             </div>
 
