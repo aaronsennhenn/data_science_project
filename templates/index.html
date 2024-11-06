@@ -11,19 +11,41 @@
             font-family: 'Dancing Script', cursive;
         }
         .bg-image {
-            background-image: url("{{ url_for('static', filename='images/background.jpg')}}");
+            background-image: url("{{ url_for('static', filename='images/background.jpg') }}");
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
+        header {
+            padding-bottom: 1rem;
+        }
+        h1 {
+            margin-top: 2rem;
+        }
+        .content-row {
+            height: calc(50vh - 2rem); /* Subtract half of header height */
+        }
+        .image-container {
+            height: 100%;
+            overflow: hidden;
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        .bg-soft-beige {
+            background-color: #D2BD96;
+        }
     </style>
 </head>
 
-<body class="bg-yellow-50 min-h-screen">
+<body class="bg-soft-beige min-h-screen flex flex-col">
     <!-- Navigation Bar -->
     <header class="w-full bg-white shadow-md py-4 px-8">
         <nav class="flex justify-between items-center">
-            <div class="text-xl font-bold text-gray-800">Savor.</div>
+            <div class="text-xl font-bold text-gray-900">Savor.</div>
             <div class="space-x-4">
                 <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded">Home</a>
                 <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded">About</a>
@@ -34,44 +56,42 @@
     </header>
 
     <!-- Main Content -->
-    <div class="w-full max-w-8xl flex flex-col h-[calc(100vh-4rem)]">
+    <div class="flex-grow flex flex-col">
         <!-- First Row with Background Image -->
-        <div class="flex-1 relative flex items-center justify-center">
+        <div class="content-row relative flex items-center justify-center">
             <div class="bg-image absolute inset-0 opacity-30"></div>
-            <div class="relative z-10 text-center">
-                <div class="text-center">
-                    <h1 style="font-size: 52px;" class="text-3xl font-semibold text-gray-800 mb-4 font-script">Choose your Favourite Menu</h1>
-                    <p class="text-gray-600 mb-6">
-                        Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
-                    </p>
-                    <a href="dining_facilities" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">Dining facilities</a>
-                    <p class="text-gray-600 mb-6">
-                        Cafeteria Morgenstelle - Mensa Morgenstelle - Cafeteria Wilhelmstraße - Mensa Wilhelmstraße - Mensa and Cafeteria Prinz Karl
-                    </p>
-                </div>
+            <div class="relative z-10 text-center px-4">
+                <h1 style="font-size: 52px;" class="text-3xl font-semibold text-gray-900 mb-4 font-script">Choose your Favourite Menu</h1>
+                <p class="text-gray-800 mb-6">
+                    Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
+                </p>
+                <a href="dining_facilities" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">Dining facilities</a>
+                <p class="text-gray-800 mb-6 mt-2">
+                    Cafeteria Morgenstelle - Mensa Morgenstelle - Cafeteria Wilhelmstraße - Mensa Wilhelmstraße - Mensa and Cafeteria Prinz Karl
+                </p>
             </div>
         </div>
 
         <!-- Second Row -->
-        <div class="flex-1 grid grid-cols-3 gap-4 overflow-hidden">
+        <div class="content-row flex">
             <!-- Left Column (Image) -->
-            <div class="col-span-1 flex items-center justify-center">
-                <img src="{{ url_for('static', filename='images/menu_1.png') }}" alt="Menu 1" class="max-w-full max-h-full object-contain">
+            <div class="w-1/3 image-container">
+                <img src="{{ url_for('static', filename='images/cup.jpg') }}" alt="cup">
             </div>
 
             <!-- Middle Column (Content) -->
-            <div class="col-span-1 flex items-center justify-center overflow-auto">
+            <div class="w-1/3 flex items-center justify-center px-4">
                 <div class="text-center">
-                    <h2 style="font-size: 24px;" class="text-xl font-bold text-gray-800">Menu Matchmaker</h2>
-                    <p class="text-gray-600 mt-2">Why waiting - start exploring!</p>
-                    <p class="text-gray-600 mt-1">Uncover your personal taste and find the menu that best suits your preferences!</p>
+                    <h2 style="font-size: 24px;" class="text-xl font-bold text-gray-900">Menu Matchmaker</h2>
+                    <p class="text-gray-800 mt-2">Why waiting - start exploring!</p>
+                    <p class="text-gray-800 mt-1">Uncover your personal taste and find the menu that best suits your preferences!</p>
                     <button class="mt-4 px-4 py-2 bg-gray-900 text-white rounded">Login</button>
                 </div>
             </div>
 
             <!-- Right Column (Image) -->
-            <div class="col-span-1 flex items-center justify-center">
-                <img src="{{ url_for('static', filename='images/menu_2.png') }}" alt="Menu 2" class="max-w-full max-h-full object-contain">
+            <div class="w-1/3 image-container">
+                <img src="{{ url_for('static', filename='images/cafeteria.jpg') }}" alt="cafeteria">
             </div>
         </div>
     </div>
