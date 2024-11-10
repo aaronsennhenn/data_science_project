@@ -143,13 +143,13 @@ def run_scraper(option, date):
                 if not os.path.exists(full_path):
                     success = generate_image(menu, full_path)
                     if not success:
-                        filename = "error.png"
+                        filename = "error.jpg"
                 
                 result_df.at[index, 'image_filename'] = filename
                 print(f"Debug: Image for {menu} - Filename: {filename}")
             else:
-                result_df.at[index, 'image_filename'] = "error.png"
-                print(f"Debug: Using error.png for empty menu - {menuLine}")
+                result_df.at[index, 'image_filename'] = "error.jpg"
+                print(f"Debug: Using error.jpg for empty menu - {menuLine}")
 
         required_columns = ["menuDate", "menuLine", "menu", "studentPrice", "image_filename"]
         for col in required_columns:
