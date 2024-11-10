@@ -1,6 +1,14 @@
-from flask import Flask, request, session, redirect, url_for, render_template
+from flask import Flask, render_template, request
+from scraper import run_scraper, get_dates, get_available_dates, get_available_mensas
+import os
 
-app = Flask(__name__)
+# Ensure the 'generated_images' folder exists
+current_dir = os.path.dirname(os.path.abspath(__file__))
+images_folder = os.path.join(current_dir, 'static', 'generated_images')
+if not os.path.exists(images_folder):
+    os.makedirs(images_folder)
+
+app = Flask(__name__, static_folder='static')
 
 @app.route('/')
 def index():
@@ -20,27 +28,21 @@ def contact():
 
 @app.route('/dining_facilities')
 def dining_facilities():
-   return render_template('dining_facilities.html')
+    available_dates = get_available_dates()
+    available_mensas = get_available_mensas()
+    return render_template('dining_facilities.html', available_dates=available_dates, available_mensas=available_mensas)
 
-@app.route('/cafeteria_mensa_pkl')
-def cafeteria_mensa_pkl():
-   return render_template('cafeteria_mensa_pkl.html')
+@app.route('/mensa/<mensa_name>')
+def mensa_menu(mensa_name):
+    selected_date = request.args.get('date')
+    if not selected_date:
+        return "Date not provided", 400
 
-@app.route('/cafeteria_mst')
-def cafeteria_mst():
-   return render_template('cafeteria_mst.html')
-
-@app.route('/mensa_mst')
-def mensa_mst():
-   return render_template('mensa_mst.html')
-
-@app.route('/cafeteria_wil')
-def cafeteria_wil():
-   return render_template('cafeteria_wil.html')
-
-@app.route('/mensa_wil')
-def mensa_wil():
-   return render_template('mensa_wil.html')
+    scraper_res = run_scraper(mensa_name, selected_date)
+    
+    all_dishes = scraper_res[["menuLine", "menu", "studentPrice", "image_filename"]].to_dict(orient="records")
+    
+    return render_template('mensa_result.html', all_dishes=all_dishes, selected_option=mensa_name, selected_date=selected_date)
 
 if __name__ == "__main__":
     # hier wird nix verändert
