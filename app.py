@@ -22,9 +22,9 @@ def about():
 def review():
    return render_template('review.html')
 
-@app.route('/contact')
-def contact():
-   return render_template('contact.html')
+# @app.route('/contact')
+# def contact():
+#    return render_template('contact.html')
 
 @app.route('/dining_facilities')
 def dining_facilities():
