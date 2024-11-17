@@ -64,7 +64,7 @@
                         <h2 class="text-xl font-semibold mb-2">Select a Date:</h2>
                         <select id="dateSelector">
                             {% for date in available_dates %}
-                                <option value="{{ date }}">{{ date }}</option>
+                                <option value="{{ date.split(', ')[1] }}">{{ date }}</option>
                             {% endfor %}
                         </select>
                     </div>

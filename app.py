@@ -22,10 +22,6 @@ def about():
 def review():
    return render_template('review.html')
 
-# @app.route('/contact')
-# def contact():
-#    return render_template('contact.html')
-
 @app.route('/dining_facilities')
 def dining_facilities():
     available_dates = get_available_dates()
@@ -43,6 +39,14 @@ def mensa_menu(mensa_name):
     all_dishes = scraper_res[["menuLine", "menu", "studentPrice", "image_filename"]].to_dict(orient="records")
     
     return render_template('mensa_result.html', all_dishes=all_dishes, selected_option=mensa_name, selected_date=selected_date)
+
+@app.route('/check_image/<filename>')
+def check_image(filename):
+    image_path = os.path.join(images_folder, filename)
+    if os.path.exists(image_path):
+        return '', 200
+    else:
+        return '', 404
 
 if __name__ == "__main__":
     # hier wird nix verändert

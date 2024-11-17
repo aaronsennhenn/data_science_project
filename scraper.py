@@ -84,6 +84,14 @@ def generate_image(prompt, filename):
 def capitalize_first_letter(text):
     return ' '.join(word.capitalize() for word in text.split())
 
+import threading
+
+def generate_image_async(prompt, filename):
+    def generate():
+        generate_image(prompt, filename)
+    thread = threading.Thread(target=generate)
+    thread.start()
+
 def run_scraper(option, date):
     try:
         print(f"Starting scraper for {option} on {date}")
@@ -141,9 +149,7 @@ def run_scraper(option, date):
                 full_path = os.path.join(image_folder, filename)
                 
                 if not os.path.exists(full_path):
-                    success = generate_image(menu, full_path)
-                    if not success:
-                        filename = "error.jpg"
+                    generate_image_async(menu, full_path)
                 
                 result_df.at[index, 'image_filename'] = filename
                 print(f"Debug: Image for {menu} - Filename: {filename}")
@@ -168,10 +174,18 @@ def run_scraper(option, date):
     
     return pd.DataFrame(columns=["menuDate", "menuLine", "menu", "studentPrice", "image_filename"])
 
+
 def get_available_dates():
     today = datetime.today()
     dates = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
-    return dates
+    filtered_dates = []
+    for date_str in dates:
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+        if date_obj.weekday() < 5:  # 0 is Monday, 6 is Sunday
+            formatted_date = date_obj.strftime('%A, %Y-%m-%d')
+            filtered_dates.append(formatted_date)
+
+    return filtered_dates
 
 def get_available_mensas():
     return list(url_dict.keys())
