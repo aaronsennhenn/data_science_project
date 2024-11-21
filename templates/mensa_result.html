@@ -40,6 +40,7 @@
     <!-- Main Content -->
     <main class="flex-grow flex flex-col items-center justify-center p-8">
         <h1 class="font-script text-3xl font-semibold text-gray-900 mb-4">Mensa Menu for {{ selected_date }}</h1>
+        <div class="mb-8"></div> <!-- Added space -->
         <div class="w-full max-w-4xl">
             {% for dish in all_dishes %}
                 <div class="mb-6 p-4 bg-white shadow-md rounded-md flex items-center">
@@ -55,6 +56,29 @@
                 </div>
             {% endfor %}
         </div>
+        <div class="mb-8"></div> <!-- Added space -->
+        <p class="text-gray-600 mb-6">
+            <table class="table-auto"> 
+                <tr>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_fisch.png') }}" alt="fisch" class="inline-block w-6 h-6 mr-2">[f] Fisch</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_gefluegel.png') }}" alt="geflügel" class="inline-block w-6 h-6 mr-2">[g] Geflügel</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_kalb.png') }}" alt="kalb" class="inline-block w-6 h-6 mr-2">[k] Kalb</td>
+                </tr>
+                <tr>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_lamm.png') }}" alt="lamm" class="inline-block w-6 h-6 mr-2">[l] Lamm</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_rind.png') }}" alt="rind" class="inline-block w-6 h-6 mr-2">[r] Rind</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_schwein.png') }}" alt="schwein" class="inline-block w-6 h-6 mr-2">[s] Schwein</td>
+                </tr>
+                <tr>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_wild.png') }}" alt="wild" class="inline-block w-6 h-6 mr-2">[w] Wild</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_empfehlung.png') }}" alt="top" class="inline-block w-6 h-6 mr-2">[top] Empfehlung</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_vegetarisch.png') }}" alt="vegetarisch" class="inline-block w-6 h-6 mr-2">[v] Vegetarisch</td>
+                </tr>
+                <tr>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_vegan.png') }}" alt="vegan" class="inline-block w-6 h-6 mr-2">[vegan] Vegan</td>
+                </tr>
+            </table>
+        </p>
     </main>
 
     <script>

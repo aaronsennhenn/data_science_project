@@ -48,6 +48,14 @@ def check_image(filename):
     else:
         return '', 404
 
+@app.route('/login')
+def login():
+   return render_template('login.html')
+
+@app.route('/menu_maker')
+def menu_maker():
+   return render_template('menu_maker.html')
+
 if __name__ == "__main__":
     # hier wird nix verändert
     app.run()

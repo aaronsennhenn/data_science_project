@@ -7,6 +7,7 @@ from diffusers import StableDiffusionPipeline
 from PIL import Image
 import os
 import hashlib
+from googletrans import Translator
 
 print(f"CUDA available: {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
@@ -92,6 +93,11 @@ def generate_image_async(prompt, filename):
     thread = threading.Thread(target=generate)
     thread.start()
 
+def translate_text(text, target_language='en'):
+    translator = Translator()
+    translation = translator.translate(text, dest=target_language)
+    return translation.text
+
 def run_scraper(option, date):
     try:
         print(f"Starting scraper for {option} on {date}")
@@ -137,6 +143,9 @@ def run_scraper(option, date):
 
             menu = capitalize_first_letter(menu)
             menuLine = capitalize_first_letter(menuLine)
+
+            # Translate menuLine to English
+            menuLine = translate_text(menuLine)
 
             result_df.at[index, 'menu'] = menu
             result_df.at[index, 'menuLine'] = menuLine
