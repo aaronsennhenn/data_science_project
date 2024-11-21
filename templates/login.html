@@ -1,54 +1,55 @@
- <!-- Needs to be saved in the database -->
- <!DOCTYPE html>
- <html lang="en">
- <head>
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Sign in</title>
-     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
-     <style>
-         .font-script { font-family: 'Dancing Script', cursive; }
-         .bg-custom-beige { background-color: #D2BD96; }
-     </style>
- </head>
- <body class="bg-custom-beige min-h-screen flex flex-col">
-     <!-- Header -->
-     <header class="w-full bg-white shadow-md py-4 px-8">
-         <nav class="flex justify-between items-center">
-             <div class="text-xl font-bold text-gray-800">Savor.</div>
-             <div class="space-x-4">
-                 <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Home</a>
-                 <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">About</a>
-                 <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Review</a>
-                 <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Contact</a>
-                 <a href="/menu_maker" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Menu Maker</a>
-             </div>
-         </nav>
-     </header>
- 
-     <!-- Main Content -->
-     <main class="flex-grow flex flex-col items-center justify-center p-8">
-         <h1 class="font-script text-3xl font-semibold text-gray-900 mb-4">Sign in</h1>
-         <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-             <form action="/login" method="post" class="space-y-6">
-                 <div>
-                     <label for="username" class="block text-gray-700 mb-2">Username</label>
-                     <input type="text" id="username" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                 </div>
-                 <div>
-                     <label for="password" class="block text-gray-700 mb-2">Password</label>
-                     <input type="password" id="password" name="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                 </div>
-                 <div class="flex justify-between items-center">
-                     <button type="submit" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Login</button>
-                     <button type="button" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300" onclick="window.location.href='/signup'">Sign up</button>
-                 </div>
-             </form>
-         </div>
-         <div class="mt-4">
-             <button type="button" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300" onclick="window.location.href='/menu_maker'">Go to Menu Maker</button>
-         </div>
-     </main>
- </body>
- </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .font-script { font-family: 'Dancing Script', cursive; }
+        .bg-custom-beige { background-color: #D2BD96; }
+    </style>
+</head>
+<body class="bg-custom-beige min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="w-full bg-white shadow-md py-4 px-8">
+        <nav class="flex justify-between items-center">
+            <div class="text-xl font-bold text-gray-800">Savor.</div>
+            <div class="space-x-4">
+                <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Home</a>
+                <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">About</a>
+                <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Review</a>
+                <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-center p-8">
+        <h1 class="font-script text-3xl font-semibold text-gray-900 mb-4">Sign in</h1>
+        <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+            <form action="/login" method="post" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="password" class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" name="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="space-y-4">
+                    <button type="submit" class="w-full px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Login</button>
+                    <button type="button" class="w-full px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300" onclick="window.location.href='/signup'">Sign up</button>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="#" class="text-blue-500 hover:underline">Forgot your password?</a>
+                </div>
+            </form>
+        </div>
+        <div class="mt-4">
+            <button type="button" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300" onclick="window.location.href='/menu_maker'">Go to Menu Maker</button>
+        </div>
+    </main>
+</body>
+</html>

@@ -33,6 +33,7 @@
                 <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Home</a>
                 <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">About</a>
                 <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Review</a>
+                <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Contact</a>
             </div>
         </nav>
     </header>
@@ -51,7 +52,7 @@
                     <div class="w-3/4 pl-4">
                         <h2 class="text-xl font-semibold">{{ dish.menuLine }}</h2>
                         <p class="text-gray-600">{{ dish.menu }}</p>
-                        <p class="text-gray-800 font-bold">{{ dish.studentPrice }} €</p>
+                        <p class="text-gray-800 font-bold">{{ dish.studentPrice | replace(',', '.') }} €</p>
                     </div>
                 </div>
             {% endfor %}
@@ -61,25 +62,25 @@
             <table class="table-auto"> 
                 <tr>
                     <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_fisch.png') }}" alt="fisch" class="inline-block w-6 h-6 mr-2">[f] Fisch</td>
-                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_gefluegel.png') }}" alt="geflügel" class="inline-block w-6 h-6 mr-2">[g] Geflügel</td>
-                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_kalb.png') }}" alt="kalb" class="inline-block w-6 h-6 mr-2">[k] Kalb</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_gefluegel.png') }}" alt="geflügel" class="inline-block w-6 h-6 mr-2">[g] Poultry</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_kalb.png') }}" alt="kalb" class="inline-block w-6 h-6 mr-2">[k] Calf</td>
                 </tr>
                 <tr>
                     <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_lamm.png') }}" alt="lamm" class="inline-block w-6 h-6 mr-2">[l] Lamm</td>
-                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_rind.png') }}" alt="rind" class="inline-block w-6 h-6 mr-2">[r] Rind</td>
-                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_schwein.png') }}" alt="schwein" class="inline-block w-6 h-6 mr-2">[s] Schwein</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_rind.png') }}" alt="rind" class="inline-block w-6 h-6 mr-2">[r] Beef</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_schwein.png') }}" alt="schwein" class="inline-block w-6 h-6 mr-2">[s] Pork</td>
                 </tr>
                 <tr>
                     <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_wild.png') }}" alt="wild" class="inline-block w-6 h-6 mr-2">[w] Wild</td>
-                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_empfehlung.png') }}" alt="top" class="inline-block w-6 h-6 mr-2">[top] Empfehlung</td>
-                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_vegetarisch.png') }}" alt="vegetarisch" class="inline-block w-6 h-6 mr-2">[v] Vegetarisch</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_empfehlung.png') }}" alt="top" class="inline-block w-6 h-6 mr-2">[top] Recommendation</td>
+                    <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_vegetarisch.png') }}" alt="vegetarisch" class="inline-block w-6 h-6 mr-2">[v] Vegetarian</td>
                 </tr>
                 <tr>
                     <td class="pr-8"><img src="{{ url_for('static', filename='images/icon_vegan.png') }}" alt="vegan" class="inline-block w-6 h-6 mr-2">[vegan] Vegan</td>
                 </tr>
             </table>
         </p>
-    </main>
+    </main>ccc
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

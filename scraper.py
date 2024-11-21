@@ -8,6 +8,10 @@ from PIL import Image
 import os
 import hashlib
 from googletrans import Translator
+import psycopg2
+from secret import PASSWORD, USER, HOST, PORT
+import traceback
+import threading
 
 print(f"CUDA available: {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
@@ -78,14 +82,11 @@ def generate_image(prompt, filename):
         print(f"Error generating image for prompt '{prompt}': {str(e)}")
         print(f"Error type: {type(e).__name__}")
         print(f"Error details: {e.args}")
-        import traceback
         traceback.print_exc()
         return False
 
 def capitalize_first_letter(text):
     return ' '.join(word.capitalize() for word in text.split())
-
-import threading
 
 def generate_image_async(prompt, filename):
     def generate():
@@ -97,6 +98,35 @@ def translate_text(text, target_language='en'):
     translator = Translator()
     translation = translator.translate(text, dest=target_language)
     return translation.text
+
+def save_to_database(data):
+    try:
+        # Database connection parameters
+        DATABASE = "postgres"
+        conn_string = f"host={HOST} dbname={DATABASE} user={USER} password={PASSWORD} port={PORT}"
+
+        # Establish the connection
+        conn = psycopg2.connect(conn_string)
+        cur = conn.cursor()
+
+        # Insert data into the menu table
+        for index, row in data.iterrows():
+            cur.execute("""
+                INSERT INTO public.menu (id, menuLine, photo, studentPrice, guestPrice, pupilPrice, menuDate, menu, meats, icons, filtersInclude, allergens, additives, co2, image_filename)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (menuDate, menuLine) DO NOTHING
+            """, (row['id'], row['menuLine'], row['photo'], row['studentPrice'], row['guestPrice'], row['pupilPrice'], row['menuDate'], row['menu'], row['meats'], row['icons'], row['filtersInclude'], row['allergens'], row['additives'], row['co2'], row['image_filename']))
+
+        # Commit the transaction
+        conn.commit()
+
+        # Close the cursor and connection
+        cur.close()
+        conn.close()
+        print("Data saved to the database successfully!")
+
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL:", error)
 
 def run_scraper(option, date):
     try:
@@ -118,7 +148,7 @@ def run_scraper(option, date):
         menus_list = df[f'{canteen_id}.menus'].iloc[0]
         if not menus_list:
             print(f"No menus found for {option} on {date}")
-            return pd.DataFrame(columns=["menuDate", "menuLine", "menu", "studentPrice", "image_filename"])
+            return pd.DataFrame(columns=["id", "menuDate", "menuLine", "menu", "studentPrice", "guestPrice", "pupilPrice", "photo", "meats", "icons", "filtersInclude", "allergens", "additives", "co2", "image_filename"])
         
         menus_df = pd.DataFrame(menus_list)
         if "photo" in menus_df.columns:
@@ -127,7 +157,7 @@ def run_scraper(option, date):
         result_df = menus_df[menus_df["menuDate"] == date]
         if result_df.empty:
             print(f"No menu items found for {option} on {date}")
-            return pd.DataFrame(columns=["menuDate", "menuLine", "menu", "studentPrice", "image_filename"])
+            return pd.DataFrame(columns=["id", "menuDate", "menuLine", "menu", "studentPrice", "guestPrice", "pupilPrice", "photo", "meats", "icons", "filtersInclude", "allergens", "additives", "co2", "image_filename"])
         
         image_folder = os.path.abspath('static/generated_images')
         os.makedirs(image_folder, exist_ok=True)
@@ -144,9 +174,7 @@ def run_scraper(option, date):
             menu = capitalize_first_letter(menu)
             menuLine = capitalize_first_letter(menuLine)
 
-            # Translate menuLine to English
-            menuLine = translate_text(menuLine)
-
+            # Save original data to the database
             result_df.at[index, 'menu'] = menu
             result_df.at[index, 'menuLine'] = menuLine
 
@@ -166,12 +194,20 @@ def run_scraper(option, date):
                 result_df.at[index, 'image_filename'] = "error.jpg"
                 print(f"Debug: Using error.jpg for empty menu - {menuLine}")
 
-        required_columns = ["menuDate", "menuLine", "menu", "studentPrice", "image_filename"]
+        required_columns = ["id", "menuDate", "menuLine", "menu", "studentPrice", "guestPrice", "pupilPrice", "photo", "meats", "icons", "filtersInclude", "allergens", "additives", "co2", "image_filename"]
         for col in required_columns:
             if col not in result_df.columns:
                 result_df[col] = 'N/A'
 
         print(f"Scraper completed for {option}. Found {len(result_df)} menu items.")
+        
+        # Save the result to the database
+        save_to_database(result_df)
+        
+        # Translate data for display
+        result_df['menuLine'] = result_df['menuLine'].apply(lambda x: translate_text(x))
+        result_df['menu'] = result_df['menu'].apply(lambda x: translate_text(x))
+        
         return result_df
 
     except requests.exceptions.RequestException as e:
@@ -181,8 +217,7 @@ def run_scraper(option, date):
     except Exception as e:
         print(f"Unexpected error in run_scraper for {option}: {e}")
     
-    return pd.DataFrame(columns=["menuDate", "menuLine", "menu", "studentPrice", "image_filename"])
-
+    return pd.DataFrame(columns=["id", "menuDate", "menuLine", "menu", "studentPrice", "guestPrice", "pupilPrice", "photo", "meats", "icons", "filtersInclude", "allergens", "additives", "co2", "image_filename"])
 
 def get_available_dates():
     today = datetime.today()
@@ -203,3 +238,10 @@ def get_dates(num_days):
     today = datetime.today()
     dates = [(today + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(num_days)]
     return dates
+
+if __name__ == "__main__":
+    available_dates = get_available_dates()
+    available_mensas = get_available_mensas()
+    for date in available_dates:
+        for mensa in available_mensas:
+            run_scraper(mensa, date)

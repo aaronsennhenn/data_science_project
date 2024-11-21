@@ -32,4 +32,5 @@ MANIFEST
 *.tiff
 *.webp
 
-db/secret.py
+# Database login details
+secret.py
