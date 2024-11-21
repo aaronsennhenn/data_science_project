@@ -4,3 +4,5 @@ requests
 torch
 wheel
 gunicorn
+# pyodbc # for linux
+psycopg2 # for windows
