@@ -24,13 +24,17 @@ share/python-wheels/
 MANIFEST
 
 # Images
-*.png
+# *.png
 # *.jpg
 # *.jpeg
 *.gif
 *.bmp
 *.tiff
 *.webp
+
+
+# ignore the stable diffusion images
+static/generated_images/*.png
 
 # Database login details
 secret.py
