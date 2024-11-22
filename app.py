@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from scraper import run_scraper, get_dates, get_available_dates, get_available_mensas
+from scraper import run_scraper, get_dates, get_available_dates, get_available_mensas, scraper, url_dict
 import os
 
 # Ensure the 'generated_images' folder exists
@@ -37,12 +37,16 @@ def mensa_menu(mensa_name):
     selected_date = request.args.get('date')
     if not selected_date:
         return "Date not provided", 400
-
-    scraper_res = run_scraper(mensa_name, selected_date)
-    
+    scraper_res = run_scraper(mensa_name, selected_date)  
     all_dishes = scraper_res[["menuLine", "menu", "studentPrice", "image_filename"]].to_dict(orient="records")
-    
     return render_template('mensa_result.html', all_dishes=all_dishes, selected_option=mensa_name, selected_date=selected_date)
+
+@app.route('/scrape_all')
+def scrape_all():
+    available_dates = get_available_dates()
+    available_mensas = get_available_mensas()
+    scraper(available_dates, available_mensas, url_dict)
+    return "Scraping completed for all dates and mensas."
 
 @app.route('/check_image/<filename>')
 def check_image(filename):

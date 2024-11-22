@@ -57,7 +57,6 @@ url_dict = {
     'Mensa Morgenstelle': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/621?lang=de&v=1731088361352'
 }
 
-
 def get_image_filename(prompt):
     hash_object = hashlib.md5(prompt.encode())
     return f"{hash_object.hexdigest()}.png"
@@ -129,45 +128,6 @@ def save_to_database(data):
     except (Exception, psycopg2.Error) as error:
         print("Error while connecting to PostgreSQL:", error)
 
-def scraper(dates, options, url_dict):
-    for date in dates:
-        for option in options:
-            try:
-                print(f"Starting scraper for {option} on {date}")
-                url = url_dict[option]
-                response = requests.get(url, timeout=10)
-                response.raise_for_status()
-                json_data = response.json()
-                
-                df = pd.json_normalize(json_data)
-                match = re.search(r'/canteens/(\d+)', url)
-                if not match:
-                    raise ValueError(f"Unable to extract canteen ID from URL: {url}")
-                
-                canteen_id = match.group(1)
-                if f'{canteen_id}.menus' not in df.columns:
-                    raise KeyError(f"Column '{canteen_id}.menus' not found in DataFrame")
-                
-                menus_list = df[f'{canteen_id}.menus'].iloc[0]
-                if not menus_list:
-                    print(f"No menus found for {option} on {date}")
-                    continue
-                
-                menus_df = pd.DataFrame(menus_list)
-                if "photo" in menus_df.columns:
-                    menus_df.drop("photo", axis=1, inplace=True)
-
-                result_df = menus_df[menus_df["menuDate"] == date]
-                if result_df.empty:
-                    print(f"No menu items found for {option} on {date}")
-                    continue
-                
-                for _, row in result_df.iterrows():
-                    save_to_database(row)
-
-            except Exception as e:
-                print(f"Error scraping {option} on {date}: {e}")
-
 def run_scraper(option, date):
     try:
         print(f"Starting scraper for {option} on {date}")
@@ -193,7 +153,7 @@ def run_scraper(option, date):
         menus_df = pd.DataFrame(menus_list)
         if "photo" in menus_df.columns:
             menus_df.drop("photo", axis=1, inplace=True)
-
+        
         result_df = menus_df[menus_df["menuDate"] == date]
         if result_df.empty:
             print(f"No menu items found for {option} on {date}")
@@ -240,6 +200,9 @@ def run_scraper(option, date):
                 result_df[col] = 'N/A'
 
         print(f"Scraper completed for {option}. Found {len(result_df)} menu items.")
+        
+        # Save the result to the database
+        save_to_database(result_df)
         
         # Translate data for display
         result_df['menuLine'] = result_df['menuLine'].apply(lambda x: translate_text(x))
