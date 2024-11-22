@@ -25,7 +25,7 @@ MANIFEST
 
 # Images
 *.png
-*.jpg
+# *.jpg
 # *.jpeg
 *.gif
 *.bmp
