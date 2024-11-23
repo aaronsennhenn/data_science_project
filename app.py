@@ -1,6 +1,9 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, flash
 from scraper import run_scraper, get_dates, get_available_dates, get_available_mensas, scraper, url_dict
 import os
+from config import mail_password,mail_username
+from flask_mail import Mail, Message
+
 
 # Ensure the 'generated_images' folder exists
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -9,6 +12,18 @@ if not os.path.exists(images_folder):
     os.makedirs(images_folder)
 
 app = Flask(__name__, static_folder='static')
+mail = Mail(app)
+
+app.secret_key = "your_secret_key" # muss noch als secret versteckt werden
+
+
+app.config['MAIL_SERVER']= "smtp.gmail.com"
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = mail_username
+app.config['MAIL_PASSWORD'] = mail_password
+
 
 @app.route('/')
 def index():
@@ -22,9 +37,33 @@ def about():
 def review():
    return render_template('review.html')
 
-@app.route('/contact')
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
-   return render_template('contact.html')
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        message = request.form.get('message')
+
+        if not name or not email or not message:
+            flash('All fields are required!', 'error')
+            return redirect(url_for('contact'))
+
+        # Send email
+        try:
+            msg = Message(subject=f"Contact Form Submission from {name}",
+                          body=f'Name: {name}\nEmail: {email}\n\nMessage:\n{message}',
+                          sender=mail_username,
+                          recipients=['mensaapptuebingen@gmail.com'])
+            
+            mail.send(msg)
+
+            flash('Message sent successfully!', 'success')
+        except Exception as e:
+            flash(f'Failed to send message: {str(e)}', 'error')
+
+        return redirect(url_for('contact'))
+
+    return render_template('contact.html')
 
 @app.route('/dining_facilities')
 def dining_facilities():
