@@ -12,7 +12,6 @@ if not os.path.exists(images_folder):
     os.makedirs(images_folder)
 
 app = Flask(__name__, static_folder='static')
-mail = Mail(app)
 
 app.secret_key = "your_secret_key" # muss noch als secret versteckt werden
 
@@ -24,6 +23,7 @@ app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = mail_username
 app.config['MAIL_PASSWORD'] = mail_password
 
+mail = Mail(app)
 
 @app.route('/')
 def index():
