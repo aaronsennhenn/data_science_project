@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from scraper import run_scraper, get_dates, get_available_dates, get_available_mensas, scraper, url_dict
 import os
-from config import mail_password,mail_username
 from flask_mail import Mail, Message
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from secret import PASSWORD, USER, HOST, PORT, MAIL_USERNAME,MAIL_PASSWORD, APP_SECRET_KEY
 
 
 # Ensure the 'generated_images' folder exists
@@ -13,17 +15,23 @@ if not os.path.exists(images_folder):
 
 app = Flask(__name__, static_folder='static')
 
-app.secret_key = "your_secret_key" # muss noch als secret versteckt werden
+app.secret_key = APP_SECRET_KEY
 
-
+################################# set up Email SMTP for contact us page #######################################
 app.config['MAIL_SERVER']= "smtp.gmail.com"
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = mail_username
-app.config['MAIL_PASSWORD'] = mail_password
+app.config['MAIL_USERNAME'] = MAIL_USERNAME
+app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
+
+################################ postgresql database ##########################################################
+app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/postgres"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 mail = Mail(app)
+db = SQLAlchemy(app)
+
 
 @app.route('/')
 def index():
@@ -39,7 +47,10 @@ def review():
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
+
     if request.method == 'POST':
+
+        # get email and message data from frontend
         name = request.form.get('name')
         email = request.form.get('email')
         message = request.form.get('message')
@@ -52,7 +63,7 @@ def contact():
         try:
             msg = Message(subject=f"Contact Form Submission from {name}",
                           body=f'Name: {name}\nEmail: {email}\n\nMessage:\n{message}',
-                          sender=mail_username,
+                          sender=MAIL_USERNAME,
                           recipients=['mensaapptuebingen@gmail.com'])
             
             mail.send(msg)
@@ -95,14 +106,87 @@ def check_image(filename):
     else:
         return '', 404
 
-@app.route('/login')
-def login():
-   return render_template('login.html')
-
 @app.route('/menu_maker')
 def menu_maker():
    return render_template('menu_maker.html')
 
+
+# Database model: Each object of the User class creates a new column in the User table
+class User(db.Model):
+    # class variables
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(25), unique=True, nullable=False)
+    password_hash = db.Column(db.String(512), nullable=True)
+
+    # set a new password but safe password hash, not the password itself in db for security reasons
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    # check if password is correct
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+# check username and password that user puts into form with db
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+
+        # collect user login data from frontend form
+        username = request.form['username']
+        password = request.form['password']
+
+        # search for username in database
+        user = User.query.filter_by(username=username).first()
+
+        # if user name exists and password is correct: log user in
+        if user and user.check_password(password):
+            session['username'] = username
+            return redirect(url_for("user_area"))
+        # if password or username is wrong, return error message
+        else:
+            error_message = "Your username or password is wrong!"
+            return render_template('login.html', error=error_message)
+    return render_template('login.html')
+
+# user can create a new username with password
+@app.route("/register", methods=["POST"])
+def register():
+
+    # get username and password from frontend
+    username = request.form['username']
+    password = request.form['password']
+    user = User.query.filter_by(username=username).first()
+
+    # check if user exists
+    if user:
+        return render_template("login.html", error="Username is already used!")
+    
+    # if not, create a new username with password and safe to db
+    else:
+        new_user = User(username=username)
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+        session['username'] = username
+        return redirect(url_for('user_area'))
+    
+# after succesfull login, send user to personal area
+@app.route("/user_area")
+def user_area():
+    if "username" in session:
+        return render_template("user_area.html", username=session['username'])
+    return redirect(url_for('index'))
+
+# user can logout from session
+@app.route("/logout")
+def logout():
+    session.pop('username',None)
+    return redirect(url_for('index'))
+
+
 if __name__ == "__main__":
-    # hier wird nix verändert
+    # create all tables if they do not exist yet
+    with app.app_context():
+        db.create_all()
     app.run()
