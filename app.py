@@ -4,7 +4,8 @@ import os
 from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from secret import PASSWORD, USER, HOST, PORT, MAIL_USERNAME,MAIL_PASSWORD, APP_SECRET_KEY
+from secret import *
+from authlib.integrations.flask_client import OAuth
 
 
 # Ensure the 'generated_images' folder exists
@@ -15,9 +16,10 @@ if not os.path.exists(images_folder):
 
 app = Flask(__name__, static_folder='static')
 
-app.secret_key = APP_SECRET_KEY
 
-################################# set up Email SMTP for contact us page #######################################
+################################# app systems variables #######################################
+
+# contact us mail 
 app.config['MAIL_SERVER']= "smtp.gmail.com"
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -25,12 +27,30 @@ app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = MAIL_USERNAME
 app.config['MAIL_PASSWORD'] = MAIL_PASSWORD
 
-################################ postgresql database ##########################################################
+# postgressql database
 app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/postgres"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-mail = Mail(app)
-db = SQLAlchemy(app)
+# app secret for session
+app.secret_key = APP_SECRET_KEY
+
+################################# initialize app services #######################################
+
+mail = Mail(app)        # contact us service
+db = SQLAlchemy(app)    # database service
+oauth = OAuth(app)      # google login service
+
+
+################################# google authentification #######################################
+
+google = oauth.register(
+    name='google',
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope':'openid profile email'})
+
+################################# app routes #######################################
 
 
 @app.route('/')
@@ -115,7 +135,7 @@ def menu_maker():
 class User(db.Model):
     # class variables
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(25), unique=True, nullable=False)
+    username = db.Column(db.String(50), unique=True, nullable=False)
     password_hash = db.Column(db.String(512), nullable=True)
 
     # set a new password but safe password hash, not the password itself in db for security reasons
@@ -183,6 +203,38 @@ def user_area():
 def logout():
     session.pop('username',None)
     return redirect(url_for('index'))
+
+# login for google
+@app.route('/login/google')
+def login_google():
+    try:
+        redirect_url = url_for('authorize_google',_external=True)
+        return google.authorize_redirect(redirect_url)
+    except Exception as e:
+        app.logger.error(f"Error during login:{str(e)}")
+        return "Error occurred during login", 500
+    
+# authorization form for google
+@app.route("/authorize/google")
+def authorize_google():
+    token = google.authorize_access_token()
+    userinfo_endpoint = google.server_metadata['userinfo_endpoint']
+    resp = google.get(userinfo_endpoint)
+    user_info = resp.json()
+    username = user_info['email']
+
+    # create new user in db
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        user = User(username=username)
+        db.session.add(user)
+        db.session.commit()
+
+    session['username'] = username
+    session['oauth_token'] = token
+
+    return redirect(url_for('user_area'))
+
 
 
 if __name__ == "__main__":
