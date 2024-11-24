@@ -1,0 +1,25 @@
+id,menuLine,studentPrice,guestPrice,pupilPrice,menuDate,menu,meats,icons,allergens,additives,location
+494,Angebot des Tages,"5,60","5,60","5,60",2024-11-22,"Putengulasch Jäger Art, mit Pilzen , Spätzle, bunte Karotten",,,"Ei, ML, Gl-a, Gl-e",,Cafeteria Wilhelmstraße
+699,Angebot des Tages,"1,70","1,70","1,70",2024-11-22,Pommes frites,,,,9,Cafeteria Morgenstelle
+700,Angebot des Tages,"5,20","5,20","5,20",2024-11-22,Wrap gefüllt mit Hackfleisch[R],R,R,"ML, Gl-a",11,Cafeteria Morgenstelle
+248,Angebot d. Tages veget.,"2,85","6,60","6,60",2024-11-22,,,,,,Cafeteria und Mensa Prinz Karl
+251,Auswahlgericht,"4,50","8,90","8,90",2024-11-22,"Paniertes Seelachsfilet [F], Beilage nach Wahl, kleiner Beilagensalat",F,F,"Ei, Fi, Sn, Sf, Gl-a, Gl-e","1, 2, 4, 5, 9",Cafeteria und Mensa Prinz Karl
+252,Auswahlgericht veget.,"4,20","8,50","8,50",2024-11-22,"Kartoffeltaschen [V], Beilage nach Wahl, kleiner Beilagensalat",,V,"Gl-a, Gl-c",,Cafeteria und Mensa Prinz Karl
+253,Auswahlgericht vegan 2,"3,90","8,20","8,20",2024-11-22,"Kaiserschmarren [V], Apfelmus, Frisches Obst",,V,Gl-a,4,Cafeteria und Mensa Prinz Karl
+247,Salat-/ Gemüsebuffet 100g,"1,10","1,50","1,50",2024-11-22,Salatbuffet mit vegetarischen [V] und veganen [vegan] Komponenten,,"V, vegan","Ei, So, Sn, Gl-a, Gl-c",2,Cafeteria und Mensa Prinz Karl
+249,Beilagen vorport.,"1,05","1,65","1,65",2024-11-22,"diverse Beilagen und Gemüsebeilagen portioniert mit vegetarischen [V] Komponenten, Gemüsebeilage mit vegetarischen [V] Komponenten",,V,,,Cafeteria und Mensa Prinz Karl
+250,Dessert vorport.,"1,05","1,65","1,65",2024-11-22,Dessert,,,"ML, Gl-a","1, 4",Cafeteria und Mensa Prinz Karl
+520,Tagesmenü,"3,45","7,10","7,10",2024-11-22,"Fischfilet im Backteig [F], Zitronendip, Pommes frites, Endiviensalat",F,F,"Ei, Fi, Sn, ML, Sf, Gl-a","1, 4, 11",Mensa Wilhelmstraße
+524,Tagesmenü vegetarisch,"3,45","7,10","7,10",2024-11-22,"veget. Spinat-Lasagne mit Frischkäse, Chinakohlsalat",,,"Ei, Se, So, ML, Sf, Gl-a","1, 4",Mensa Wilhelmstraße
+527,Auswahlgericht,"4,20","8,50","8,50",2024-11-22,"Farfalle al forno [R/S], Blattsalat","R, S","R, S","Se, Sn, ML, Sf, Gl-a","1, 4",Mensa Wilhelmstraße
+525,Auswahlgericht vegan,"3,60","7,90","7,90",2024-11-22,"veganer Linseneintopf mit Kartoffeln, Brötchen",,,"Gl, Se, Gl-a",,Mensa Wilhelmstraße
+521,Salat-/ Gemüsebuffet 100g,"1,10","1,50","1,50",2024-11-22,Salat-/Gemüsebuffet,,,"Ei, Se, So, Sn, ML, Gl-a, Gl-e",11,Mensa Wilhelmstraße
+526,Beilagen vorport.,"1,05","1,65","1,65",2024-11-22,diverse Beilagen portioniert mit vegetarischen [V] Komponenten,,V,"Ei, Gl-a, Gl-e",,Mensa Wilhelmstraße
+522,Dessert vorport.,"1,05","1,65","1,65",2024-11-22,Dessertauswahltheke,,,"So, ML, Gl-a","1, 4, 11",Mensa Wilhelmstraße
+622,Tagesmenü,"3,45","7,10","7,10",2024-11-22,"Pouchiertes Hokifilet mit Gemüsestreifen [F], Weißweinsauce, Blattspinat, Salzkartoffeln",F,F,"Fi, ML, ALK",,Mensa Morgenstelle
+623,Tagesmenü vegan,"3,45","7,10","7,10",2024-11-22,"Kaiserschmarren [Vegan], Apfelmus, Frisches Obst",,Vegan,Gl-a,4,Mensa Morgenstelle
+616,Angebot des Tages,"2,85","6,60","6,60",2024-11-22,"Bunte Spätzlepfanne mit Pilzen und Hackfleisch[R,S]",,"R,S",,,Mensa Morgenstelle
+619,Salat-/ Gemüsebuffet 100g,"1,10","1,50","1,50",2024-11-22,Salat-/Gemüse-/Beilagenbuffet mit vegetarischen [V] und veganen [vegan] Komponenten,,"V, vegan","Ei, Se, ML, Sf","1, 4, 6",Mensa Morgenstelle
+621,Beilagen SB,"1,25","1,85","1,85",2024-11-22,Beilagenbuffet MM,,,,,Mensa Morgenstelle
+620,Dessert vorport.,"1,05","1,65","1,65",2024-11-22,Dessertauswahltheke,,,ML,,Mensa Morgenstelle
+617,Dessert SB,"0,75","0,75","0,75",2024-11-22,Frisches Obst,,,,,Mensa Morgenstelle
