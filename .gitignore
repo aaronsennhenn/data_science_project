@@ -41,3 +41,6 @@ secret.py
 
 # Ignore compiled bytecode files
 __pycache__/*.pyc
+
+# Ignore old data (Mayer)
+data/*.csv
