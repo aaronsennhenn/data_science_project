@@ -38,3 +38,6 @@ static/generated_images/*.png
 
 # Database login details
 secret.py
+
+# Ignore compiled bytecode files
+__pycache__/*.pyc
