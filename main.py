@@ -1,74 +1,92 @@
+from scraper_daniel import *
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Date
+from secret import USER, PASSWORD, HOST, PORT
+from sqlalchemy import create_engine
 import pandas as pd
-import requests
-import re
-from datetime import datetime
+from sqlalchemy.orm import sessionmaker
 
 
-url_dict = {
-    'Cafeteria Wilhelmstraße': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/715?lang=de&v=1731244959433',
-    'Cafeteria Morgenstelle': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/724?lang=de&v=1731245000291',
-    'Cafeteria und Mensa Prinz Karl': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/623?lang=de&v=1731088441410',
-    'Mensa Wilhelmstraße': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/611?lang=de&v=1731088386173',
-    'Mensa Morgenstelle': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/621?lang=de&v=1731088361352'
-}
+# Connection string
+connection_string = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/postgres"
+engine = create_engine(connection_string)
 
-file_name = "scraper_results.csv"
+# Create session factory
+Session = sessionmaker(bind=engine)
+
+# Base class for ORM models
+db = declarative_base()
+
+# Define your Dish model
+class Dish(db):
+    __tablename__ = 'dishes'
+
+    id = Column(Integer, primary_key=True)
+    menuDate = Column(Date, nullable=True)
+    location = Column(String, nullable=True)
+    menuGer = Column(String, nullable=True)
+    menuEng = Column(String, nullable=True)
+    guestPrice = Column(String, nullable=True)
+    studentPrice = Column(String, nullable=True)
+    meats = Column(String, nullable=True)
+    icons = Column(String, nullable=True)
+    filters = Column(String, nullable=True)
+    allergens = Column(String, nullable=True)
+    additives = Column(String, nullable=True)
+    menuLine = Column(String, nullable=True)
 
 
-def run_scraper(option,date):
-
-    url = url_dict[option]
-    response = requests.get(url, timeout=10)
-    response.raise_for_status()
-    json_data = response.json()
+def safe_menus_to_db(url_dict):
     
-    df = pd.json_normalize(json_data)
-    match = re.search(r'/canteens/(\d+)', url)
-    if not match:
-        raise ValueError(f"Unable to extract canteen ID from URL: {url}")
+    result_df = pd.DataFrame(columns=["id","menuLine","studentPrice","guestPrice","pupilPrice","menuDate","menu","meats","icons","allergens","additives","location","filtersInclude"])
     
-    canteen_id = match.group(1)
-    if f'{canteen_id}.menus' not in df.columns:
-        raise KeyError(f"Column '{canteen_id}.menus' not found in DataFrame")
-    
-    menus_list = df[f'{canteen_id}.menus'].iloc[0]
-
-    menus_df = pd.DataFrame(menus_list)
-    if "photo" in menus_df.columns:
-        menus_df.drop(["photo","co2","filtersInclude"], axis=1, inplace=True)
-    
-    required_columns = ["menuDate", "menuLine", "menu", "studentPrice"]
-    for col in required_columns:
-        if col not in menus_df.columns:
-            menus_df[col] = 'N/A'
-
-    result_df = menus_df[menus_df["menuDate"] == date]
-
-    result_df = result_df.copy()
-    result_df["location"] = option
-
-    list_cols = ["menu","meats","icons","allergens","additives"]
-
-    for col in list_cols:
-        result_df[col] = result_df[col].apply(lambda x: ', '.join(map(str, x)) if isinstance(x, list) else x)
-
-    return result_df
-    
-
-def run_scraper_df(url_dict):
-    
-    try:
-        out_df = pd.read_csv(file_name)
-    except:
-        out_df = pd.DataFrame(columns=["id","menuLine","studentPrice","guestPrice","pupilPrice","menuDate","menu","meats","icons","allergens","additives","location"])
-    
-    todays_date = datetime.today().strftime("%Y-%m-%d")
-
     for _,value in enumerate(url_dict):
-        res_df = run_scraper(value,todays_date)
-        out_df = pd.concat([out_df,res_df])
+        temp = run_scraper(value)
+        result_df = pd.concat([result_df,temp])
+
+    # get dates of next 7 days without weekends
+    available_dates = get_available_dates()
+    filtered_df = result_df[result_df["menuDate"].isin(available_dates)]
+    filtered_df["menu"] = filtered_df['menu'].apply(lambda row: remove_brackets(row))
+    filtered_df["guestPrice"] = filtered_df["guestPrice"].str.replace(',','.')
+    filtered_df["studentPrice"] = filtered_df["studentPrice"].str.replace(',','.')
+
+  
+
+    # Dynamically create tables if not initialized
+    Dish.metadata.create_all(engine)
+
+    #print(filtered_df.filtersInclude)
+    # Extract the dates that already exist in the database
+    with Session() as session:  # Use 'with' to handle session lifecycle
+        existing_dates = [result[0].strftime('%Y-%m-%d') for result in session.query(Dish.menuDate).distinct().all()]
+
+        # Filter out dishes for dates already in the database
+        new_entries_df = filtered_df[~filtered_df["menuDate"].isin(existing_dates)]
+
+        # translate to english
+     #   new_entries_df["menu_eng"] = new_entries_df['menu'].apply(lambda x:translate_text(x))
+
+
+        ####
+
+        # TO BE DONE: STABLE DIFFUSION FUNCTION - ADD IMAGE NAME COLUMN TO DATAFRAME AND GENERATE IMAGE, STORE IMAGE TO FOLDER
     
-    out_df.to_csv(file_name, index=False)
+        ####
+
+        # Store new dishes in the database
+        for _, row in new_entries_df.iterrows():
+            new_dish = Dish(menuDate=row['menuDate'], location=row['location'], menuGer=row['menu'],menuLine=row['menuLine'] ,guestPrice=row['guestPrice'], studentPrice=row['studentPrice'], meats=row['meats'], icons=row['icons'],filters=row['filtersInclude'],allergens=row['allergens'],additives=row['additives'])
+            session.add(new_dish)
+
+
+
+        # Commit the transaction
+        session.commit()
+
+    session.close()
+
+
 
 if __name__ == "__main__":
-    run_scraper_df(url_dict)
+    safe_menus_to_db(url_dict)
