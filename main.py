@@ -1,4 +1,4 @@
-from scraper_daniel import *
+from archive.scraper_daniel import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Date
 from secret import USER, PASSWORD, HOST, PORT
