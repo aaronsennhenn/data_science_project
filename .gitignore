@@ -44,3 +44,6 @@ __pycache__/*.pyc
 
 # Ignore old data (Mayer)
 data/*.csv
+
+# Ignore all test files
+tests/
