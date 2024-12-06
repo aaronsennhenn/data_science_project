@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from scraper import run_scraper, get_dates, get_available_dates, get_available_mensas, scraper, url_dict
 import os
 from flask_mail import Mail, Message
@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from authlib.integrations.flask_client import OAuth
+from archive.scraper_daniel import get_test_dict, get_scraper_df
 
 
 # Ensure the 'generated_images' folder exists
@@ -96,20 +97,55 @@ def contact():
 
     return render_template('contact.html')
 
-@app.route('/dining_facilities')
+@app.route('/dining_facilities', methods=['GET', 'POST'])
 def dining_facilities():
-    available_dates = get_available_dates()
-    available_mensas = get_available_mensas()
-    return render_template('dining_facilities.html', available_dates=available_dates, available_mensas=available_mensas)
+   # Days of the week
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
-@app.route('/mensa/<mensa_name>')
-def mensa_menu(mensa_name):
-    selected_date = request.args.get('date')
-    if not selected_date:
-        return "Date not provided", 400
-    scraper_res = run_scraper(mensa_name, selected_date)  
-    all_dishes = scraper_res[["menuLine", "menu", "studentPrice", "image_filename"]].to_dict(orient="records")
-    return render_template('mensa_result.html', all_dishes=all_dishes, selected_option=mensa_name, selected_date=selected_date)
+    # Sample data structure
+    overview_data = get_test_dict()
+
+    #return "Welcome to the weekly menu!"
+    return render_template('weekly_menu.html', overview_data=overview_data,days=days,zip=zip)
+
+@app.route('/dish-clicked', methods=['POST'])
+def dish_clicked():
+    try:
+        mensa_name = request.form.get('mensa_name')  # Extract restaurant name
+        mensa_day = request.form.get('mensa_day')  # Extract weekday
+        if not mensa_name or not mensa_day:
+            return jsonify({'error': 'Missing data'}), 400
+    # Do something with the data (e.g., log, process)
+        print(f"Received data: {mensa_name}, {mensa_day}")
+        #return jsonify({'success': True, 'message': 'Data received'})  # Send back a valid JSON response
+        #return redirect(url_for('mensa_menu', selected_mensa=mensa_name, selected_date=mensa_date))
+        return jsonify({'success': True, 'message': 'Data received'})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/mensa_menu')
+def mensa_menu():
+    mensa_name = request.args.get('mensa_name')  # Get the selected mensa name
+    mensa_day = request.args.get('mensa_day')    # Get the selected weekday
+    
+    # Debugging: Print the values to check if they are correct
+    print(f"Selected Mensa: {mensa_name}, Selected day: {mensa_day}")
+    
+    if not mensa_name or not mensa_day:
+        return "Error: Missing data", 400
+    
+
+    # filter df based on mensa_name and mensa_day
+    filtered_df = get_scraper_df(mensa_name,mensa_day)
+
+    # render to html for testing
+    df_html = filtered_df.to_html(classes='table table-bordered table-striped', index=False)
+
+
+    # Render the mensa_result.html template with the passed data
+    return render_template('mensa_result.html', mensa_name=mensa_name, mensa_day=mensa_day, table=df_html)
 
 @app.route('/scrape_all')
 def scrape_all():
@@ -189,6 +225,8 @@ def register():
         db.session.add(new_user)
         db.session.commit()
         session['username'] = username
+        db.session.close()
+
         return redirect(url_for('user_area'))
     
 # after succesfull login, send user to personal area
@@ -229,6 +267,7 @@ def authorize_google():
         user = User(username=username)
         db.session.add(user)
         db.session.commit()
+        db.session.close()
 
     session['username'] = username
     session['oauth_token'] = token
