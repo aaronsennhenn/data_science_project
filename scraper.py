@@ -12,6 +12,8 @@ import psycopg2
 from secret import PASSWORD, USER, HOST, PORT
 import traceback
 import threading
+from realesrgan import RealESRGANer
+from basicsr.archs.rrdbnet_arch import RRDBNet
 
 print(f"CUDA available: {torch.cuda.is_available()}")
 print(f"CUDA version: {torch.version.cuda}")
@@ -49,6 +51,7 @@ def initialize_pipeline():
 
 pipeline, device = initialize_pipeline()
 
+# URLs
 url_dict = {
     'Cafeteria Wilhelmstraße': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/715?lang=de&v=1731244959433',
     'Cafeteria Morgenstelle': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/724?lang=de&v=1731245000291',
@@ -58,10 +61,36 @@ url_dict = {
 }
 
 
+# Filenames
 def get_image_filename(prompt):
     hash_object = hashlib.md5(prompt.encode())
     return f"{hash_object.hexdigest()}.png"
 
+# Prompt weigting
+def apply_prompt_weighting(prompt):
+    weighted_prompt = []
+    items = prompt.split(',')
+    
+    for i, item in enumerate(items):
+        item = item.strip()
+        if i == 0:
+            # Remove square brackets and their contents from the first item
+            item = re.sub(r'\[.*?\]', '', item).strip()
+            weighted_prompt.append(f"({item}:1.5)")
+        else:
+            weighted_prompt.append(f"({item}:1.0)")
+    
+    return ", ".join(weighted_prompt)
+
+
+#High resolution 
+def upscale_image(image):
+    model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
+    upsampler = RealESRGANer(scale=4, model_path='realesrgan-x4plus.pth', model=model, tile=0, tile_pad=10, pre_pad=0, half=True)
+    upscaled_image, _ = upsampler.enhance(np.array(image))
+    return Image.fromarray(upscaled_image)
+
+#Image generation
 def generate_image(prompt, filename):
     try:
         print(f"Generating image for prompt: {prompt}")
@@ -71,13 +100,14 @@ def generate_image(prompt, filename):
         
         with torch.no_grad():
             image = pipeline(
-                prompt=prompt,
+                prompt=weighted_prompt,
                 num_inference_steps=num_inference_steps,
                 guidance_scale=7.0
             ).images[0]
         
-        image.save(filename)
-        print(f"Image successfully generated and saved: {filename}")
+        upscaled_image = upscale_image(image)
+        upscaled_image.save(filename)
+        print(f"Image successfully generated, upscaled, and saved: {filename}")
         return True
     except Exception as e:
         print(f"Error generating image for prompt '{prompt}': {str(e)}")
