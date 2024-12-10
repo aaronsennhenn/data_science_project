@@ -1,13 +1,8 @@
 Flask
 pandas
 requests
+torch
 wheel
 gunicorn
 # pyodbc # for linux
 psycopg2 # for windows
-authlib
-torch==2.0.1 
-torchvision==0.15.2 
-torchaudio==2.0.2
-torchtext==0.15.2
-accelerate
