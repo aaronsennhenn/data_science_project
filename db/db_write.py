@@ -1,5 +1,5 @@
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Date
 import pandas as pd
@@ -7,29 +7,22 @@ import sys
 
 Base = declarative_base()
 
-# Define the Dish model
+# Define the Dish model with updated structure
 class Dish(Base):
     __tablename__ = 'dishes'
 
     id = Column(Integer, primary_key=True)
     menuDate = Column(Date, nullable=True)
+    menuLine = Column(String, nullable=True)
+    menu = Column(String, nullable=True)
+    studentPrice = Column(Float, nullable=True)
     location = Column(String, nullable=True)
-    menuGer = Column(String, nullable=True)
-    menuEng = Column(String, nullable=True)
-    guestPrice = Column(String, nullable=True)
-    studentPrice = Column(String, nullable=True)
+    guestPrice = Column(Float, nullable=True)
+    pupilPrice = Column(Float, nullable=True)
     meats = Column(String, nullable=True)
     icons = Column(String, nullable=True)
-    filters = Column(String, nullable=True)
     allergens = Column(String, nullable=True)
     additives = Column(String, nullable=True)
-    menuLine = Column(String, nullable=True)
-    descriptionGer = Column(String, nullable=True)
-    descriptionEn = Column(String, nullable=True)
-    taste = Column(String, nullable=True)
-    ingredients = Column(String, nullable=True)
-    tokens = Column(Integer, nullable=True)
-    image_path = Column(String, nullable=True)
 
 def setup_database_connection(user, password, host, port):
     try:
@@ -47,29 +40,40 @@ def write_to_db(filtered_df: pd.DataFrame, engine, Session):
 
     with Session() as session:
         for _, row in filtered_df.iterrows():
-            # Check if image_path already exists. dont write if it does
-            existing_dish = session.query(Dish).filter(Dish.image_path == row.get('image_path')).first()
-            
-            if not existing_dish:
-                dish = Dish(
-                    menuDate=row.get('menuDate'),
-                    location=row.get('location'),
-                    menuGer=row.get('menuGer'),
-                    menuEng=row.get('menuEng'),
-                    guestPrice=row.get('guestPrice'),
-                    studentPrice=row.get('studentPrice'),
-                    meats=row.get('meats'),
-                    icons=row.get('icons'),
-                    filters=row.get('filters'),
-                    allergens=row.get('allergens'),
-                    additives=row.get('additives'),
-                    menuLine=row.get('menuLine'),
-                    descriptionGer=row.get('descriptionGer'),
-                    descriptionEn=row.get('descriptionEn'),
-                    taste=row.get('taste'),
-                    ingredients=row.get('ingredients'),
-                    tokens=row.get('tokens'),
-                    image_path=row.get('image_path'),
-                )
-                session.add(dish)
+            try:
+                # Check if image_path already exists. Don't write if it does
+                existing_dish = session.query(Dish).filter(
+                    Dish.menuDate == row.get('menuDate'),
+                    Dish.menuLine == row.get('menuLine'),
+                    Dish.menu == row.get('menu')
+                ).first()
+    
+                if not existing_dish:
+                    student_price = row.get('studentPrice', 0)
+                    student_price = -1 if student_price == '-' else float(student_price.replace(',', '.'))
+                    
+                    guest_price = row.get('guestPrice', 0)
+                    guest_price = -1 if guest_price == '-' else float(guest_price.replace(',', '.'))
+                    
+                    pupil_price = row.get('pupilPrice', 0)
+                    pupil_price = -1 if pupil_price == '-' else float(pupil_price.replace(',', '.'))
+                    
+                    dish = Dish(
+                        menuDate=row.get('menuDate'),
+                        menuLine=row.get('menuLine'),
+                        menu=row.get('menu'),
+                        studentPrice=student_price,
+                        location=row.get('location'),
+                        guestPrice=guest_price,
+                        pupilPrice=pupil_price,
+                        meats=row.get('meats'),
+                        icons=row.get('icons'),
+                        allergens=row.get('allergens'),
+                        additives=row.get('additives'),
+                    )
+                    session.add(dish)
+            except ValueError as e:
+                print(f"Error converting values for row: {row}")
+                print(f"Error message: {str(e)}")
+                continue
         session.commit()

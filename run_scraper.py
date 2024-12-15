@@ -12,14 +12,12 @@ URL_DICT = {
     'Mensa Morgenstelle': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/621?lang=de&v=1731088361352'
 }
 
-WORKER_NUMBER = 1
-
 def main():
     engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
-    result_df = pd.DataFrame(columns=["menuDate", "menuLine", "menu", "studentPrice", "location", "image_path"])
+    result_df = pd.DataFrame(columns=["menuDate", "menuLine", "menu", "studentPrice", "location"])
 
     for option in URL_DICT:
-        temp_df = run_scraper(option, URL_DICT, WORKER_NUMBER)
+        temp_df = run_scraper(option, URL_DICT)
         cleaned_df = clean_data(temp_df, option)
         result_df = pd.concat([result_df, cleaned_df])
 
@@ -28,44 +26,9 @@ def main():
 
     filtered_df["menu"] = filtered_df['menu'].apply(remove_brackets)
 
-    # placeholders here, need to be filled with the correct values,
-    # BUT DONT DO THIS HERE!!!!      
-    filtered_df["tokens"] = 0
-    filtered_df["tokens"] = filtered_df["tokens"].astype(int)
-    filtered_df["menuGer"] = "N/A"
-    filtered_df["menuEng"] = "N/A"
-    filtered_df["filters"] = "N/A"
-    filtered_df["descriptionGer"] = "N/A"
-    filtered_df["descriptionEn"] = "N/A"
-    filtered_df["taste"] = "N/A"
-    filtered_df["ingredients"] = "N/A"
-
-    # Cast columns to the correct data types
-    filtered_df = filtered_df.astype({
-        'menuDate': 'datetime64[ns]',
-        'location': 'string',
-        'menuGer': 'string',
-        'menuEng': 'string',
-        'guestPrice': 'string',
-        'studentPrice': 'string',
-        'meats': 'string',
-        'icons': 'string',
-        'filters': 'string',
-        'allergens': 'string',
-        'additives': 'string',
-        'menuLine': 'string',
-        'descriptionGer': 'string',
-        'descriptionEn': 'string',
-        'taste': 'string',
-        'ingredients': 'string',
-        'image_path': 'string',
-    })
-
-    print(filtered_df)
-
     write_to_db(filtered_df, engine, Session)
 
-    print("Finished")
+    print(f"Finished at {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
     main()

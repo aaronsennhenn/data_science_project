@@ -6,7 +6,7 @@ import re
 def clean_data(menus_df, option):
     menus_df.drop(["photo", "co2", "filtersInclude"], axis=1, inplace=True)
     
-    required_columns = ["menuDate", "menuLine", "menu", "studentPrice", "image_filename"]
+    required_columns = ["menuDate", "menuLine", "menu", "studentPrice"]
     for col in required_columns:
         if col not in menus_df.columns:
             menus_df[col] = 'N/A'
