@@ -41,7 +41,8 @@ def write_to_db(filtered_df: pd.DataFrame, engine, Session):
     with Session() as session:
         for _, row in filtered_df.iterrows():
             try:
-                # Check if image_path already exists. Don't write if it does
+                # Check if menuDat + menuLine + menu combination already exists in the database then skip
+                # e.g. 2024-12-16 + Frisches Obst + Dessert SB -> skipped if exists
                 existing_dish = session.query(Dish).filter(
                     Dish.menuDate == row.get('menuDate'),
                     Dish.menuLine == row.get('menuLine'),
