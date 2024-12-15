@@ -6,39 +6,7 @@
     <title>Menu Selection</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        .font-script {
-            font-family: 'Dancing Script', cursive;
-        }
-        .bg-image {
-            background-image: url("{{ url_for('static', filename='images/background.jpg') }}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-        header {
-            padding-bottom: 1rem;
-        }
-        h1 {
-            margin-top: 2rem;
-        }
-        .content-row {
-            height: calc(50vh - 2rem); /* Subtract half of header height */
-        }
-        .image-container {
-            height: 100%;
-            overflow: hidden;
-        }
-        .image-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-        }
-        .bg-soft-beige {
-            background-color: #D2BD96;
-        }
-    </style>
+    <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet"> <!-- Custom CSS -->
 </head>
 
 <body class="bg-soft-beige min-h-screen flex flex-col">

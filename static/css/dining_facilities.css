@@ -1,0 +1,20 @@
+.font-script { font-family: 'Dancing Script', cursive; }
+.bg-custom-beige { background-color: #D2BD96; }
+select {
+    appearance: none;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.25rem;
+    color: black;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+    cursor: pointer;
+}
+select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+select:hover {
+    background-color: #f7fafc;
+}

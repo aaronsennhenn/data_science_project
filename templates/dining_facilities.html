@@ -6,28 +6,8 @@
     <title>Dining Facilities</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        .font-script { font-family: 'Dancing Script', cursive; }
-        .bg-custom-beige { background-color: #D2BD96; }
-        select {
-            appearance: none;
-            background-color: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.25rem;
-            color: black;
-            padding: 0.5rem 1rem;
-            margin-bottom: 1rem;
-            width: 100%;
-            cursor: pointer;
-        }
-        select:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-        }
-        select:hover {
-            background-color: #f7fafc;
-        }
-    </style>
+    <link href="{{ url_for('static', filename='css/dining_facilities.css') }}" rel="stylesheet"> <!-- Custom CSS -->
+
 </head>
 
 <body class="bg-custom-beige min-h-screen flex flex-col">
@@ -86,19 +66,6 @@
             </div>
         </div>
     </main>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateSelector = document.getElementById('dateSelector');
-            const mensaSelector = document.getElementById('mensaSelector');
-            const submitButton = document.getElementById('submitButton');
-
-            submitButton.addEventListener('click', function() {
-                const selectedDate = dateSelector.value;
-                const selectedMensa = mensaSelector.value;
-                window.location.href = `/mensa/${selectedMensa}?date=${selectedDate}`;
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='js/dining_facilities.js') }}"></script> <!-- Custom JS -->
 </body>
 </html>
