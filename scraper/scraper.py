@@ -16,20 +16,20 @@ def initialize_pipeline():
         device = torch.device("cuda")
         print("Using CUDA device")
         pipeline = StableDiffusionPipeline.from_pretrained(
-            "sd-legacy/stable-diffusion-v1-5",
+            "stabilityai/stable-diffusion-2-1",
             torch_dtype=torch.float16
         ).to(device)
     elif torch.backends.mps.is_available():
         device = torch.device("mps")
         print("Using MPS device")
         pipeline = StableDiffusionPipeline.from_pretrained(
-            "sd-legacy/stable-diffusion-v1-5"
+            "stabilityai/stable-diffusion-2-1"
         ).to(device)
     else:
         device = torch.device("cpu")
         print("Using CPU device")
         pipeline = StableDiffusionPipeline.from_pretrained(
-            "sd-legacy/stable-diffusion-v1-5",
+            "stabilityai/stable-diffusion-2-1",
             torch_dtype=torch.float32
         ).to(device)
     

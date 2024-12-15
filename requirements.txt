@@ -11,3 +11,4 @@ diffusers
 SQLAlchemy
 transformers
 accelerate
+argostranslate
