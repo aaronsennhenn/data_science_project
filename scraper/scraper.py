@@ -16,20 +16,20 @@ def initialize_pipeline():
         device = torch.device("cuda")
         print("Using CUDA device")
         pipeline = StableDiffusionPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-2-1",
+            "sd-legacy/stable-diffusion-v1-5",
             torch_dtype=torch.float16
         ).to(device)
     elif torch.backends.mps.is_available():
         device = torch.device("mps")
         print("Using MPS device")
         pipeline = StableDiffusionPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-2-1"
+            "sd-legacy/stable-diffusion-v1-5"
         ).to(device)
     else:
         device = torch.device("cpu")
         print("Using CPU device")
         pipeline = StableDiffusionPipeline.from_pretrained(
-            "stabilityai/stable-diffusion-2-1",
+            "sd-legacy/stable-diffusion-v1-5",
             torch_dtype=torch.float32
         ).to(device)
     
@@ -101,7 +101,7 @@ def run_scraper(option, url_dict):
             menus_df.at[index, 'image_path'] = "error.jpg"
 
     # Use ThreadPoolExecutor to process images in parallel
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         futures = {executor.submit(process_menu, index, row): index for index, row in menus_df.iterrows()}
         concurrent.futures.wait(futures)
 

@@ -4,6 +4,10 @@ requests
 torch
 wheel
 gunicorn
-# pyodbc # for linux
-psycopg2 # for windows
+pyodbc # for linux
+# psycopg2 # for windows
+psycopg2-binary
 diffusers
+SQLAlchemy
+transformers
+accelerate
