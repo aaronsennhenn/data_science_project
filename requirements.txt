@@ -6,3 +6,8 @@ wheel
 gunicorn
 # pyodbc # for linux
 psycopg2 # for windows
+diffusers
+googletrans
+transformers
+accelerate
+tqdm

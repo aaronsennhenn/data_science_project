@@ -6,20 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mensa Details</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
 </head>
 <body>
-    <h1>Mensa Details</h1>
-    <p><strong>Selected Mensa:</strong> {{ mensa_name }}</p>
-    <p><strong>Selected day:</strong> {{ mensa_day }}</p>
-
-    <title>The following information is stored in the DB about that mensa and day</title>
-
     <div class="container mt-5">
-        <h1>DataFrame Display</h1>
-        <!-- Render the DataFrame HTML table -->
-        {{ table|safe }}
+        <h1>{{ mensa_name }} - {{ mensa_day }}</h1>
+        
+        <div class="row">
+            {% for dish in dishes %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    {% if dish.image_path %}
+                    <img src="{{ url_for('static', filename='generated_images/' + dish.image_path) }}" class="card-img-top" alt="{{ dish.menuGer }}">
+                    {% endif %}                    
+                    <div class="card-body">
+                        <h5 class="card-title">{{ dish.menuGer }}</h5>
+                        <p class="card-text">{{ dish.menuEng }}</p>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Student: {{ dish.studentPrice }} | Guest: {{ dish.guestPrice }}
+                            </small>
+                        </p>
+                        {% if dish.allergens %}
+                        <p class="card-text"><small>Allergens: {{ dish.allergens }}</small></p>
+                        {% endif %}
+                        {% if dish.additives %}
+                        <p class="card-text"><small>Additives: {{ dish.additives }}</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-
 </body>
 </html>
