@@ -4,7 +4,7 @@ import pandas as pd
 from db.db_write import setup_database_connection, write_to_db
 from secret import USER, PASSWORD, HOST, PORT
 
-url_dict = {
+URL_DICT = {
     'Cafeteria Wilhelmstraße': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/715?lang=de&v=1731244959433',
     'Cafeteria Morgenstelle': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/724?lang=de&v=1731245000291',
     'Cafeteria und Mensa Prinz Karl': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/623?lang=de&v=1731088441410',
@@ -12,13 +12,14 @@ url_dict = {
     'Mensa Morgenstelle': 'https://www.my-stuwe.de//wp-json/mealplans/v1/canteens/621?lang=de&v=1731088361352'
 }
 
+WORKER_NUMBER = 1
+
 def main():
     engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
     result_df = pd.DataFrame(columns=["menuDate", "menuLine", "menu", "studentPrice", "location", "image_path"])
 
-    
-    for option in url_dict:
-        temp_df = run_scraper(option, url_dict)
+    for option in URL_DICT:
+        temp_df = run_scraper(option, URL_DICT, WORKER_NUMBER)
         cleaned_df = clean_data(temp_df, option)
         result_df = pd.concat([result_df, cleaned_df])
 
@@ -62,7 +63,6 @@ def main():
 
     print(filtered_df)
 
-    # Write the filtered DataFrame to the database
     write_to_db(filtered_df, engine, Session)
 
     print("Finished")

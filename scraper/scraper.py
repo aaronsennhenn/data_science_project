@@ -66,7 +66,7 @@ def parse_data(json_data, canteen_id):
     menus_list = df[f'{canteen_id}.menus'].iloc[0]
     return pd.DataFrame(menus_list)
 
-def run_scraper(option, url_dict):
+def run_scraper(option, url_dict, worker_number):
     url = url_dict[option]
     json_data = fetch_data(url)
     match = re.search(r'/canteens/(\d+)', url)
@@ -94,15 +94,16 @@ def run_scraper(option, url_dict):
             filename = get_image_filename(menu)
             full_path = os.path.join(image_folder, filename)
             if not os.path.exists(full_path):
-                print(f"Worker {threading.current_thread().name} processing image {index}")
+                print(f"Worker {worker_number} processing image {index}")
                 generate_image(menu, full_path)
             menus_df.at[index, 'image_path'] = filename
         else:
             menus_df.at[index, 'image_path'] = "error.jpg"
 
     # Use ThreadPoolExecutor to process images in parallel
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=worker_number) as executor:
         futures = {executor.submit(process_menu, index, row): index for index, row in menus_df.iterrows()}
         concurrent.futures.wait(futures)
 
+    return menus_df
     return menus_df
