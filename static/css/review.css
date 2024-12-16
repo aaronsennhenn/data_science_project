@@ -1,8 +1,9 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #d8cbbb; /* Solid beige background */
+}
 .font-script {
     font-family: 'Dancing Script', cursive;
-}
-.bg-soft-beige {
-    background-color: #D2BD96;
 }
 .star {
     color: #FFD700; /* More yellow tone */
@@ -29,4 +30,17 @@
     font-size: 0.75rem;
     color: #6b7280;
     margin-top: 4px;
+}
+header, footer {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+.btn-primary {
+    background-color: #4A5568;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.3s ease;
+}
+.btn-primary:hover {
+    background-color: #2D3748;
 }

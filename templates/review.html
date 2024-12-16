@@ -8,42 +8,38 @@
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/review.css') }}" rel="stylesheet"> <!-- Custom CSS -->
 </head>
-<body class="bg-soft-beige min-h-screen flex flex-col">
-    
+<body class="min-h-screen flex flex-col relative">
     <!-- Header -->
     <header class="w-full bg-white shadow-md py-4 px-8">
         <nav class="flex justify-between items-center">
-            <div class="text-xl font-bold text-gray-800">Savor.</div>
+            <div class="text-xl font-bold text-gray-800">MENSA APP.</div>
             <div class="space-x-4">
-                <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded">Home</a>
-                <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded">About</a>
-                <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded">Review</a>
-                <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded">Contact</a>
+                <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Home</a>
+                <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">About</a>
+                <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Review</a>
+                <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Contact</a>
+                <a href="/login" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Login</a>
             </div>
         </nav>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center justify-center px-4 mt-12">
-        
+    <div class="flex-grow flex flex-col items-center justify-center px-4 py-12">
         <!-- Headline -->
-        <h1 class="text-5xl font-semibold text-gray-800 mb-12 font-script">Customer's Review</h1>
+        <h1 class="text-5xl font-semibold text-gray-900 mb-12 font-script text-center">Customer's Review</h1>
 
         <!-- Review Cards Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full">
 
             <!-- Review Card 1 -->
             <div class="review-card">
-                <!-- Stars and Cafeteria Name -->
                 <div class="stars-container mb-4">
                     <div class="flex">
                         <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
                     </div>
                     <p class="cafeteria-name">Cafeteria Morgenstelle</p>
                 </div>
-                <!-- Review Text -->
                 <p class="text-gray-700 mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Asperiores sint corporis voluptate non error obcaecati adipisci.</p>
-                <!-- Reviewer Info -->
                 <div class="flex items-center">
                     <img src="{{ url_for('static', filename='images/profile1.jpg') }}" alt="John Doe" class="profile-img mr-4">
                     <div>
@@ -55,16 +51,13 @@
 
             <!-- Review Card 2 -->
             <div class="review-card">
-                <!-- Stars and Cafeteria Name -->
                 <div class="stars-container mb-4">
                     <div class="flex">
                         <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
                     </div>
                     <p class="cafeteria-name">Cafeteria Morgenstelle</p>
                 </div>
-                <!-- Review Text -->
                 <p class="text-gray-700 mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Asperiores sint corporis voluptate non error obcaecati adipisci.</p>
-                <!-- Reviewer Info -->
                 <div class="flex items-center">
                     <img src="{{ url_for('static', filename='images/profile2.jpg') }}" alt="Jane Doe" class="profile-img mr-4">
                     <div>
@@ -76,16 +69,13 @@
 
             <!-- Review Card 3 -->
             <div class="review-card">
-                <!-- Stars and Cafeteria Name -->
                 <div class="stars-container mb-4">
                     <div class="flex">
                         <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
                     </div>
                     <p class="cafeteria-name">Cafeteria Morgenstelle</p>
                 </div>
-                <!-- Review Text -->
                 <p class="text-gray-700 mb-6">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Asperiores sint corporis voluptate non error obcaecati adipisci.</p>
-                <!-- Reviewer Info -->
                 <div class="flex items-center">
                     <img src="{{ url_for('static', filename='images/profile3.jpg') }}" alt="Alex Smith" class="profile-img mr-4">
                     <div>
@@ -96,9 +86,13 @@
             </div>
 
         </div>
+    </div>
 
-        <!-- Button to view more reviews could be inserted here -->
-    </main>
-
+    <!-- Footer -->
+    <footer class="w-full py-4 px-8">
+        <div class="text-center text-gray-900">
+            &copy; 2024 MENSA APP. All rights reserved.
+        </div>
+    </footer>
 </body>
 </html>

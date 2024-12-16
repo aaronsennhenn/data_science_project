@@ -9,59 +9,44 @@
     <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet"> <!-- Custom CSS -->
 </head>
 
-<body class="bg-soft-beige min-h-screen flex flex-col">
-    <!-- Navigation Bar -->
+<body class="min-h-screen flex flex-col relative">
+    <!-- Background Image -->
+    <div class="bg-image"></div>
+    
+    <!-- Navigation Bar (unchanged) -->
     <header class="w-full bg-white shadow-md py-4 px-8">
         <nav class="flex justify-between items-center">
-            <div class="text-xl font-bold text-gray-900">Savor.</div>
+            <div class="text-xl font-bold text-gray-800">MENSA APP.</div>
             <div class="space-x-4">
-                <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded">Home</a>
-                <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded">About</a>
-                <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded">Review</a>
+                <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Home</a>
+                <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">About</a>
+                <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Review</a>
                 <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded">Contact</a>
             </div>
         </nav>
     </header>
-
+    
     <!-- Main Content -->
-    <div class="flex-grow flex flex-col">
-        <!-- First Row with Background Image -->
-        <div class="content-row relative flex items-center justify-center">
-            <div class="bg-image absolute inset-0 opacity-30"></div>
-            <div class="relative z-10 text-center px-4">
-                <h1 style="font-size: 52px;" class="text-3xl font-semibold text-gray-900 mb-4 font-script">Choose your Favourite Menu</h1>
-                <p class="text-gray-800 mb-6">
-                    Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
-                </p>
-                <a href="dining_facilities" class="mt-4 px-4 py-2 bg-gray-900 text-white rounded inline-block">Dining Facilities</a>
-                <p class="text-gray-800 mb-6 mt-2">
-                    Cafeteria Morgenstelle - Mensa Morgenstelle - Cafeteria Wilhelmstraße - Mensa Wilhelmstraße - Mensa and Cafeteria Prinz Karl
-                </p>
+    <div class="flex-grow flex items-center justify-center px-4 py-12">
+        <div class="content-wrapper max-w-4xl w-full p-8">
+            <h1 class="text-6xl font-semibold text-gray-900 mb-6 font-script text-center">Choose your Favourite Menu</h1>
+            <p class="text-gray-800 mb-8 text-lg text-center">
+                Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
+            </p>
+            <div class="text-center mb-8">
+                <a href="dining_facilities" class="px-4 py-2 bg-gray-900 text-white rounded">Weekly Menu Overview</a>
             </div>
-        </div>
-
-        <!-- Second Row -->
-        <div class="content-row flex">
-            <!-- Left Column (Image) -->
-            <div class="w-1/3 image-container">
-                <img src="{{ url_for('static', filename='images/cup.jpg') }}" alt="cup">
-            </div>
-
-            <!-- Middle Column (Content) -->
-            <div class="w-1/3 flex items-center justify-center px-4">
-                <div class="text-center">
-                    <h2 style="font-size: 24px;" class="text-xl font-bold text-gray-900">Menu Matchmaker</h2>
-                    <p class="text-gray-800 mt-2">Why waiting - start exploring!</p>
-                    <p class="text-gray-800 mt-1 mb-8">Uncover your personal taste and find the menu that best suits your preferences!</p>
-                    <a href="/login" class="mt-8 px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Login</a>
-                </div>
-            </div>
-        
-            <!-- Right Column (Image) -->
-            <div class="w-1/3 image-container">
-                <img src="{{ url_for('static', filename='images/cafeteria.jpg') }}" alt="cafeteria">
+            <div class="text-center">
+                <p class="text-gray-800 text-lg mb-6">Uncover your personal taste and find the menu that best suits your preferences!</p>
+                <strong class="text-xl text-gray-900">Start exploring and log in now!</strong>
             </div>
         </div>
     </div>
+
+    <footer class="w-full py-4 px-8">
+        <div class="text-center text-gray-900">
+            &copy; 2024 MENSA APP. All rights reserved.
+        </div>
+    </footer>
 </body>
 </html>

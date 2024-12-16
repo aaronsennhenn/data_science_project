@@ -1,3 +1,19 @@
+/* General body styling */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #d8cbbb; /* Solid beige background */
+}
+
+/* Font styling for specific elements */
+.font-script {
+    font-family: 'Dancing Script', cursive;
+}
+
+/* Header and footer styling */
+header, footer {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
 /* Styling for restaurant names */
 .restaurant-name {
     font-weight: bold;
@@ -49,4 +65,15 @@ table {
     text-decoration: none; /* Remove underline */
     color: inherit; /* Inherit color from parent */
     font-weight: bold; /* Make text bold */
+}    
+
+/* Additional menu styling */
+.menu-type {
+    font-weight: bold; 
+}
+
+.menu-name {
+    font-weight: normal; 
+    display: block;
+    margin-bottom: 20px;
 }
