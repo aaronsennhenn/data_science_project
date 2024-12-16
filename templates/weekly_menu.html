@@ -11,7 +11,6 @@
 <body>
     <div class="container">
         <h1 class="text-center my-4">Weekly Menu Overview</h1>
-
         <table class="table">
             <thead>
                 <tr>
@@ -34,7 +33,6 @@
                                        <a class="dish-link" onclick="sendDishData('{{ restaurant["name"] }}', '{{ day }}')">
                                         <strong>{{ menu_type }}</strong>: {{ menu_name}}
                                         </a>
-
                                     </li>
                                 {% endfor %}
                             <!-- <li><strong>{{ dish['name'] }}</strong>: {{ dish['description'] }}</li> -->
