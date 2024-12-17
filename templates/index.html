@@ -3,48 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu Selection</title>
+    <title>Mensa App - Your Digital Dining Guide</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet"> <!-- Custom CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
 </head>
 
-<body class="min-h-screen flex flex-col relative">
-    <!-- Background Image -->
-    <div class="bg-image"></div>
-    
-    <!-- Navigation Bar (unchanged) -->
-    <header class="w-full bg-white shadow-md py-4 px-8">
-        <nav class="flex justify-between items-center">
-            <div class="text-xl font-bold text-gray-800">MENSA APP.</div>
+<body class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Background Image with Overlay -->
+    <div class="bg-image fixed inset-0 z-0"></div>
+
+    <!-- Navigation Bar -->
+    <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
+        <nav class="flex justify-between items-center max-w-7xl mx-auto">
+            <div class="text-2xl font-bold text-indigo-600">MENSA APP.</div>
             <div class="space-x-4">
-                <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Home</a>
-                <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">About</a>
-                <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Review</a>
-                <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded">Contact</a>
+                <a href="/" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300">Home</a>
+                <a href="/about" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300">About</a>
+                <a href="/review" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300">Review</a>
+                <a href="/contact" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300">Contact</a>
+                <a href="/analysis" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300">Analytics</a>
             </div>
         </nav>
-    </header>
+    </header>  
     
     <!-- Main Content -->
-    <div class="flex-grow flex items-center justify-center px-4 py-12">
-        <div class="content-wrapper max-w-4xl w-full p-8">
-            <h1 class="text-6xl font-semibold text-gray-900 mb-6 font-script text-center">Choose your Favourite Menu</h1>
-            <p class="text-gray-800 mb-8 text-lg text-center">
+    <div class="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
+        <div class="content-wrapper max-w-4xl w-full p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
+                Your Digital Dining Guide
+            </h1>
+            <p class="text-xl text-gray-600 mb-12 text-center leading-relaxed">
                 Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. From hearty traditional dishes to creative vegan options, there's something to satisfy every palate.
             </p>
-            <div class="text-center mb-8">
-                <a href="dining_facilities" class="px-4 py-2 bg-gray-900 text-white rounded">Weekly Menu Overview</a>
+            <div class="text-center mb-12">
+                <a href="dining_facilities" 
+                   class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300 text-lg font-medium">
+                   Meal Plan
+                </a>
             </div>
-            <div class="text-center">
-                <p class="text-gray-800 text-lg mb-6">Uncover your personal taste and find the menu that best suits your preferences!</p>
-                <strong class="text-xl text-gray-900">Start exploring and log in now!</strong>
+            <p class="text-xl text-gray-600 mb-12 text-center leading-relaxed">
+                Explore comprehensive insights into Tübingen's dining facilities. Discover price trends, menu patterns, and data-driven statistics to make informed dining choices.
+            </p>
+            
+            <div class="text-center mb-12">
+                <a href="analysis" 
+                   class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300 text-lg font-medium">
+                    Analytics
+                </a>
             </div>
         </div>
     </div>
 
-    <footer class="w-full py-4 px-8">
-        <div class="text-center text-gray-900">
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
             &copy; 2024 MENSA APP. All rights reserved.
         </div>
     </footer>

@@ -3,9 +3,13 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import setup_database_connection, Dish, Base
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data
-
+from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_average_prices_per_menuline, get_lowest_prices_per_menuline, get_price_development
 from datetime import datetime
+import plotly
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import json
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -43,6 +47,89 @@ def dining_facilities():
     return render_template('dining_facilities.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas)
+
+@app.route('/analysis')
+def analysis():
+    with Session() as session:
+        total_mensas = get_total_mensas(session)
+        names_available_mensas = get_available_mensas(session)
+        first_updated_date = get_first_updated_date(session)
+        dish_count_per_mensa = get_dish_count_per_mensa(session)
+        average_prices = get_average_prices_per_menuline(session)
+        lowest_prices = get_lowest_prices_per_menuline(session)
+        price_development = get_price_development(session)
+
+        fig = make_subplots(
+            rows=len(price_development), 
+            cols=1,
+            subplot_titles=list(price_development.keys()),
+            vertical_spacing=0.05
+        )
+
+        # Define consistent traces for legend
+        common_traces = [
+            ('Pupil Price', '#4F46E5'),   # Blue
+            ('Student Price', '#059669'),  # Green
+            ('Guest Price', '#DC2626')     # Red
+        ]
+
+        row = 1
+        for menu_line, data in price_development.items():
+            for (name, color), price_data in zip(
+                common_traces, 
+                [data['pupil_prices'], data['student_prices'], data['guest_prices']]
+            ):
+                fig.add_trace(
+                    go.Scatter(
+                        x=data['dates'],
+                        y=price_data,
+                        name=name,
+                        line=dict(color=color),
+                        showlegend=(row == 1)  # Show legend only for first row
+                    ),
+                    row=row, col=1
+                )
+            row += 1
+
+        fig.update_layout(
+            height=300*len(price_development),
+            plot_bgcolor='rgba(255,255,255,0.9)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font_family="Inter",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            ),
+            margin=dict(t=50, b=50, l=50, r=50)
+        )
+
+        fig.update_xaxes(
+            gridcolor='rgba(0,0,0,0.1)',
+            showline=True,
+            linewidth=1,
+            linecolor='rgba(0,0,0,0.2)'
+        )
+
+        fig.update_yaxes(
+            gridcolor='rgba(0,0,0,0.1)',
+            showline=True,
+            linewidth=1,
+            linecolor='rgba(0,0,0,0.2)'
+        )
+
+        plot_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('analysis.html',
+                         total_mensas=total_mensas,
+                         names_available_mensas=names_available_mensas,
+                         first_updated_date=first_updated_date,
+                         dish_count_per_mensa=dish_count_per_mensa,
+                         average_prices=average_prices,
+                         lowest_prices=lowest_prices,
+                         plot_json=plot_json)
 
 
 @app.route('/dish-clicked', methods=['POST'])
