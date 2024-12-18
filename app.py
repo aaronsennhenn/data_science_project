@@ -159,11 +159,9 @@ def mensa_menu(mensa_name):
         menu_data = []
         for dish in dishes:
             menu_data.append({
-                'menuGer': dish.menuGer,
-                'menuEng': dish.menuEng,
+                'menu': dish.menu,
                 'studentPrice': dish.studentPrice,
                 'guestPrice': dish.guestPrice,
-                'image_path': dish.image_path,
                 'allergens': dish.allergens,
                 'additives': dish.additives
             })

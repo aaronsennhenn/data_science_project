@@ -12,3 +12,4 @@ SQLAlchemy
 transformers
 accelerate
 argostranslate
+plotly
