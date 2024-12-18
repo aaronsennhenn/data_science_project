@@ -3,7 +3,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import setup_database_connection, Dish, Base
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_average_prices_per_menuline, get_lowest_prices_per_menuline, get_price_development
+from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline
 from datetime import datetime
 import plotly
 import plotly.express as px
@@ -55,9 +55,15 @@ def analysis():
         names_available_mensas = get_available_mensas(session)
         first_updated_date = get_first_updated_date(session)
         dish_count_per_mensa = get_dish_count_per_mensa(session)
-        average_prices = get_average_prices_per_menuline(session)
-        lowest_prices = get_lowest_prices_per_menuline(session)
+        average_prices = get_average_prices_per_menuline_per_mensa(session)  
+        lowest_prices = get_lowest_prices_per_menuline(session)    
         price_development = get_price_development(session)
+        menu_line_distribution = get_menu_line_distribution(session)
+        mensa_average_prices = get_average_prices_per_menuline_per_mensa(session)
+        mensa_lowest_prices = get_lowest_prices_per_menuline_per_mensa(session)
+
+        # Define professional color scheme
+        PLOT_COLORS = ['#4F46E5', '#6366F1', '#455d7a']
 
         fig = make_subplots(
             rows=len(price_development), 
@@ -66,17 +72,14 @@ def analysis():
             vertical_spacing=0.05
         )
 
-        # Define consistent traces for legend
-        common_traces = [
-            ('Pupil Price', '#4F46E5'),   # Blue
-            ('Student Price', '#059669'),  # Green
-            ('Guest Price', '#DC2626')     # Red
-        ]
+        today = datetime.now().date()
 
         row = 1
         for menu_line, data in price_development.items():
             for (name, color), price_data in zip(
-                common_traces, 
+                [('Pupil Price', PLOT_COLORS[0]), 
+                ('Student Price', PLOT_COLORS[1]), 
+                ('Guest Price', PLOT_COLORS[2])],
                 [data['pupil_prices'], data['student_prices'], data['guest_prices']]
             ):
                 fig.add_trace(
@@ -84,53 +87,109 @@ def analysis():
                         x=data['dates'],
                         y=price_data,
                         name=name,
-                        line=dict(color=color),
-                        showlegend=(row == 1)  # Show legend only for first row
+                        line=dict(color=color, width=2),
+                        showlegend=(row == 1)
                     ),
                     row=row, col=1
                 )
+            
+            # Add vertical line for today
+            fig.add_vline(
+                x=today,
+                line_width=1,
+                line_dash="dash",
+                line_color="gray",
+                row=row,
+                col=1
+            )
             row += 1
 
         fig.update_layout(
-            height=300*len(price_development),
-            plot_bgcolor='rgba(255,255,255,0.9)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font_family="Inter",
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
-            ),
-            margin=dict(t=50, b=50, l=50, r=50)
+        height=400*len(price_development),  # Increased from 300 to 400
+        plot_bgcolor='rgb(249, 250, 251)',  # gray-50
+        paper_bgcolor='rgba(0,0,0,0)',
+        font_family="Inter",
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        margin=dict(t=50, b=50, l=50, r=50)
         )
 
+
         fig.update_xaxes(
-            gridcolor='rgba(0,0,0,0.1)',
-            showline=True,
-            linewidth=1,
-            linecolor='rgba(0,0,0,0.2)'
+        gridcolor='rgba(0,0,0,0.1)',
+        showline=True,
+        linewidth=1,
+        linecolor='rgba(0,0,0,0.2)',
+        dtick="M1",  # Monthly ticks
+        title_text="Date",
+        tickformat="%Y-%m-%d",  # Show full date for each tick
+        tickangle=45,  # Angle the dates for better readability
+        tickmode="array",
+        ticktext=data['dates'],
+        tickvals=data['dates']
         )
 
         fig.update_yaxes(
             gridcolor='rgba(0,0,0,0.1)',
             showline=True,
             linewidth=1,
-            linecolor='rgba(0,0,0,0.2)'
+            linecolor='rgba(0,0,0,0.2)',
+            dtick=0.5,  # Price increments of 0.50€
+            title_text="Price (€)"
         )
 
+        # Create plot_json before using it
         plot_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template('analysis.html',
-                         total_mensas=total_mensas,
-                         names_available_mensas=names_available_mensas,
-                         first_updated_date=first_updated_date,
-                         dish_count_per_mensa=dish_count_per_mensa,
-                         average_prices=average_prices,
-                         lowest_prices=lowest_prices,
-                         plot_json=plot_json)
+        # Create pie charts for each mensa
+        VIOLET_COLORS = ['#4F46E5', '#6366F1', '#818CF8', '#A5B4FC', '#233142', '#455d7a', '#e3e3e3']
 
+        pie_charts = {}
+        for mensa, distribution in menu_line_distribution.items():
+            labels = list(distribution.keys())
+            values = list(distribution.values())
+            
+            fig = go.Figure(data=[go.Pie(
+                labels=labels,
+                values=values,
+                hole=0,
+                marker=dict(colors=VIOLET_COLORS),
+                textinfo='label+percent',
+                textposition='inside',
+                insidetextorientation='horizontal',
+                textfont=dict(size=10, color='white', family='Inter'),
+                hovertemplate="%{value} dishes<extra></extra>"
+            )])
+            
+            fig.update_layout(
+                showlegend=False,
+                margin=dict(t=0, b=0, l=0, r=0),
+                height=200,  # Reduced size
+                width=200,   # Reduced size
+                paper_bgcolor='rgba(0,0,0,0)',
+                font_family='Inter'
+            )
+            
+            pie_charts[mensa] = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
+        # Add pie_charts to the template context
+        return render_template('analysis.html',
+                             total_mensas=total_mensas,
+                             names_available_mensas=names_available_mensas,
+                             first_updated_date=first_updated_date,
+                             dish_count_per_mensa=dish_count_per_mensa,
+                             mensa_average_prices=mensa_average_prices,
+                             mensa_lowest_prices=mensa_lowest_prices,
+                             average_prices=average_prices,           
+                             lowest_prices=lowest_prices,   
+                             plot_json=plot_json,
+                             pie_charts=pie_charts)
 
 @app.route('/dish-clicked', methods=['POST'])
 def dish_clicked():

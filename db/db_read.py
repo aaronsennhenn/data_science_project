@@ -50,7 +50,7 @@ def get_dish_count_per_mensa(session: Session) -> dict:
         results[mensa] = count
     return results
 
-# Get average prices per menu line (Dish.menuLine)
+#Get average prices per menu line (Dish.menuLine)
 def get_average_prices_per_menuline(session: Session) -> dict:
     results = {}
     menu_lines = session.query(Dish.menuLine).distinct().all()
@@ -92,6 +92,38 @@ def get_lowest_prices_per_menuline(session: Session) -> dict:
     
     return results
 
+# Average Menu Prices per Each Mensa (Dish.menu) over all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) but grouped by each menu line (Dish.menuLine)
+def get_average_prices_per_menuline_per_mensa(session: Session) -> dict:
+    results = {}
+    for mensa in get_available_mensas(session):
+        menu_lines = session.query(Dish.menuLine).filter_by(location=mensa).distinct().all()
+        results[mensa] = {}
+        
+        for menu_line in menu_lines:
+            menu_line = menu_line[0]
+            avg_price = session.query(
+                func.avg((Dish.pupilPrice + Dish.studentPrice + Dish.guestPrice) / 3)
+            ).filter(Dish.location == mensa, Dish.menuLine == menu_line).scalar()
+            
+            results[mensa][menu_line] = round(avg_price, 2) if avg_price else 0
+    return results
+
+# Lowest Menu Prices per Each Mensa (Dish.menu) over all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) but grouped by each menu line (Dish.menuLine)
+def get_lowest_prices_per_menuline_per_mensa(session: Session) -> dict:
+    results = {}
+    for mensa in get_available_mensas(session):
+        menu_lines = session.query(Dish.menuLine).filter_by(location=mensa).distinct().order_by(Dish.menuLine).all()
+        results[mensa] = {}
+        
+        for menu_line in menu_lines:
+            menu_line = menu_line[0]
+            lowest_price = session.query(
+                func.min((Dish.pupilPrice + Dish.studentPrice + Dish.guestPrice) / 3)
+            ).filter(Dish.location == mensa, Dish.menuLine == menu_line).scalar()
+            
+            results[mensa][menu_line] = round(lowest_price, 2) if lowest_price else 0
+    return results
+
 # Get price development per menu line (Dish.menuLine)
 def get_price_development(session: Session) -> dict:
     menu_lines = session.query(Dish.menuLine).distinct().all()
@@ -114,3 +146,16 @@ def get_price_development(session: Session) -> dict:
         }
     
     return price_data
+
+# Get district count of menu line (Dish.menuLine) per each mensa (Dish.location) (such that with this information I can plot pie charts)
+def get_menu_line_distribution(session: Session) -> dict:
+    results = {}
+    for mensa in get_available_mensas(session):
+        menu_line_counts = session.query(
+            Dish.menuLine, 
+            func.count(Dish.menuLine)
+        ).filter_by(location=mensa).group_by(Dish.menuLine).all()
+        
+        results[mensa] = {menu_line: count for menu_line, count in menu_line_counts}
+    
+    return results
