@@ -9,3 +9,24 @@
 //         });
 //     });
 // });
+document.addEventListener('DOMContentLoaded', function () {
+    const submitRatingButtons = document.querySelectorAll('.submit-rating');
+
+    submitRatingButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const menuLine = this.getAttribute('data-menu-line');
+            const id = this.getAttribute('data-id');
+            const rating = document.querySelector(`input[name="rating_${menuLine}"]:checked`).value;
+
+            const formData = new FormData();
+            //formData.append('rating_menu_line', menuLine);
+            formData.append('id', id);
+            formData.append('rating', rating);
+
+            fetch('/dining_facilities', {
+                method: 'POST',
+                body: formData,
+            })
+        });
+    });
+});

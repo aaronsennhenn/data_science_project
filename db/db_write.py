@@ -1,9 +1,10 @@
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine, Float
+from sqlalchemy import create_engine, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Date
 import pandas as pd
 import sys
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -23,6 +24,13 @@ class Dish(Base):
     icons = Column(String, nullable=True)
     allergens = Column(String, nullable=True)
     additives = Column(String, nullable=True)
+
+class Rating(Base):
+    __tablename__ = 'rating'
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
+    rating = Column(Integer, nullable=False)
+    timestamp = Column(DateTime,default=datetime.now, nullable=False)
 
 def setup_database_connection(user, password, host, port):
     try:
@@ -77,4 +85,13 @@ def write_to_db(filtered_df: pd.DataFrame, engine, Session):
                 print(f"Error converting values for row: {row}")
                 print(f"Error message: {str(e)}")
                 continue
+        session.commit()
+
+# create a new table called rating. it should contain two columns: id and rating
+def write_to_rating(id: int, rating: int, engine, Session):
+    Rating.metadata.create_all(engine)
+
+    with Session() as session:
+        rating = Rating(menu_id=id, rating=rating)
+        session.add(rating)
         session.commit()

@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import setup_database_connection, Dish, Base
+from db.db_write import setup_database_connection, Dish, Base,write_to_rating
 from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
@@ -60,6 +60,7 @@ def dining_facilities():
         # set default values for filters
         selected_meat = None
         selected_diet = None
+        rating = None
         selected_price = "studentPrice"
 
 
@@ -71,7 +72,13 @@ def dining_facilities():
             selected_diet = request.form.get('selected_diet')
             selected_price = request.form.get('selected_price')
 
-            print(selected_meat, selected_diet, selected_price)
+            # get rating from user and selected dish with mensa
+            rating,id = request.form.get('rating'),request.form.get('id')
+
+            # write rating and id to database
+            if rating:
+                write_to_rating(id,rating,engine,Session)
+
             # if no date is selected, set default date to today
             if not date:
                 date = datetime.now().strftime('%Y-%m-%d')
@@ -82,6 +89,7 @@ def dining_facilities():
         menu_data = []
         for dish in dishes:
             menu_data.append({
+                'id': dish.id,
                 'menu': dish.menu,
                 'studentPrice': dish.studentPrice,
                 'guestPrice': dish.guestPrice,

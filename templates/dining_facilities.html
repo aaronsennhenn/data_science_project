@@ -9,6 +9,8 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="{{ url_for('static', filename='css/dining_facilities.css') }}" rel="stylesheet"> <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 
 </head>
 
@@ -107,9 +109,9 @@
                         <p class="card-text">
                             <small class="text-muted">
                                 {% if selected_price == 'studentPrice' %}
-                                Student: {{ dish.studentPrice }}
+                                    Student: {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} {% endif %}
                                 {% elif selected_price == 'guestPrice' %}
-                                Guest: {{ dish.guestPrice }}
+                                    Guest: {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} {% endif %}
                                 {% endif %}
                             </small>
                         </p>
@@ -119,6 +121,22 @@
                         {% if dish.additives %}
                         <p class="card-text"><small>Additives: {{ dish.additives }}</small></p>
                         {% endif %}
+
+                        <div class="rating">
+                            <input type="radio" id="star5_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="5" />
+                            <label for="star5_{{ dish.menuLine }}">&#9733;</label>
+                            <input type="radio" id="star4_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="4" />
+                            <label for="star4_{{ dish.menuLine }}" >&#9733;</label>
+                            <input type="radio" id="star3_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="3" />
+                            <label for="star3_{{ dish.menuLine }}">&#9733;</label>
+                            <input type="radio" id="star2_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="2" />
+                            <label for="star2_{{ dish.menuLine }}">&#9733;</label>
+                            <input type="radio" id="star1_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="1" />
+                            <label for="star1_{{ dish.menuLine }}">&#9733;</label>
+                        </div>
+
+                        <button class="submit-rating" data-menu-line="{{ dish.menuLine }}" data-id="{{ dish.id }}">Submit Rating</button>
+
                     </div>
                 </div>
             </div>
