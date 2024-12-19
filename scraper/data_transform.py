@@ -31,3 +31,17 @@ def get_available_dates():
 def remove_brackets(text):
     cleaned_text = re.sub(r'\[.*?\]', '', text)
     return cleaned_text.strip().strip(',')
+
+
+def collect_unique_meats(data):
+    encodings = {"F":"Fisch", "G":"Geflügel", "R":"Rind", "S":"Schwein", "V":"Vegetarisch", "W":"Wild", "L":"Lamm", "K":"Kalb"}
+    unique_strings = set()
+    
+    for item in data:
+        for sub_item in item[0].split(','):
+            sub_item = sub_item.strip()
+            if sub_item != 'NA':
+                unique_strings.add(sub_item)
+    
+    encoded_strings = [(string, encodings[string]) for string in unique_strings if string in encodings]
+    return encoded_strings

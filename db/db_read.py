@@ -17,6 +17,9 @@ def get_image_path(dish_id: int, session: Session) -> str:
     dish = session.query(Dish).filter_by(id=dish_id).first()
     return dish.image_path if dish else None
 
+def get_meat_options(session: Session) -> List[str]:
+    return session.query(Dish.meats).distinct().all()
+
 from datetime import datetime, timedelta
 
 def get_next_five_days_data(session: Session) -> dict:

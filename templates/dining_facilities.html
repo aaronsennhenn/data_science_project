@@ -31,13 +31,14 @@
  <!-- Main Content -->
 <main class="bg-custom-beige min-h-screen flex justify-start">
 
-    <div class="flex flex-col space-y-4 p-6 w-full max-w-md"> 
+    <div class="flex flex-col space-y-4 p-6 w-full max-w-lg"> 
         <!-- Display current selected mensa and date -->
         <header class="mb-4">
             <h2 class="text-center text-primary">{{ selected_weekday }}  {{ selected_date  }}</h2>
         </header>
         <form action="{{ url_for('dining_facilities') }}" method="POST" class="space-y-4" id="filter-form">
             <!-- Dropdown Menu for Mensa -->
+             <p class="text-left">Select a Mensa:</p>
             <select name="selected_mensa" id="mensa-dropdown" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 transition w-full">
                 {% for mensa in available_mensas %}
                     <option value="{{ mensa }}" {% if selected_mensa == mensa %} selected {% endif %}>{{ mensa }}</option>
@@ -45,14 +46,48 @@
             </select>
 
             <!-- radio buttons for date selection -->
+            <p class="text-left">Select a Date:</p>
                 <div class="radio-group">
                     {% for date in available_dates %}
                         <input type="radio" id="date_{{ date }}" name="selected_date" value="{{ date }}" />
                         <label for="date_{{ date }}">{{ date }}</label>
                     {% endfor %}
                 </div>
+            
+                <!-- when no date is selected, return a popup that states please select a date-->
+                <div class="alert alert-danger" role="alert" id="date-alert" style="display: none;">
+                    Please select a date.
+                </div>
 
-            <button type="submit"style="display:none">Submit</button> <!-- Hidden submit button ;-->
+                <!-- radio buttons for meat selection-->
+                <p class="text-left">Select a Meat:</p>
+                <div class="radio-group">
+                    {% for meat in available_meat %}
+                        <input type="radio" id="meat_{{ meat[0] }}" name="selected_meat" value="{{ meat[0] }}" />
+                        <label for="meat_{{ meat[0] }}">{{ meat[1] }}</label>
+                    {% endfor %}
+                </div>
+
+                <!-- select only vegan or vegetarian options-->
+                <p class="text-left">Select a Diet:</p>
+                <div class="radio-group">
+                    <input type="radio" id="diet_vegan" name="selected_diet" value="vegan" />
+                    <label for="diet_vegan">Vegan</label>
+                    <input type="radio" id="diet_vegetarian" name="selected_diet" value="v" />
+                    <label for="diet_vegetarian">Vegetarian</label>
+                </div>
+
+                <!-- toogle switch to display student or guest price-->
+                <p class="text-left">Select a Price:</p>
+                <div class="toggle-switch">
+                    <input type="radio" id="price_student" name="selected_price" value="studentPrice" checked />
+                    <label for="price_student">Student</label>
+                    <input type="radio" id="price_guest" name="selected_price" value="guestPrice" />
+                    <label for="price_guest">Guest</label>
+                </div>
+
+            <!-- Submit Button -->
+            <button type="submit">Submit</button> <!-- Hidden submit button ;-->
         </form>
 
         <script src="{{ url_for('static', filename='js/dining_facilities.js') }}"></script>
@@ -71,7 +106,11 @@
                         <h5 class="card-title">{{ dish.menu }}</h5>
                         <p class="card-text">
                             <small class="text-muted">
-                                Student: {{ dish.studentPrice }} | Guest: {{ dish.guestPrice }}
+                                {% if selected_price == 'studentPrice' %}
+                                Student: {{ dish.studentPrice }}
+                                {% elif selected_price == 'guestPrice' %}
+                                Guest: {{ dish.guestPrice }}
+                                {% endif %}
                             </small>
                         </p>
                         {% if dish.allergens %}

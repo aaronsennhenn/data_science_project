@@ -3,7 +3,8 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import setup_database_connection, Dish, Base
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline
+from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options
+from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
 import plotly.express as px
@@ -48,15 +49,33 @@ def dining_facilities():
         available_dates = [key.split(", ")[1] for key in data.keys()]
         available_mensas = list(set([mensa for mensas in data.values() for mensa in mensas]))
 
+        # get available meat options
+        available_meat = get_meat_options(session)
+        available_meat = collect_unique_meats(available_meat)
+
         # display default mensa and date when loading the page for the first time
         mensa_name = available_mensas[0]
         date = available_dates[0]
+
+        # set default values for filters
+        selected_meat = None
+        selected_diet = None
+        selected_price = "studentPrice"
 
 
         # When user filters, get filtered mensa and date values
         if request.method == 'POST':
             mensa_name = request.form.get('selected_mensa')
             date = request.form.get('selected_date')
+            selected_meat = request.form.get('selected_meat')
+            selected_diet = request.form.get('selected_diet')
+            selected_price = request.form.get('selected_price')
+
+            print(selected_meat, selected_diet, selected_price)
+            # if no date is selected, set default date to today
+            if not date:
+                date = datetime.now().strftime('%Y-%m-%d')
+
 
         # Query dishes for respective mensa and date
         dishes = get_dishes_by_date_location(session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
@@ -68,8 +87,17 @@ def dining_facilities():
                 'guestPrice': dish.guestPrice,
                 'allergens': dish.allergens,
                 'additives': dish.additives,
-                'menuLine': dish.menuLine
+                'menuLine': dish.menuLine,
+                'meats': dish.meats,
+                'icons': dish.icons
             })
+        
+        # if user filters by meat, diet or price, filter the dishes
+        if selected_meat:
+            menu_data = [dish for dish in menu_data if selected_meat.lower() in dish['meats'].lower()]
+        
+        if selected_diet:
+            menu_data = [dish for dish in menu_data if selected_diet.lower() in dish['icons'].lower()]
 
         # encode selected weekday to display
         selected_weekday = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
@@ -77,10 +105,12 @@ def dining_facilities():
     return render_template('dining_facilities.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,
+                         available_meat=available_meat,
                          dishes=menu_data,
                          selected_mensa=mensa_name,
                          selected_date=date,
-                         selected_weekday=selected_weekday)
+                         selected_weekday=selected_weekday,
+                         selected_price=selected_price)
 
 @app.route('/analysis')
 def analysis():
@@ -275,4 +305,4 @@ def check_image(filename):
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)
-    app.run()
+    app.run(debug=True)

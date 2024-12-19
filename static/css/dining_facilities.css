@@ -8,7 +8,7 @@ select {
     color: black;
     padding: 0.5rem 1rem;
     margin-bottom: 1rem;
-    width: 100%;
+    width: 50%;
     cursor: pointer;
 }
 select:focus {
@@ -82,3 +82,20 @@ p {
 }
 
 
+/* Add this rule to set the width of the form block */
+#filter-form {
+    width: 170%; /* You can adjust this value as needed */
+    max-width: 600px; /* Optional: set a maximum width */
+    margin: 0 auto; /* Center the form */
+    background-color: white; /* Set background color to white */
+    border-radius: 10px; /* Set rounded edges */
+    padding: 15px; /* Add padding for better spacing */
+}
+
+/* add toggle switch styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
