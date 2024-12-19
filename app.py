@@ -37,16 +37,50 @@ def about():
 def review():
    return render_template('review.html')
 
-@app.route('/dining_facilities', methods=['GET'])
+@app.route('/dining_facilities', methods=['GET','POST'])
 def dining_facilities():
     with Session() as session:
+
+        # query available data for the next five days
         data = get_next_five_days_data(session)
-        available_dates = list(data.keys())
+
+        # store dates and mensas in a list
+        available_dates = [key.split(", ")[1] for key in data.keys()]
         available_mensas = list(set([mensa for mensas in data.values() for mensa in mensas]))
-        
+
+        # display default mensa and date when loading the page for the first time
+        mensa_name = available_mensas[0]
+        date = available_dates[0]
+
+
+        # When user filters, get filtered mensa and date values
+        if request.method == 'POST':
+            mensa_name = request.form.get('selected_mensa')
+            date = request.form.get('selected_date')
+
+        # Query dishes for respective mensa and date
+        dishes = get_dishes_by_date_location(session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
+        menu_data = []
+        for dish in dishes:
+            menu_data.append({
+                'menu': dish.menu,
+                'studentPrice': dish.studentPrice,
+                'guestPrice': dish.guestPrice,
+                'allergens': dish.allergens,
+                'additives': dish.additives,
+                'menuLine': dish.menuLine
+            })
+
+        # encode selected weekday to display
+        selected_weekday = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
+            
     return render_template('dining_facilities.html', 
                          available_dates=available_dates,
-                         available_mensas=available_mensas)
+                         available_mensas=available_mensas,
+                         dishes=menu_data,
+                         selected_mensa=mensa_name,
+                         selected_date=date,
+                         selected_weekday=selected_weekday)
 
 @app.route('/analysis')
 def analysis():

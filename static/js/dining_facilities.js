@@ -1,11 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const dateSelector = document.getElementById('dateSelector');
-    const mensaSelector = document.getElementById('mensaSelector');
-    const submitButton = document.getElementById('submitButton');
-
-    submitButton.addEventListener('click', function() {
-        const selectedDate = dateSelector.value;
-        const selectedMensa = mensaSelector.value;
-        window.location.href = `/mensa/${selectedMensa}?date=${selectedDate}`;
+document.addEventListener('DOMContentLoaded', function () {
+   const radioButtons = document.querySelectorAll('input[name="selected_date"]');    
+    radioButtons.forEach(button => {
+        button.addEventListener('change', function() {
+            // Submit the form immediately when a radio button is selected
+            if (button.checked) {
+                document.querySelector('#filter-form').submit();  // Submit the form
+            }
+        });
     });
 });
