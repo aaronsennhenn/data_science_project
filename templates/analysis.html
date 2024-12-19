@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/analysis.css') }}" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
@@ -28,7 +29,7 @@
     <main class="flex-grow p-8 max-w-7xl mx-auto w-full">
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Analytics</h1>
-            <p class="text-gray-600">Comprehensive analysis of dining facilities, prices, and trends</p>
+            <p class="text-gray-600">Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias</p>
         </div>
 
         <!-- Key Metrics Section -->
@@ -41,7 +42,7 @@
                 </div>
                 
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2">Data Collection Period</h3>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2">Data Inception</h3>
                     <p class="text-2xl font-bold text-gray-900">{{ first_updated_date }}</p>
                 </div>
             </div>
@@ -53,20 +54,25 @@
             
             <!-- Mensa Details -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-                <h3 class="text-lg font-medium text-gray-800 mb-4">Available Mensas</h3>
+                <h3 class="text-lg font-medium text-gray-800 mb-4">Menu Options</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {% for mensa in names_available_mensas %}
                     <div class="p-4 bg-gray-50 rounded-lg">
-                        <p class="text-gray-700">{{ mensa }}</p>
-                        <p class="text-sm text-gray-500">Dishes: {{ dish_count_per_mensa[mensa] }}</p>
+                        <div class="flex flex-col items-center">
+                            <div class="w-full mb-4">
+                                <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
+                                <p class="text-sm font-medium text-gray-600">Menus Count: {{ dish_count_per_mensa[mensa] }}</p>
+                                <p class="text-sm font-medium text-gray-600">Menu Line Distribution: </p>
+                            </div>
+                            <div id="pie-chart-{{ loop.index }}" class="shadow-sm rounded-lg" style="width: 200px; height: 200px;"></div>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- Price Analysis -->
+        <!--
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Average Prices -->
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <h3 class="text-lg font-medium text-gray-800 mb-4">Average Menu Prices</h3>
                     <div class="grid gap-4">
@@ -91,8 +97,6 @@
                         {% endfor %}
                     </div>
                 </div>
-
-                <!-- Lowest Prices -->
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <h3 class="text-lg font-medium text-gray-800 mb-4">Lowest Menu Prices</h3>
                     <div class="grid gap-4">
@@ -118,10 +122,56 @@
                     </div>
                 </div>
             </div>
+        -->
+                <!-- Price Analysis -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+                    <h3 class="text-lg font-medium text-gray-800 mb-4">Price Analysis</h3>
+                    <h4 class="text-lg italic text-gray-800 mb-4 text-center">Average Prices</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for mensa in names_available_mensas %}
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="flex flex-col">
+                                <div class="w-full mb-4">
+                                    <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
+                                    {% for menu_line, price in mensa_average_prices[mensa].items()|sort %}
+                                    <div class="mt-2">
+                                        <p class="text-sm font-medium text-gray-600">{{ menu_line }}</p>
+                                        <p class="font-medium">€{{ price }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                <!-- Lowest Prices Column -->
+                    <h4 class="text-lg italic text-gray-800 mb-4 text-center">Lowest Prices</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {% for mensa in names_available_mensas %}
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <div class="flex flex-col">
+                                <div class="w-full mb-4">
+                                    <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
+                                    {% for menu_line, price in mensa_lowest_prices[mensa].items() %}
+                                    <div class="mt-2">
+                                        <p class="text-sm font-medium text-gray-600">{{ menu_line }}</p>
+                                        <p class="font-medium">€{{ price }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
             <!-- Price Development Chart -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <h3 class="text-lg font-medium text-gray-800 mb-4">Price Development Over Time</h3>
+                <h3 class="text-lg font-medium text-gray-800 mb-4">Price Development</h3>
                 <div id="price-development-plots" class="w-full h-[600px]"></div>
             </div>
         </section>
@@ -140,5 +190,12 @@
         var graphs = {{ plot_json | safe }};
         Plotly.newPlot('price-development-plots', graphs.data, graphs.layout);
     </script>
+     <script>
+        {% for mensa in names_available_mensas %}
+            var pieData = {{ pie_charts[mensa] | safe }};
+            Plotly.newPlot('pie-chart-{{ loop.index }}', pieData.data, pieData.layout);
+        {% endfor %}
+    </script>
 </body>
 </html>
+
