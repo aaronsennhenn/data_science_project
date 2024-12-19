@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from .db_write import Dish, setup_database_connection
 from typing import List
 from sqlalchemy import func
+import datetime 
 
 def get_user_by_username(session: Session, username: str):
     return session.query(User).filter_by(username=username).first()
@@ -150,11 +151,18 @@ def get_price_development(session: Session) -> dict:
 # Get district count of menu line (Dish.menuLine) per each mensa (Dish.location) (such that with this information I can plot pie charts)
 def get_menu_line_distribution(session: Session) -> dict:
     results = {}
+    today = datetime.now().date()
+    week_end = today + timedelta(days=7)
+    
     for mensa in get_available_mensas(session):
         menu_line_counts = session.query(
             Dish.menuLine, 
             func.count(Dish.menuLine)
-        ).filter_by(location=mensa).group_by(Dish.menuLine).all()
+        ).filter(
+            Dish.location == mensa,
+            Dish.menuDate >= today,
+            Dish.menuDate < week_end
+        ).group_by(Dish.menuLine).all()
         
         results[mensa] = {menu_line: count for menu_line, count in menu_line_counts}
     
