@@ -1,2 +1,14 @@
 .font-script { font-family: 'Dancing Script', cursive; }
 .bg-custom-beige { background-color: #D2BD96; }
+/* Sidebar transition */
+.sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+/* Hamburger menu icon */
+.menu-toggle:hover {
+    cursor: pointer;
+}
+/* Close button */
+.close-menu:hover {
+    cursor: pointer;
+}

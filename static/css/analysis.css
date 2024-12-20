@@ -57,3 +57,17 @@ header, footer {
 .location-link:hover {
     background-color: #6366F1;
 }
+/* Sidebar transition */
+.sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Hamburger menu icon */
+.menu-toggle:hover {
+    cursor: pointer;
+}
+
+/* Close button */
+.close-menu:hover {
+    cursor: pointer;
+}

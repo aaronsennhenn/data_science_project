@@ -33,12 +33,10 @@ header, footer {
     border-radius: 1rem; /* Rounded corners */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
 }
-
 /* Heading styles */
 h1 {
     margin-top: 2rem; /* Space above the heading */
 }
-
 /* Button styles */
 .btn-primary {
     background-color: #4A5568; /* Dark gray background */
@@ -47,7 +45,20 @@ h1 {
     border-radius: 0.25rem; /* Rounded button corners */
     transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }
-
 .btn-primary:hover {
     background-color: #2D3748; /* Darker gray on hover */
+}
+/* Sidebar transition */
+.sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Hamburger menu icon */
+.menu-toggle:hover {
+    cursor: pointer;
+}
+
+/* Close button */
+.close-menu:hover {
+    cursor: pointer;
 }
