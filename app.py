@@ -25,10 +25,10 @@ app.secret_key = APP_SECRET_KEY
 
 engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
 
-
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    mensa_names = ["Mensa Morgenstelle", "Mensa Wilhelmstraße", "Cafeteria und Mensa Prinz Karl"]    
+    return render_template('index.html', mensa_names=mensa_names)
 
 @app.route('/about')
 def about():
@@ -53,8 +53,8 @@ def dining_facilities():
         available_meat = get_meat_options(session)
         available_meat = collect_unique_meats(available_meat)
 
-        # display default mensa and date when loading the page for the first time
-        mensa_name = available_mensas[0]
+        # Get GET request to display the selected Mensa from index
+        mensa_name = request.args.get('selected_mensa', available_mensas[0])
         date = available_dates[0]
 
         # set default values for filters
