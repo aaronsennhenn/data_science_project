@@ -25,6 +25,9 @@ from datetime import datetime, timedelta
 def get_next_five_days_data(session: Session) -> dict:
     today = datetime.now().date()
     date_range = [today + timedelta(days=x) for x in range(5)]
+
+    # MANUALLY FIX DATES OVER CHRISTMAS PERIOD BECAUSE MENSA IS CLOSED. MUST BE REMOVED AFTER CHRISTMAS
+    date_range = [datetime(2024, 12, 15), datetime(2041, 12, 16), datetime(2024, 12, 17), datetime(2024, 12, 18), datetime(2024, 12, 19), datetime(2024, 12, 20)]
     
     results = {}
     for date in date_range:
