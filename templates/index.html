@@ -45,34 +45,51 @@
 
     <!-- Main Content -->
 
+    <!-- Main Content -->
     <div class="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
         <div class="content-wrapper max-w-4xl w-full p-8 bg-white rounded-xl shadow-sm border border-gray-100">
             <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
-                Your Digital Dining Guide
+                Your Digital Mensa Guide
             </h1>
             <p class="text-xl text-gray-600 mb-12 text-center leading-relaxed">
                 Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. 
                 Explore Tübingen's mensa scene, uncovering menu patterns, pricing insights, and emerging trends.
             </p>
-
-<!-- Choose a Dining Facility Section            
-            <div class="mt-12">
+            <!-- Choose a Dining Facility Section with Image Map -->
+            <div class="mt-12 relative">
                 <h2 class="text-3xl font-semibold text-gray-800 mb-6 text-center">
-                    Choose a Dining Facility
+                   Locations
                 </h2>
-                <div class="flex justify-center gap-6">
-                    {% for mensa_name in mensa_names %}
-                        <a href="{{ url_for('dining_facilities', selected_mensa=mensa_name) }}">
-                            <button class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300 text-lg font-medium">
+                <!-- Container for the image -->
+                <div class="relative max-w-4xl mx-auto">
+                    <!-- The map image -->
+                    <img src="{{ url_for('static', filename='images/map.jpg') }}" 
+                         alt="Map with Dining Facilities" 
+                         class="w-full h-auto rounded-lg shadow-sm">
+                    
+                    <!-- Markers on the map -->
+                    {% for mensa_name, coordinates in mensa_coordinates.items() %}
+                        <a href="{{ url_for('dining_facilities', selected_mensa=mensa_name) }}"
+                           class="absolute"
+                           style="top: {{ coordinates.top }}%; left: {{ coordinates.left }}%;">
+                            <!-- Marker Image -->
+                            <img src="{{ url_for('static', filename='images/marker.jpg') }}" 
+                                 alt="Marker for {{ mensa_name }}" 
+                                 class="w-8 h-8 marker">
+                            <!-- Mensa Name -->
+                            <span 
+                                class="absolute text-sm bg-white text-gray-800 px-2 py-1 rounded shadow-lg mensa-label"
+                                style="top: 10%; left: 120%; white-space: nowrap;">
                                 {{ mensa_name }}
-                            </button>
+                            </span>
                         </a>
                     {% endfor %}
                 </div>
             </div>
- -->
+
         </div>
     </div>
+
 
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 py-8 relative z-10">

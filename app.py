@@ -27,8 +27,11 @@ engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
 
 @app.route('/', methods=['GET'])
 def index():
-    mensa_names = ["Mensa Morgenstelle", "Mensa Wilhelmstraße", "Cafeteria und Mensa Prinz Karl"]    
-    return render_template('index.html', mensa_names=mensa_names)
+    mensa_coordinates = {
+    "Mensa Morgenstelle": {"top": 20, "left": 30},
+    "Mensa Wilhelmstraße": {"top": 50, "left": 70},
+    "Cafeteria und Mensa Prinz Karl": {"top": 35, "left": 50},}
+    return render_template('index.html', mensa_coordinates=mensa_coordinates)
 
 @app.route('/about')
 def about():
