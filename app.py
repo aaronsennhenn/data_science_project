@@ -49,7 +49,8 @@ def dining_facilities():
         data = get_next_five_days_data(session)
 
         # store dates and mensas in a list
-        available_dates = [key.split(", ")[1] for key in data.keys()]
+        available_dates = sorted([datetime.strptime(key.split(", ")[1], '%Y-%m-%d').strftime('%Y-%m-%d') 
+                                for key in data.keys()])
         available_mensas = list(set([mensa for mensas in data.values() for mensa in mensas]))
 
         # get available meat options
