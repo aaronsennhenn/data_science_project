@@ -117,16 +117,18 @@
         <script src="{{ url_for('static', filename='js/dining_facilities.js') }}"></script>
 
     </div> 
-            <!-- display dishes -->
+            <!-- display dishes, prices and recipe link-->
     <div class="container mt-5">
         <div class="row">
             {% for dish in dishes %}
             <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
+                        <!-- dishes names-->
                         <h3 class="card-title">{{ dish.menuLine }}</h5>
                         <h5 class="card-title">{{ dish.menu }}</h5>
                         <p class="card-text">
+                             <!-- prices-->
                             <small class="text-muted">
                                 {% if selected_price == 'studentPrice' %}
                                     Student: {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} {% endif %}
@@ -135,13 +137,19 @@
                                 {% endif %}
                             </small>
                         </p>
+                        <!-- allergens and additives-->
                         {% if dish.allergens %}
                         <p class="card-text"><small>Allergens: {{ dish.allergens }}</small></p>
                         {% endif %}
                         {% if dish.additives %}
                         <p class="card-text"><small>Additives: {{ dish.additives }}</small></p>
                         {% endif %}
-
+                        <!-- recipe link -->
+                        <a href="https://www.gutekueche.de/{{ dish.menu | replace(' ', '-') | lower }}" 
+                            target="_blank" 
+                            class="bg-violet-500 text-white px-4 py-2 rounded-md shadow hover:bg-violet-600 transition inline-block mt-2">
+                            <i class="fas fa-utensils mr-2"></i>Recipe
+                        </a>                     
                         <div class="rating">
                             <input type="radio" id="star5_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="5" />
                             <label for="star5_{{ dish.menuLine }}">&#9733;</label>
