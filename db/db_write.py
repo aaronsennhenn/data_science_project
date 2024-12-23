@@ -8,7 +8,6 @@ from datetime import datetime
 
 Base = declarative_base()
 
-# Define the Dish model with updated structure
 class Dish(Base):
     __tablename__ = 'dishes'
 
@@ -31,6 +30,15 @@ class Rating(Base):
     menu_id = Column(Integer, nullable=False)
     rating = Column(Integer, nullable=False)
     timestamp = Column(DateTime,default=datetime.now, nullable=False)
+
+class Directory(Base):
+    __tablename__ = 'directory'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    additives = Column(String, nullable=True)
+    additives_written = Column(String, nullable=True)
+    allergens = Column(String, nullable=True)
+    allergens_written = Column(String, nullable=True)
+
 
 def setup_database_connection(user, password, host, port):
     try:
@@ -94,4 +102,61 @@ def write_to_rating(id: int, rating: int, engine, Session):
     with Session() as session:
         rating = Rating(menu_id=id, rating=rating)
         session.add(rating)
+        session.commit()
+
+# create a new table called directory, that includes the abbreviations saved in additives and allergens and their corresponding written out form
+def write_to_directory(engine, Session):
+    Directory.metadata.create_all(engine)
+    
+    additives_map = {
+        '9': 'Süßungsmittel',
+        '1': 'Farbstoff',
+        '2': 'Konservierungsstoff',
+        '3': 'Nitritpökelsalz',
+        '4': 'Antioxidationsmittel',
+        '5': 'Geschmacksverstärker',
+        '11': 'Phosphat'
+    }
+    
+    allergens_map = {
+        'Ei': 'Eier',
+        'Se': 'Sellerie',
+        'ML': 'Milch / Laktose',
+        'Sa': 'Sesam',
+        'Gl-a': 'Weizen',
+        'So': 'Soja',
+        'Nu-a': 'Mandeln'
+    }
+    
+    with Session() as session:
+        # Get unique additives and allergens from dishes table
+        unique_additives = session.query(Dish.additives).distinct().all()
+        unique_allergens = session.query(Dish.allergens).distinct().all()
+        
+        # Process additives
+        for additive in unique_additives:
+            if additive[0]:
+                codes = [code.strip() for code in additive[0].split(',')]
+                for code in codes:
+                    existing = session.query(Directory).filter_by(additives=code).first()
+                    if not existing:
+                        directory_entry = Directory(
+                            additives=code,
+                            additives_written=additives_map.get(code, None)
+                        )
+                        session.add(directory_entry)
+        
+        # Process allergens
+        for allergen in unique_allergens:
+            if allergen[0]:
+                codes = [code.strip() for code in allergen[0].split(',')]
+                for code in codes:
+                    existing = session.query(Directory).filter_by(allergens=code).first()
+                    if not existing:
+                        directory_entry = Directory(
+                            allergens=code,
+                            allergens_written=allergens_map.get(code, None)
+                        )
+                        session.add(directory_entry)
+                
         session.commit()

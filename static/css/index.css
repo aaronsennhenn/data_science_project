@@ -27,6 +27,18 @@ header, footer {
     background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
 }
 
+nav {
+    width: 100%;
+    padding: 0 2rem;
+    max-width: none !important;
+  }
+  
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
 /* Content wrapper styling */
 .content-wrapper {
     background-color: rgba(255, 255, 255, 0.85); /* Slightly transparent white */

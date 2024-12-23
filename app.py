@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import setup_database_connection, Dish, Base,write_to_rating
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options
+from db.db_write import setup_database_connection, Dish, Base, write_to_rating, write_to_directory
+from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -11,6 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import json
+from db.utils import translate_text_all_capitalized, translate_text_first_word_capitalized
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -44,7 +45,9 @@ def review():
 @app.route('/dining_facilities', methods=['GET','POST'])
 def dining_facilities():
     with Session() as session:
-
+        # Get additives and allergens 
+        additives_dict, allergens_dict = get_written_forms(session)
+        
         # query available data for the next five days
         data = get_next_five_days_data(session)
 
@@ -66,7 +69,6 @@ def dining_facilities():
         selected_diet = None
         rating = None
         selected_price = "studentPrice"
-
 
         # When user filters, get filtered mensa and date values
         if request.method == 'POST':
@@ -91,15 +93,16 @@ def dining_facilities():
         # Query dishes for respective mensa and date
         dishes = get_dishes_by_date_location(session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
         menu_data = []
+        menu_data = []
         for dish in dishes:
             menu_data.append({
                 'id': dish.id,
-                'menu': dish.menu,
+                'menu': translate_text_first_word_capitalized(dish.menu),  # Translate menu
                 'studentPrice': dish.studentPrice,
                 'guestPrice': dish.guestPrice,
                 'allergens': dish.allergens,
                 'additives': dish.additives,
-                'menuLine': dish.menuLine,
+                'menuLine': translate_text_all_capitalized(dish.menuLine),  # Translate menuLine
                 'meats': dish.meats,
                 'icons': dish.icons
             })
@@ -122,7 +125,9 @@ def dining_facilities():
                          selected_mensa=mensa_name,
                          selected_date=date,
                          selected_weekday=selected_weekday,
-                         selected_price=selected_price)
+                         selected_price=selected_price,
+                         additives_dict=additives_dict,
+                         allergens_dict=allergens_dict)
 
 @app.route('/analysis')
 def analysis():
@@ -317,4 +322,5 @@ def check_image(filename):
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)
+#        write_to_directory(engine, Session) This will add data to the directory
     app.run()

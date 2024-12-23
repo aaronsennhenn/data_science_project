@@ -5,19 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/default.css') }}" rel="stylesheet"> <!-- Custom CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/default.css') }}" rel="stylesheet">
 </head>
-<body class="bg-soft-beige min-h-screen flex flex-col">
+
+<body class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Background Image with Overlay -->
+    <div class="bg-image fixed inset-0 z-0"></div>
+
     <!-- Header -->
     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
-        <nav class="flex justify-between items-center max-w-7xl mx-auto">
-            <div class="text-2xl font-bold text-indigo-600">MENSA APP.</div>
-            <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
-                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
+        <nav>
+            <div class="nav-container">
+                <div class="text-2xl font-bold text-indigo-600">MENSA APP.</div>
+                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
         </nav>
     </header>
 
@@ -40,27 +46,32 @@
     </div>
 
     <!-- Main Content -->
-    <main class="flex-grow flex items-center justify-center px-4 py-12">
-        <div class="max-w-6xl w-full flex flex-col md:flex-row items-center md:items-start">
-            <!-- Text Section -->
-            <div class="w-full md:w-1/2 mb-8 md:mb-0 md:pr-8">
-                <h1 class="text-5xl font-semibold text-gray-800 mb-8 font-script">About Us</h1>
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Welcome to Mensa App!</h2>
-                <p class="text-gray-700 leading-relaxed mb-4">
-                    We’re a dedicated group of students who share a passion for good food and a desire to enhance the dining experience in Tübingen. 
-                <p class="text-gray-700 leading-relaxed">
+    <div class="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
+        <div class="content-wrapper max-w-4xl w-full p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">Welcome to Mensa App</h1>
+            <div class="w-full">
+                <p class="text-lg text-gray-600 mb-4">
+                    We're a dedicated group of students who share a passion for good food and a desire to enhance the dining experience in Tübingen.
+                </p>
+                <p class="text-lg text-gray-600 mb-4">
                     Our platform allows you to explore the menus of local mensas and cafeterias, complete with analytics and honest reviews.
-                    Our goal is to connect students with the best dining options available. Thank you for joining us on this journey!
+                    Our goal is to connect students with the best dining options available.
                 </p>
+                <p class="text-lg text-gray-600 mb-4">
+                    Thank you for joining us on this journey!
                 </p>
-            </div>
-
-            <!-- Image Section -->
-            <div class="w-full md:w-1/2 flex justify-center items-center">
-                <img src="{{ url_for('static', filename='images/cup.jpg') }}" alt="cup" class="max-w-full h-auto rounded-lg shadow-lg">
             </div>
         </div>
-    </main>
+    </div>
+
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+            &copy; 2024 MENSA APP. All rights reserved.
+        </div>
+    </footer>
+
     <script>
         const menuToggle = document.getElementById('menu-toggle');
         const closeMenu = document.getElementById('close-menu');

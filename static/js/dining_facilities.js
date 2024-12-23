@@ -30,3 +30,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            if (this.name === 'selected_diet') {  // Remove 'selected_price' from here
+                document.querySelectorAll(`input[name="${this.name}"]`).forEach(cb => {
+                    if (cb !== this) cb.checked = false;
+                });
+            }     
+        }
+    });
+});
