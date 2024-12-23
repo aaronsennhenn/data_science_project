@@ -7,7 +7,6 @@ import sys
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from flask import render_template, request, redirect, url_for, session
 
 Base = declarative_base()
 
@@ -30,6 +29,7 @@ class Dish(Base):
 class Rating(Base):
     __tablename__ = 'rating'
     id = Column(Integer, primary_key=True)
+    user_name = Column(String, nullable=True)
     menu_id = Column(Integer, nullable=False)
     rating = Column(Integer, nullable=False)
     timestamp = Column(DateTime,default=datetime.now, nullable=False)
@@ -42,7 +42,6 @@ class Directory(Base):
     allergens = Column(String, nullable=True)
     allergens_written = Column(String, nullable=True)
 
-# Database model: Each object of the User class creates a new column in the User table
 class User(Base):
     __tablename__ = 'users'
     
@@ -70,12 +69,12 @@ def setup_database_connection(user, password, host, port):
 def write_to_db(filtered_df: pd.DataFrame, engine, Session):
     Dish.metadata.create_all(engine)
 
-    with Session() as session:
+    with Session() as db_session:
         for _, row in filtered_df.iterrows():
             try:
                 # Check if menuDat + menuLine + menu combination already exists in the database then skip
                 # e.g. 2024-12-16 + Frisches Obst + Dessert SB -> skipped if exists
-                existing_dish = session.query(Dish).filter(
+                existing_dish = db_session.query(Dish).filter(
                     Dish.menuDate == row.get('menuDate'),
                     Dish.menuLine == row.get('menuLine'),
                     Dish.menu == row.get('menu')
@@ -104,21 +103,31 @@ def write_to_db(filtered_df: pd.DataFrame, engine, Session):
                         allergens=row.get('allergens'),
                         additives=row.get('additives'),
                     )
-                    session.add(dish)
+                    db_session.add(dish)
             except ValueError as e:
                 print(f"Error converting values for row: {row}")
                 print(f"Error message: {str(e)}")
                 continue
-        session.commit()
+        db_session.commit()
 
-# create a new table called rating. it should contain two columns: id and rating
-def write_to_rating(id: int, rating: int, engine, Session):
-    Rating.metadata.create_all(engine)
+# This table contains the user ratings, the menu_id of the rated meal, a timestamp, and the user_id if he is logged in
+def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):
+    Rating.metadata.create_all(engine) 
 
-    with Session() as session:
-        rating = Rating(menu_id=id, rating=rating)
-        session.add(rating)
-        session.commit()
+    with Session() as db_session:
+        rating = Rating(menu_id=menu_id, rating=rating, user_name=user_name)
+        db_session.add(rating)
+        db_session.commit()
+
+def write_to_user(username: str, password: str, engine, Session):
+    User.metadata.create_all(engine)
+
+    with Session() as db_session:
+        user = User(username=username)
+        user.set_password(password)
+        db_session.add(user)
+        db_session.commit()
+
 
 # create a new table called directory, that includes the abbreviations saved in additives and allergens and their corresponding written out form
 def write_to_directory(engine, Session):
@@ -144,35 +153,35 @@ def write_to_directory(engine, Session):
         'Nu-a': 'Mandeln'
     }
     
-    with Session() as session:
+    with Session() as db_session:
         # Get unique additives and allergens from dishes table
-        unique_additives = session.query(Dish.additives).distinct().all()
-        unique_allergens = session.query(Dish.allergens).distinct().all()
+        unique_additives = db_session.query(Dish.additives).distinct().all()
+        unique_allergens = db_session.query(Dish.allergens).distinct().all()
         
         # Process additives
         for additive in unique_additives:
             if additive[0]:
                 codes = [code.strip() for code in additive[0].split(',')]
                 for code in codes:
-                    existing = session.query(Directory).filter_by(additives=code).first()
+                    existing = db_session.query(Directory).filter_by(additives=code).first()
                     if not existing:
                         directory_entry = Directory(
                             additives=code,
                             additives_written=additives_map.get(code, None)
                         )
-                        session.add(directory_entry)
+                        db_session.add(directory_entry)
         
         # Process allergens
         for allergen in unique_allergens:
             if allergen[0]:
                 codes = [code.strip() for code in allergen[0].split(',')]
                 for code in codes:
-                    existing = session.query(Directory).filter_by(allergens=code).first()
+                    existing = db_session.query(Directory).filter_by(allergens=code).first()
                     if not existing:
                         directory_entry = Directory(
                             allergens=code,
                             allergens_written=allergens_map.get(code, None)
                         )
-                        session.add(directory_entry)
+                        db_session.add(directory_entry)
                 
-        session.commit()
+        db_session.commit()

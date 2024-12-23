@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection
+from .db_write import Dish, Directory, setup_database_connection, User
 from typing import List
 from sqlalchemy import func
 import datetime 
@@ -189,3 +189,7 @@ def get_written_forms(session):
             allergens_dict[entry.allergens] = entry.allergens_written
             
     return additives_dict, allergens_dict
+
+def get_user_name(db_session, username):
+    return db_session.query(User).filter_by(username=username).first()
+    

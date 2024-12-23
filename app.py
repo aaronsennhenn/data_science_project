@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import setup_database_connection, Dish, Base, User, write_to_rating, write_to_directory
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms
+from db.db_write import setup_database_connection, Dish, Base, User, write_to_rating, write_to_directory,write_to_user
+from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -60,9 +60,9 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        
+
         with Session() as db_session:
-            user = db_session.query(User).filter_by(username=username).first()
+            user = get_user_name(db_session, username)
             
             if user and user.check_password(password):
                 session['username'] = username
@@ -79,15 +79,12 @@ def register():
     password = request.form['password']
     
     with Session() as db_session:
-        user = db_session.query(User).filter_by(username=username).first()
+        user = get_user_name(db_session, username)
         
         if user:
             return render_template("login.html", error="Username is already used!")
         
-        new_user = User(username=username)
-        new_user.set_password(password)
-        db_session.add(new_user)
-        db_session.commit()
+        write_to_user(username, password, engine, Session)
         
         session['username'] = username
         return redirect(url_for('menu'))
@@ -114,6 +111,7 @@ def authorize_google():
 
     # create new user in db
     user = User.query.filter_by(username=username).first()
+
     if not user:
         user = User(username=username)
         db.session.add(user)
@@ -128,7 +126,7 @@ def authorize_google():
 @app.route("/logout")
 def logout():
     session.pop('username', None)
-    return redirect(url_for('index'))
+    return redirect(url_for('menu'))
 
 @app.route('/menu', methods=['GET','POST'])
 def menu():
@@ -158,6 +156,12 @@ def menu():
         rating = None
         selected_price = "studentPrice"
 
+        # if user logged in, get user_id
+        if "username" in session:
+            user_name = session['username']
+        else:
+            user_name = None
+
         # When user filters, get filtered mensa and date values
         if request.method == 'POST':
             mensa_name = request.form.get('selected_mensa')
@@ -167,11 +171,13 @@ def menu():
             selected_price = request.form.get('selected_price')
 
             # get rating from user and selected dish with mensa
-            rating,id = request.form.get('rating'),request.form.get('id')
+            rating,menu_id = request.form.get('rating'),request.form.get('id')
+            print(rating,menu_id)
+
 
             # write rating and id to database
             if rating:
-                write_to_rating(id,rating,engine,Session)
+                write_to_rating(menu_id,rating,user_name,engine,Session)
 
             # if no date is selected, set default date to today
             if not date:
@@ -204,11 +210,6 @@ def menu():
 
         # encode selected weekday to display
         selected_weekday = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
-
-        if "username" in session:
-            print(session['username'])
-        else:
-            print("No username in session")
             
     return render_template('menu.html', 
                          available_dates=available_dates,
@@ -220,7 +221,8 @@ def menu():
                          selected_weekday=selected_weekday,
                          selected_price=selected_price,
                          additives_dict=additives_dict,
-                         allergens_dict=allergens_dict)
+                         allergens_dict=allergens_dict,
+                         username=user_name)
 
 @app.route('/analysis')
 def analysis():
