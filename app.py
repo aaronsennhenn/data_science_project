@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import setup_database_connection, Dish, Base,write_to_rating
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options
+from db.db_write import setup_database_connection, Dish, Base, User, write_to_rating, write_to_directory
+from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -11,6 +11,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import json
+from db.utils import translate_text_all_capitalized, translate_text_first_word_capitalized
+from functools import wraps
+from authlib.integrations.flask_client import OAuth
+from flask_sqlalchemy import SQLAlchemy
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -24,6 +28,15 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = APP_SECRET_KEY
 
 engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
+
+oauth = OAuth(app)      # google login service
+db = SQLAlchemy(app)    # database service 
+google = oauth.register(
+    name='google',
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope':'openid profile email'})
 
 @app.route('/', methods=['GET'])
 def index():
@@ -40,13 +53,91 @@ def about():
 @app.route('/review')
 def review():
    return render_template('review.html')
+                                   
+# check username and password that user puts into form with db
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        with Session() as db_session:
+            user = db_session.query(User).filter_by(username=username).first()
+            
+            if user and user.check_password(password):
+                session['username'] = username
+                return redirect(url_for("menu"))
+            else:
+                error_message = "Your username or password is wrong!"
+                return render_template('login.html', error=error_message)
+                
+    return render_template('login.html')
 
-@app.route('/dining_facilities', methods=['GET','POST'])
-def dining_facilities():
-    with Session() as session:
+@app.route("/register", methods=["POST"])
+def register():
+    username = request.form['username']
+    password = request.form['password']
+    
+    with Session() as db_session:
+        user = db_session.query(User).filter_by(username=username).first()
+        
+        if user:
+            return render_template("login.html", error="Username is already used!")
+        
+        new_user = User(username=username)
+        new_user.set_password(password)
+        db_session.add(new_user)
+        db_session.commit()
+        
+        session['username'] = username
+        return redirect(url_for('menu'))
 
+
+# login for google
+@app.route('/login/google')
+def login_google():
+    try:
+        redirect_url = url_for('authorize_google',_external=True)
+        return google.authorize_redirect(redirect_url)
+    except Exception as e:
+        app.logger.error(f"Error during login:{str(e)}")
+        return "Error occurred during login", 500
+
+# authorization form for google
+@app.route("/authorize/google")
+def authorize_google():
+    token = google.authorize_access_token()
+    userinfo_endpoint = google.server_metadata['userinfo_endpoint']
+    resp = google.get(userinfo_endpoint)
+    user_info = resp.json()
+    username = user_info['email']
+
+    # create new user in db
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        user = User(username=username)
+        db.session.add(user)
+        db.session.commit()
+        db.session.close()
+
+    session['username'] = username
+    session['oauth_token'] = token
+
+    return redirect(url_for('menu'))
+
+@app.route("/logout")
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+@app.route('/menu', methods=['GET','POST'])
+def menu():
+    with Session() as db_session:
+        # Get additives and allergens 
+        additives_dict, allergens_dict = get_written_forms(db_session)
+        
         # query available data for the next five days
-        data = get_next_five_days_data(session)
+        data = get_next_five_days_data(db_session)
 
         # store dates and mensas in a list
         available_dates = sorted([datetime.strptime(key.split(", ")[1], '%Y-%m-%d').strftime('%Y-%m-%d') 
@@ -54,7 +145,7 @@ def dining_facilities():
         available_mensas = list(set([mensa for mensas in data.values() for mensa in mensas]))
 
         # get available meat options
-        available_meat = get_meat_options(session)
+        available_meat = get_meat_options(db_session)
         available_meat = collect_unique_meats(available_meat)
 
         # Get GET request to display the selected Mensa from index
@@ -66,7 +157,6 @@ def dining_facilities():
         selected_diet = None
         rating = None
         selected_price = "studentPrice"
-
 
         # When user filters, get filtered mensa and date values
         if request.method == 'POST':
@@ -89,17 +179,18 @@ def dining_facilities():
 
 
         # Query dishes for respective mensa and date
-        dishes = get_dishes_by_date_location(session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
+        dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
+        menu_data = []
         menu_data = []
         for dish in dishes:
             menu_data.append({
                 'id': dish.id,
-                'menu': dish.menu,
+                'menu': translate_text_first_word_capitalized(dish.menu),  # Translate menu
                 'studentPrice': dish.studentPrice,
                 'guestPrice': dish.guestPrice,
                 'allergens': dish.allergens,
                 'additives': dish.additives,
-                'menuLine': dish.menuLine,
+                'menuLine': translate_text_all_capitalized(dish.menuLine),  # Translate menuLine
                 'meats': dish.meats,
                 'icons': dish.icons
             })
@@ -113,8 +204,13 @@ def dining_facilities():
 
         # encode selected weekday to display
         selected_weekday = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
+
+        if "username" in session:
+            print(session['username'])
+        else:
+            print("No username in session")
             
-    return render_template('dining_facilities.html', 
+    return render_template('menu.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,
                          available_meat=available_meat,
@@ -122,21 +218,23 @@ def dining_facilities():
                          selected_mensa=mensa_name,
                          selected_date=date,
                          selected_weekday=selected_weekday,
-                         selected_price=selected_price)
+                         selected_price=selected_price,
+                         additives_dict=additives_dict,
+                         allergens_dict=allergens_dict)
 
 @app.route('/analysis')
 def analysis():
-    with Session() as session:
-        total_mensas = get_total_mensas(session)
-        names_available_mensas = get_available_mensas(session)
-        first_updated_date = get_first_updated_date(session)
-        dish_count_per_mensa = get_dish_count_per_mensa(session)
-        average_prices = get_average_prices_per_menuline_per_mensa(session)  
-        lowest_prices = get_lowest_prices_per_menuline(session)    
-        price_development = get_price_development(session)
-        menu_line_distribution = get_menu_line_distribution(session)
-        mensa_average_prices = get_average_prices_per_menuline_per_mensa(session)
-        mensa_lowest_prices = get_lowest_prices_per_menuline_per_mensa(session)
+    with Session() as db_session:
+        total_mensas = get_total_mensas(db_session)
+        names_available_mensas = get_available_mensas(db_session)
+        first_updated_date = get_first_updated_date(db_session)
+        dish_count_per_mensa = get_dish_count_per_mensa(db_session)
+        average_prices = get_average_prices_per_menuline_per_mensa(db_session)  
+        lowest_prices = get_lowest_prices_per_menuline(db_session)    
+        price_development = get_price_development(db_session)
+        menu_line_distribution = get_menu_line_distribution(db_session)
+        mensa_average_prices = get_average_prices_per_menuline_per_mensa(db_session)
+        mensa_lowest_prices = get_lowest_prices_per_menuline_per_mensa(db_session)
 
         # Define professional color scheme
         PLOT_COLORS = ['#4F46E5', '#6366F1', '#455d7a']
@@ -288,8 +386,8 @@ def dish_clicked():
 def mensa_menu(mensa_name):
     date = request.args.get('date')
     
-    with Session() as session:
-        dishes = get_dishes_by_date_location(session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
+    with Session() as db_session:
+        dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
         
         menu_data = []
         for dish in dishes:
@@ -317,4 +415,5 @@ def check_image(filename):
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)
+#        write_to_directory(engine, Session) This will add data to the directory
     app.run()

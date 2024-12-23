@@ -3,65 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in</title>
+    <title>Login - MENSA APP</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/default.css') }}" rel="stylesheet"> <!-- Custom CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/default.css') }}" rel="stylesheet">
 </head>
-<body class="bg-custom-beige min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="w-full bg-white shadow-md py-4 px-8">
-        <nav class="flex justify-between items-center">
-            <div class="text-xl font-bold text-gray-800">Savor.</div>
-            <div class="space-x-4">
-                <a href="/" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Home</a>
-                <a href="/about" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">About</a>
-                <a href="/review" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Review</a>
-                <a href="/contact" class="px-4 py-2 bg-gray-900 text-white rounded">Contact</a>
+
+<body class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Keep existing header and navigation -->
+     <!-- Navigation Bar -->
+     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
+        <nav>
+            <div class="nav-container">
+                <div class="text-2xl font-bold text-indigo-600">MENSA APP.</div>
+                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
             </div>
         </nav>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center justify-center p-8">
-        <h1 class="font-script text-3xl font-semibold text-gray-900 mb-4">Sign in</h1>
-        <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-            <form id="auth-form" action="{{ url_for('login') }}" method="post">
-                <div>
-                    <label for="username" class="block text-gray-700 mb-2">Username</label>
-                    <input type="text" id="username" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label for="password" class="block text-gray-700 mb-2">Password</label>
-                    <input type="password" id="password" name="password" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
-                </div>
-                <div class="space-y-4">
-                    <button type="submit" value="Login" class="w-full px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300">Login</button>
-                    <button type="button" value="Register" class="w-full px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300" onclick="setActionForm('register')">Sign up</button>
-                </div>
-                <div class="relative flex items-center justify-center mt-6 mb-6">
-                    <hr class="border-gray-400">
-                    <p class="text-center">OR</p>
-                    <hr class="border-gray-400">
-                </div>
-                <div class="space-<-4">
-                    <button type="button" value="Login with Google" class="w-full px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300" onclick="window.location.href='{{url_for('login_google')}}'">Google Login</button>
-                </div>
-                <div class="text-center mt-4">
-                    <a href="#" class="text-blue-500 hover:underline">Forgot your password?</a>
-                </div>
-            </form>
-                    <!-- Error Message Display -->
-                    {% if error %}
-                    <div class="error-message">
-                        {{ error }}
-                    </div>
-                    {% endif %}
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-20">
+        <div class="p-5">
+            <button id="close-menu" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <nav class="mt-8">
+                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Home</a>
+                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Menu</a>
+                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Analysis</a>
+                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">About</a>
+                <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a>  
+            </nav>
         </div>
-        <div class="mt-4">
-            <button type="button" class="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition duration-300" onclick="window.location.href='/menu_maker'">Go to Menu Maker</button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center px-4 py-4">
+        <div class="flex flex-col space-y-1 p-6 w-full">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">Account Access</h1>
+            <p class="text-gray-600 text-center">Sign in to access personalized features and preferences</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
+            <form id="auth-form" action="{{ url_for('login') }}" method="post" class="space-y-6">
+                <div>
+                    <label for="username" class="text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" name="username" required 
+                           class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500">
+                </div>
+                
+                <div>
+                    <label for="password" class="text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" required 
+                           class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div class="flex flex-col space-y-4">
+                    <button type="submit" value="Login" 
+                            class="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-300">
+                        Sign In
+                    </button>
+                    <button type="button" value="Register" onclick="setActionForm('register')"
+                            class="w-full px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition duration-300">
+                        Create Account
+                    </button>
+                </div>
+
+                <div class="relative flex items-center justify-center">
+                    <div class="border-t border-gray-300 w-full"></div>
+                    <span class="bg-white px-4 text-sm text-gray-500">or continue with</span>
+                    <div class="border-t border-gray-300 w-full"></div>
+                </div>
+
+                <button type="button" onclick="window.location.href='{{url_for('login_google')}}'"
+                        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-300 flex items-center justify-center">
+                    <img src="{{ url_for('static', filename='images/google-icon.svg') }}" alt="Google" class="h-5 w-5 mr-2">
+                    Continue with Google
+                </button>
+            </form>
+
+            {% if error %}
+            <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                <p class="text-red-600">{{ error }}</p>
+            </div>
+            {% endif %}
         </div>
     </main>
-    <script src="{{ url_for('static', filename='js/login.js') }}"></script> <!-- Custom JS -->
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeMenu = document.getElementById('close-menu');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('translate-x-full');
+        });
+
+        closeMenu.addEventListener('click', () => {
+            sidebar.classList.add('translate-x-full');
+        });
+    </script>
+
+
+    <script>
+        function setActionForm(action) {
+            let form = document.getElementById('auth-form');
+            if (action === 'login') {
+                form.action = "{{ url_for('login') }}";
+                form.method = 'post';
+                form.submit();
+            } else if (action === 'register') {
+                form.action = "{{ url_for('register') }}";
+                form.method = 'post';
+                form.submit();
+            }
+        }
+    </script>
 </body>
 </html>

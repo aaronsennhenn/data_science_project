@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, setup_database_connection
+from .db_write import Dish, Directory, setup_database_connection
 from typing import List
 from sqlalchemy import func
 import datetime 
@@ -173,3 +173,19 @@ def get_menu_line_distribution(session: Session) -> dict:
         results[mensa] = {menu_line: count for menu_line, count in menu_line_counts}
     
     return results
+
+# Get directory values of additives and allergens 
+def get_written_forms(session):
+    """Get written forms of additives and allergens from Directory"""
+    additives_dict = {}
+    allergens_dict = {}
+    
+    directory_entries = session.query(Directory).all()
+    
+    for entry in directory_entries:
+        if entry.additives:
+            additives_dict[entry.additives] = entry.additives_written
+        if entry.allergens:
+            allergens_dict[entry.allergens] = entry.allergens_written
+            
+    return additives_dict, allergens_dict

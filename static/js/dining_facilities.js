@@ -23,10 +23,22 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('id', id);
             formData.append('rating', rating);
 
-            fetch('/dining_facilities', {
+            fetch('/menu', {
                 method: 'POST',
                 body: formData,
             })
         });
+    });
+});
+
+document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            if (this.name === 'selected_diet') {  // Remove 'selected_price' from here
+                document.querySelectorAll(`input[name="${this.name}"]`).forEach(cb => {
+                    if (cb !== this) cb.checked = false;
+                });
+            }     
+        }
     });
 });
