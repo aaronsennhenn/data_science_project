@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import setup_database_connection, Dish, Base, write_to_rating, write_to_directory
+from db.db_write import setup_database_connection, Dish, Base, User, write_to_rating, write_to_directory
 from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
@@ -12,6 +12,9 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import json
 from db.utils import translate_text_all_capitalized, translate_text_first_word_capitalized
+from functools import wraps
+from authlib.integrations.flask_client import OAuth
+from flask_sqlalchemy import SQLAlchemy
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -25,6 +28,15 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = APP_SECRET_KEY
 
 engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
+
+oauth = OAuth(app)      # google login service
+db = SQLAlchemy(app)    # database service 
+google = oauth.register(
+    name='google',
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope':'openid profile email'})
 
 @app.route('/', methods=['GET'])
 def index():
@@ -41,9 +53,91 @@ def about():
 @app.route('/review')
 def review():
    return render_template('review.html')
+                                   
+# check username and password that user puts into form with db
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        with Session() as db_session:
+            user = db_session.query(User).filter_by(username=username).first()
+            
+            if user and user.check_password(password):
+                session['username'] = username
+                return redirect(url_for("menu"))
+            else:
+                error_message = "Your username or password is wrong!"
+                return render_template('login.html', error=error_message)
+                
+    return render_template('login.html')
 
-@app.route('/dining_facilities', methods=['GET','POST'])
-def dining_facilities():
+@app.route("/register", methods=["POST"])
+def register():
+    username = request.form['username']
+    password = request.form['password']
+    
+    with Session() as db_session:
+        user = db_session.query(User).filter_by(username=username).first()
+        
+        if user:
+            return render_template("login.html", error="Username is already used!")
+        
+        new_user = User(username=username)
+        new_user.set_password(password)
+        db_session.add(new_user)
+        db_session.commit()
+        
+        session['username'] = username
+        return redirect(url_for('menu'))
+
+# after succesfull login, send user to personal area
+@app.route("/user_area")
+def user_area():
+    if "username" in session:
+        return render_template("user_area.html", username=session['username'])
+    return redirect(url_for('index'))
+
+# login for google
+@app.route('/login/google')
+def login_google():
+    try:
+        redirect_url = url_for('authorize_google',_external=True)
+        return google.authorize_redirect(redirect_url)
+    except Exception as e:
+        app.logger.error(f"Error during login:{str(e)}")
+        return "Error occurred during login", 500
+
+# authorization form for google
+@app.route("/authorize/google")
+def authorize_google():
+    token = google.authorize_access_token()
+    userinfo_endpoint = google.server_metadata['userinfo_endpoint']
+    resp = google.get(userinfo_endpoint)
+    user_info = resp.json()
+    username = user_info['email']
+
+    # create new user in db
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        user = User(username=username)
+        db.session.add(user)
+        db.session.commit()
+        db.session.close()
+
+    session['username'] = username
+    session['oauth_token'] = token
+
+    return redirect(url_for('user_area'))
+
+@app.route("/logout")
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+@app.route('/menu', methods=['GET','POST'])
+def menu():
     with Session() as session:
         # Get additives and allergens 
         additives_dict, allergens_dict = get_written_forms(session)
@@ -117,7 +211,7 @@ def dining_facilities():
         # encode selected weekday to display
         selected_weekday = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
             
-    return render_template('dining_facilities.html', 
+    return render_template('menu.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,
                          available_meat=available_meat,

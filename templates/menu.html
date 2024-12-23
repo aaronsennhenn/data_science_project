@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dining Facilities</title>
+    <title>Menu</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> 
-    <link href="{{ url_for('static', filename='css/dining_facilities.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/menu.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
@@ -36,18 +36,18 @@
             </button>
             <nav class="mt-8">
                 <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Home</a>
+                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Menu</a>
+                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Analysis</a>
                 <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">About</a>
-                <a href="/contact" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Contact</a>
-                <a href="/dining_facilities" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Menu</a>
-                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Statistics</a>
+                <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a>  
             </nav>
         </div>
     </div>
 
 <main class="flex-grow flex flex-col items-center px-4 py-4">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
-        <h1 class="text-3xl text-center mb-8">Choose your menu based on your preferences</h1>
-        <form action="{{ url_for('dining_facilities') }}" method="POST" class="flex flex-wrap gap-4" id="filter-form">
+        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">Choose your menu based on your preferences</h1>
+        <form action="{{ url_for('menu') }}" method="POST" class="flex flex-wrap gap-4" id="filter-form">
             <div class="flex-1">
                 <p class="text-left">Select a Mensa:</p>
                 <select name="selected_mensa" id="mensa-dropdown" class="w-full">

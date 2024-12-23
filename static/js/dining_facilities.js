@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('id', id);
             formData.append('rating', rating);
 
-            fetch('/dining_facilities', {
+            fetch('/menu', {
                 method: 'POST',
                 body: formData,
             })

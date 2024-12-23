@@ -1,5 +1,12 @@
-.font-script { font-family: 'Dancing Script', cursive; }
-.bg-custom-beige { background-color: #D2BD96; }
+body {
+    font-family: 'Poppins', sans-serif;
+}
+.font-script { font-family: 'Dancing Script', cursive; 
+}
+
+header, footer {
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+}
 /* Sidebar transition */
 .sidebar {
     transition: transform 0.3s ease-in-out;

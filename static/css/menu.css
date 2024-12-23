@@ -67,7 +67,11 @@ select, input[type="date"] {
   padding: 16px;
 }
 
-h1, h2 {
+h1 {
+  margin-top: 2rem; /* Space above the heading */
+}
+
+h2 {
   font-size: 2.5rem;
   font-weight: 600;
   text-align: center;

@@ -35,35 +35,43 @@
             </button>
             <nav class="mt-8">
                 <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Home</a>
+                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Menu</a>
+                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Analysis</a>
                 <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">About</a>
-                <a href="/contact" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Contact</a>
-                <a href="/dining_facilities" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Menu</a>
-                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Statistics</a>
+                <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
             </nav>
         </div>
     </div>
 
     <!-- Main Content -->
-    <main class="flex-grow p-8 max-w-7xl mx-auto w-full">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Statistics</h1>
-            <p class="text-gray-600">Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias</p>
+    <main class="flex-grow flex flex-col items-center px-4 py-4">
+        <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">Analysis</h1>
+            <p class="text-gray-600 text-center">Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias</p>
         </div>
 
         <!-- Key Metrics Section -->
-        <section class="mb-12">
+        <section class="mb-12 w-full">
             <h2 class="text-xl font-semibold text-gray-800 mb-6">Key Metrics</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2">Total Mensas</h3>
-                    <p class="text-2xl font-bold text-gray-900">{{ total_mensas }}</p>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2">Data Inception</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Data Inception</h3>
                     <p class="text-2xl font-bold text-gray-900">{{ first_updated_date }}</p>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2">Covered Area</h3>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Total Menus</h3>
+                    <p class="text-2xl font-bold text-gray-900">TBD</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Total Mensas</h3>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_mensas }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Total Reviews</h3>
+                    <p class="text-2xl font-bold text-gray-900">TBD</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Covered Area</h3>
                     <a href="https://www.google.com/maps/place/Tübingen" target="_blank" class="location-link">
                         Tübingen
                     </a>
@@ -71,13 +79,12 @@
             </div>
         </section>
 
-        <!-- Detailed Analysis Section -->
-        <section class="mb-12">
+        <section class="mb-12 w-full">
             <h2 class="text-xl font-semibold text-gray-800 mb-6">Weekly Analytics</h2>
             
             <!-- Mensa Details -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-                <h3 class="text-lg font-medium text-gray-800 mb-4">Menu Options</h3>
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Menu Options</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {% for mensa in names_available_mensas %}
                     <div class="p-4 bg-gray-50 rounded-lg">
@@ -147,9 +154,9 @@
             </div>
         -->
                 <!-- Price Analysis -->
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-                    <h3 class="text-lg font-medium text-gray-800 mb-4">Price Analysis</h3>
-                    <h4 class="text-lg italic text-gray-800 mb-4 text-center">Average Prices</h4>
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 w-full">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Price Analysis</h3>
+                    <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">Average Prices</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {% for mensa in names_available_mensas %}
                         <div class="p-4 bg-gray-50 rounded-lg">
@@ -169,7 +176,7 @@
                     </div>
 
                 <!-- Lowest Prices Column -->
-                    <h4 class="text-lg italic text-gray-800 mb-4 text-center">Lowest Prices</h4>
+                <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">Lowest Prices</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {% for mensa in names_available_mensas %}
                         <div class="p-4 bg-gray-50 rounded-lg">
@@ -192,15 +199,17 @@
         </div>
     </section>
 
-            <!-- Price Development Chart -->
-            <h2 class="text-xl font-semibold text-gray-800 mb-6">Total Analytics</h2>
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-                <h3 class="text-lg font-medium text-gray-800 mb-4">Price Development</h3>
-                <div id="price-development-plots" class="w-full h-[600px]"></div>
-            </div>
-        </section>
+    <section class="mb-12 w-full max-w-full px-4">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Total Analytics</h2>
+        
+        <!-- Mensa Details -->
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+            <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Price Development</h3>
+            <div id="price-development-plots" class="w-full h-[600px]"></div>
+        </div>
+    </section>
     </main>
-
+    
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 py-8">
         <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">

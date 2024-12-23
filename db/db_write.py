@@ -5,6 +5,9 @@ from sqlalchemy import Column, Integer, String, Date
 import pandas as pd
 import sys
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from secret import *
+from flask import render_template, request, redirect, url_for, session
 
 Base = declarative_base()
 
@@ -39,7 +42,20 @@ class Directory(Base):
     allergens = Column(String, nullable=True)
     allergens_written = Column(String, nullable=True)
 
+# Database model: Each object of the User class creates a new column in the User table
+class User(Base):
+    __tablename__ = 'users'
+    
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), unique=True, nullable=False)
+    password_hash = Column(String(512), nullable=True)
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+                                   
 def setup_database_connection(user, password, host, port):
     try:
         connection_string = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/postgres"
