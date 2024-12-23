@@ -172,8 +172,6 @@ def menu():
 
             # get rating from user and selected dish with mensa
             rating,menu_id = request.form.get('rating'),request.form.get('id')
-            print(rating,menu_id)
-
 
             # write rating and id to database
             if rating:

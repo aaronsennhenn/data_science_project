@@ -18,6 +18,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const id = this.getAttribute('data-id');
             const rating = document.querySelector(`input[name="rating_${menuLine}"]:checked`).value;
 
+            if (rating) {
+                // Display the "Rating received" message
+                const feedback = this.nextElementSibling;
+                feedback.classList.remove('hidden');
+                feedback.textContent = 'Rating received!';
+                
+                // Optionally, clear the feedback after a few seconds
+                setTimeout(() => {
+                    feedback.classList.add('hidden');
+                }, 3000);
+            } else {
+                alert('Please select a rating before submitting.');
+            }
+
             const formData = new FormData();
             //formData.append('rating_menu_line', menuLine);
             formData.append('id', id);
