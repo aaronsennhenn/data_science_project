@@ -107,7 +107,7 @@ def get_lowest_prices_per_menuline(session: Session) -> dict:
     
     return results
 
-# Average Menu Prices per Each Mensa (Dish.menu) over all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) but grouped by each menu line (Dish.menuLine)
+# Get average Menu Prices per Each Mensa (Dish.menu) over all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) but grouped by each menu line (Dish.menuLine)
 def get_average_prices_per_menuline_per_mensa(session: Session) -> dict:
     results = {}
     for mensa in get_available_mensas(session):
@@ -123,7 +123,7 @@ def get_average_prices_per_menuline_per_mensa(session: Session) -> dict:
             results[mensa][menu_line] = round(avg_price, 2) if avg_price else 0
     return results
 
-# Lowest Menu Prices per Each Mensa (Dish.menu) over all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) but grouped by each menu line (Dish.menuLine)
+# Get lowest Menu Prices per Each Mensa (Dish.menu) over all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) but grouped by each menu line (Dish.menuLine)
 def get_lowest_prices_per_menuline_per_mensa(session: Session) -> dict:
     results = {}
     for mensa in get_available_mensas(session):

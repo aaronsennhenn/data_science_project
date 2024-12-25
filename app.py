@@ -142,69 +142,48 @@ def menu():
                                 for key in data.keys()])
         available_mensas = list(set([mensa for mensas in data.values() for mensa in mensas]))
 
-        # get available meat options
-        available_meat = get_meat_options(db_session)
-        available_meat = collect_unique_meats(available_meat)
-
-        # Get GET request to display the selected Mensa from index
+        # set default values
         mensa_name = request.args.get('selected_mensa', available_mensas[0])
         date = available_dates[0]
-
-        # set default values for filters
-        selected_meat = None
-        selected_diet = None
-        rating = None
+        selected_diet_meat = 'omnivore'
         selected_price = "studentPrice"
 
         # if user logged in, get user_id
-        if "username" in session:
-            user_name = session['username']
-        else:
-            user_name = None
+        user_name = session.get('username')
 
-        # When user filters, get filtered mensa and date values
+        # When user filters, get filtered values
         if request.method == 'POST':
             mensa_name = request.form.get('selected_mensa')
             date = request.form.get('selected_date')
-            selected_meat = request.form.get('selected_meat')
-            selected_diet = request.form.get('selected_diet')
+            selected_diet_meat = request.form.get('selected_diet_meat')
             selected_price = request.form.get('selected_price')
 
             # get rating from user and selected dish with mensa
-            rating,menu_id = request.form.get('rating'),request.form.get('id')
+            rating, menu_id = request.form.get('rating'), request.form.get('id')
 
             # write rating and id to database
-            if rating:
-                write_to_rating(menu_id,rating,user_name,engine,Session)
-
-            # if no date is selected, set default date to today
-            if not date:
-                date = datetime.now().strftime('%Y-%m-%d')
-
+            if rating and user_name:
+                write_to_rating(menu_id, rating, user_name, engine, Session)
 
         # Query dishes for respective mensa and date
         dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
         menu_data = []
-        menu_data = []
         for dish in dishes:
             menu_data.append({
                 'id': dish.id,
-                'menu': translate_text_first_word_capitalized(dish.menu),  # Translate menu
+                'menu': translate_text_first_word_capitalized(dish.menu),
                 'studentPrice': dish.studentPrice,
                 'guestPrice': dish.guestPrice,
                 'allergens': dish.allergens,
                 'additives': dish.additives,
-                'menuLine': translate_text_all_capitalized(dish.menuLine),  # Translate menuLine
+                'menuLine': translate_text_all_capitalized(dish.menuLine),
                 'meats': dish.meats,
                 'icons': dish.icons
             })
         
-        # if user filters by meat, diet or price, filter the dishes
-        if selected_meat:
-            menu_data = [dish for dish in menu_data if selected_meat.lower() in dish['meats'].lower()]
-        
-        if selected_diet:
-            menu_data = [dish for dish in menu_data if selected_diet.lower() in dish['icons'].lower()]
+        # Filter dishes based on selected diet or meat
+        if selected_diet_meat and 'omnivore' not in selected_diet_meat:
+            menu_data = [dish for dish in menu_data if any(icon in dish['icons'] for icon in selected_diet_meat)]
 
         # encode selected weekday to display
         selected_weekday = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
@@ -212,15 +191,16 @@ def menu():
     return render_template('menu.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,
-                         available_meat=available_meat,
                          dishes=menu_data,
                          selected_mensa=mensa_name,
                          selected_date=date,
                          selected_weekday=selected_weekday,
                          selected_price=selected_price,
+                         selected_diet_meat=selected_diet_meat,
                          additives_dict=additives_dict,
                          allergens_dict=allergens_dict,
                          username=user_name)
+
 
 @app.route('/analysis')
 def analysis():

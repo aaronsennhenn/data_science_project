@@ -76,37 +76,29 @@
                 <p class="text-left">Select a Date:</p>
                 <input type="date" id="date_selector" name="selected_date" class="bg-violet-500 text-black px-4 py-2 rounded-md shadow hover:bg-violet-600 transition w-full" value="{{ selected_date }}" min="{{ available_dates[0] }}" max="{{ available_dates[-1] }}" />
             </div>
-
             <div class="flex-1">
-                <p class="text-left">Select a Diet:</p>
+                <p class="text-left">Select a Diet or Meat:</p>
                 <div class="radio-group">
-                    <input type="checkbox" id="diet_vegan" name="selected_diet" value="vegan" />
-                    <label for="diet_vegan">Vegan</label>
-                    <input type="checkbox" id="diet_vegetarian" name="selected_diet" value="v" />
-                    <label for="diet_vegetarian">Vegetarian</label>
-                    <!--
-                    <input type="checkbox" id="diet_omnivore" name="selected_diet" value="o" />
+                    <input type="checkbox" id="diet_omnivore" name="selected_diet_meat" value="omnivore" />
                     <label for="diet_omnivore">Omnivore</label>
-                    -->
-                </div>
-            </div>
-            <!-- If omnivore all meats are selected -->
-            <div class="flex-1">
-                <p class="text-left">Select a Meat:</p>
-                <div class="radio-group">
-                    <input type="checkbox" id="meat_beef" name="selected_meat" value="Rind" />
+                    <input type="checkbox" id="diet_vegan" name="selected_diet_meat" value="vegan" />
+                    <label for="diet_vegan">Vegan</label>
+                    <input type="checkbox" id="diet_vegetarian" name="selected_diet_meat" value="V" />
+                    <label for="diet_vegetarian">Vegetarian</label>
+                    <input type="checkbox" id="meat_beef" name="selected_diet_meat" value="R" />
                     <label for="meat_beef">Beef</label>
-                    <input type="checkbox" id="meat_poultry" name="selected_meat" value="Geflügel" />
+                    <input type="checkbox" id="meat_poultry" name="selected_diet_meat" value="G" />
                     <label for="meat_poultry">Poultry</label>
-                    <input type="checkbox" id="meat_wild" name="selected_meat" value="Wild" />
+                    <input type="checkbox" id="meat_wild" name="selected_diet_meat" value="W" />
                     <label for="meat_wild">Game</label>
-                    <input type="checkbox" id="meat_fish" name="selected_meat" value="Fisch" />
+                    <input type="checkbox" id="meat_fish" name="selected_diet_meat" value="F" />
                     <label for="meat_fish">Fish</label>
-                    <input type="checkbox" id="meat_pork" name="selected_meat" value="Schwein" />
+                    <input type="checkbox" id="meat_pork" name="selected_diet_meat" value="S" />
                     <label for="meat_pork">Pork</label>
+                    <input type="checkbox" id="diet_mensavital" name="selected_diet_meat" value="mensaVital" />
+                    <label for="diet_mensavital">Vital</label>
                 </div>
-            </div>
-
+            </div>       
             <div class="flex-1">
                 <p class="text-left">Select a Price:</p>
                 <div class="radio-group">
@@ -116,7 +108,6 @@
                     <label for="price_guest">Guest</label>
                 </div>
             </div>            
-
             <div class="w-full">
                 <button type="submit" class="bg-violet-500 text-white px-4 py-2 rounded-md shadow hover:bg-violet-600 transition">Submit</button>
             </div>

@@ -19,12 +19,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const rating = document.querySelector(`input[name="rating_${menuLine}"]:checked`).value;
 
             if (rating) {
-                // Display the "Rating received" message
                 const feedback = this.nextElementSibling;
                 feedback.classList.remove('hidden');
                 feedback.textContent = 'Rating received!';
                 
-                // Optionally, clear the feedback after a few seconds
                 setTimeout(() => {
                     feedback.classList.add('hidden');
                 }, 3000);
@@ -33,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const formData = new FormData();
-            //formData.append('rating_menu_line', menuLine);
             formData.append('id', id);
             formData.append('rating', rating);
 
@@ -43,16 +40,21 @@ document.addEventListener('DOMContentLoaded', function () {
             })
         });
     });
-});
 
-document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
+    // Handle omnivore checkbox
+    const omnivoreCheckbox = document.getElementById('diet_omnivore');
+    const otherCheckboxes = document.querySelectorAll('input[name="selected_diet_meat"]:not(#diet_omnivore)');
+
+    omnivoreCheckbox.addEventListener('change', function() {
         if (this.checked) {
-            if (this.name === 'selected_diet') {  // Remove 'selected_price' from here
-                document.querySelectorAll(`input[name="${this.name}"]`).forEach(cb => {
-                    if (cb !== this) cb.checked = false;
-                });
-            }     
+            otherCheckboxes.forEach(cb => {
+                cb.checked = false;
+                cb.disabled = true;
+            });
+        } else {
+            otherCheckboxes.forEach(cb => {
+                cb.disabled = false;
+            });
         }
     });
 });
