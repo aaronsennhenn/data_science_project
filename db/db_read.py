@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User
+from .db_write import Dish, Directory, setup_database_connection, User, Rating
 from typing import List
 from sqlalchemy import func
 import datetime 
@@ -40,6 +40,14 @@ def get_next_five_days_data(session: Session) -> dict:
 # Get total number of mensas (Dish.location)
 def get_total_mensas(session: Session) -> int:
     return session.query(Dish.location).distinct().count()
+
+# Get total number of ratings (table rating)
+def get_total_ratings(session: Session) -> int:
+    return session.query(Rating.id).distinct().count()
+
+# Get total number of menus (table menu)
+def get_total_menus(session: Session) -> int:
+    return session.query(Dish.id).distinct().count()
 
 # Get list of available mensas (Dish.location)
 def get_available_mensas(session: Session) -> List[str]:

@@ -13,7 +13,6 @@ transformers
 accelerate
 argostranslate
 plotly
-
-Authlib
+authlib
 flask_sqlalchemy
 deep_translator

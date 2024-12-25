@@ -3,7 +3,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import setup_database_connection, Dish, Base, User, write_to_rating, write_to_directory,write_to_user
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name
+from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -226,6 +226,8 @@ def menu():
 def analysis():
     with Session() as db_session:
         total_mensas = get_total_mensas(db_session)
+        total_ratings = get_total_ratings(db_session)
+        total_menus = get_total_menus(db_session)
         names_available_mensas = get_available_mensas(db_session)
         first_updated_date = get_first_updated_date(db_session)
         dish_count_per_mensa = get_dish_count_per_mensa(db_session)
@@ -355,6 +357,8 @@ def analysis():
         # Add pie_charts to the template context
         return render_template('analysis.html',
                              total_mensas=total_mensas,
+                             total_ratings = total_ratings,
+                             total_menus = total_menus,
                              names_available_mensas=names_available_mensas,
                              first_updated_date=first_updated_date,
                              dish_count_per_mensa=dish_count_per_mensa,
