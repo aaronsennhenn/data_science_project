@@ -3,7 +3,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import setup_database_connection, Dish, Base, User, write_to_rating, write_to_directory,write_to_user
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus
+from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -147,6 +147,8 @@ def menu():
         date = available_dates[0]
         selected_diet_meat = 'omnivore'
         selected_price = "studentPrice"
+        no_results = False 
+        headlines_set = set()
 
         # if user logged in, get user_id
         user_name = session.get('username')
@@ -181,9 +183,34 @@ def menu():
                 'icons': dish.icons
             })
         
+        # Determine the lowest price among dishes
+        #    lowest_price_dish = min(menu_data, key=lambda x: x['studentPrice'] if x['studentPrice'] != -1 else float('inf'), default=None)
+        #    lowest_price_id = lowest_price_dish['id'] if lowest_price_dish else None
+
         # Filter dishes based on selected diet or meat
         if selected_diet_meat and 'omnivore' not in selected_diet_meat:
             menu_data = [dish for dish in menu_data if any(icon in dish['icons'] for icon in selected_diet_meat)]
+
+        # Determine unique menu lines and their types
+            unique_menu_lines = get_unique_menu_lines(db_session, date, mensa_name)
+            main_dishes_keywords = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan',  'Auswahlgericht', 'Auswahlgericht vegan 2', 'Auswahlgericht 2', 'Auswahlgericht veget.', 'Auswahlgericht vegan', 'mensaVital vegetarisch']
+            side_dishes_keywords = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Beilagen SB']
+            dessert_keywords = [ 'Dessert SB', 'Dessert vorport.']
+
+            headlines = []
+            for line in unique_menu_lines:
+                if any(keyword in line for keyword in main_dishes_keywords):
+                    headlines.append("Main Dishes")
+                elif any(keyword in line for keyword in side_dishes_keywords):
+                    headlines.append("Side Dishes")
+                elif any(keyword in line for keyword in dessert_keywords):
+                    headlines.append("Desserts")
+            
+            headlines_set = set(headlines)  # Remove duplicates
+        
+        # If no dishes found, set no_results flag
+        if not menu_data:
+            no_results = True
 
         # encode selected weekday to display
         selected_weekday = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
@@ -199,7 +226,9 @@ def menu():
                          selected_diet_meat=selected_diet_meat,
                          additives_dict=additives_dict,
                          allergens_dict=allergens_dict,
-                         username=user_name)
+                         username=user_name,
+                         no_results = no_results,
+                         headlines=headlines_set)
 
 
 @app.route('/analysis')
@@ -281,13 +310,12 @@ def analysis():
         showline=True,
         linewidth=1,
         linecolor='rgba(0,0,0,0.2)',
-        dtick="M1",  # Monthly ticks
         title_text="Date",
         tickformat="%Y-%m-%d",  # Show full date for each tick
         tickangle=45,  # Angle the dates for better readability
-        tickmode="array",
-        ticktext=data['dates'],
-        tickvals=data['dates']
+        tickmode="auto"
+        #ticktext=data['dates'],
+        #tickvals=data['dates']
         )
 
         fig.update_yaxes(

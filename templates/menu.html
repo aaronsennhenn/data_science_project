@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- To Dos: Highlight lowest price; Fix headlines; Add recipes; Add description; Add images;-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -116,11 +117,31 @@
 
     <!-- Results section -->
     <div class="container mt-8 w-full">
+        {% if no_results %}
+        <div class="text-2xl font-bold text-center">
+            No data was found for the selected options!
+        </div>
+        {% else %}
         <div class="grid grid-cols-1 gap-6">
+            {% set current_headline = "" %}
             {% for dish in dishes %}
+            {% if current_headline != (dish.menuLineEng if dish.menuLineEng else dish.menuLine) %}
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+                {% if "Main Dishes" in headlines %}
+                    Main Dishes
+                {% elif "Side Dishes" in headlines %}
+                    Side Dishes
+                {% elif "Desserts" in headlines %}
+                    Desserts
+                {% endif %}
+            </h2>
+            <!-- Check if we need to display a new headline -->
+            {% set current_headline = (dish.menuLineEng if dish.menuLineEng else dish.menuLine) %}
+            {% endif %}
             <div class="card w-full">
                 <div class="card-body flex justify-between p-6">
                     <div class="flex-grow space-y-4">
+                        <!-- Here a headline shall be added for which kind of dish it is -->
                         <h3 class="card-title menu-line text-2xl font-bold">{{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}</h3>
                         <h5 class="card-title menu-name text-xl">{{ dish.menuEng if dish.menuEng else dish.menu }}</h5>
                         <div class="text-lg font-medium text-gray-700">
@@ -191,6 +212,8 @@
                             {% endif %}
                         </p>
                     </div>
+                    <!-- Descriptions -->
+                    <!-- Recipes -->
                     <!-- Ratings -->
                     <div class="flex flex-col items-end ml-8">
                         <div class="rating mt-4 text-4xl">
@@ -207,12 +230,13 @@
                         </div>
                         <button class="submit-rating mt-2" data-menu-line="{{ dish.menuLine }}" data-id="{{ dish.id }}">Submit Rating</button>
                         <p class="rating-feedback mt-2 text-sm text-green-600 hidden">Rating received!</p>
-
                     </div>
+                    <!-- Images -->
                 </div>
             </div>
             {% endfor %}
         </div>
+    {% endif %}
     </div>   
 </main>
 

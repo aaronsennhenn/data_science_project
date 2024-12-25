@@ -27,7 +27,7 @@ def get_next_five_days_data(session: Session) -> dict:
     date_range = [today + timedelta(days=x) for x in range(5)]
 
     # MANUALLY FIX DATES OVER CHRISTMAS PERIOD BECAUSE MENSA IS CLOSED. MUST BE REMOVED AFTER CHRISTMAS
-    date_range = [datetime(2024, 12, 15), datetime(2041, 12, 16), datetime(2024, 12, 17), datetime(2024, 12, 18), datetime(2024, 12, 19), datetime(2024, 12, 20)]
+    date_range = [datetime(2024, 12, 17), datetime(2024, 12, 18), datetime(2024, 12, 19), datetime(2024, 12, 20)]
     
     results = {}
     for date in date_range:
@@ -56,6 +56,12 @@ def get_available_mensas(session: Session) -> List[str]:
 # Get time window since when the Dish was last updated which can be seen in menuDate
 def get_first_updated_date(session: Session) -> datetime:
     return session.query(Dish.menuDate).order_by(Dish.menuDate.asc()).first()[0]
+
+# Get unique menu lines to sort menus into Main, Side dish or Dessert
+def get_unique_menu_lines(session: Session, date: str, location: str) -> List[str]:
+    dishes = session.query(Dish).filter_by(menuDate=date, location=location).all()
+    unique_menu_lines = list(set(dish.menuLine for dish in dishes if dish.menuLine))
+    return unique_menu_lines
 
 # Get number of dishes (Dish.menu) per each mensa (Dish.location)
 def get_dish_count_per_mensa(session: Session) -> dict:
