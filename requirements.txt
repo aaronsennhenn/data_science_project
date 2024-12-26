@@ -16,3 +16,8 @@ plotly
 authlib
 flask_sqlalchemy
 deep_translator
+openai
+nltk
+re
+json
+numpy
