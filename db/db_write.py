@@ -40,7 +40,41 @@ class Directory(Base):
     additives = Column(String, nullable=True)
     additives_written = Column(String, nullable=True)
     allergens = Column(String, nullable=True)
-    allergens_written = Column(String, nullable=True)
+    allergens_written = Column(String, nullable=True)   
+    
+class Ingredient(Base):
+    __tablename__ = 'ingredients'
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
+    ingredients_de = Column(String, nullable=True)
+    ingredients_en = Column(String, nullable=True)
+
+class Embedding(Base):
+    __tablename__ = 'embeddings'
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
+    embedding = Column(String, nullable=True)
+    
+class Description(Base):
+    __tablename__ = 'descriptions'
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
+    description_de = Column(String, nullable=True)
+    description_en = Column(String, nullable=True)
+    
+class Recipe(Base):
+    __tablename__ = 'recipes'
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
+    recipe_de = Column(String, nullable=True)
+    recipe_en = Column(String, nullable=True)
+    
+class Taste(Base):
+    __tablename__ = 'tastes'
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
+    taste_de = Column(String, nullable=True)
+    taste_en = Column(String, nullable=True)
 
 class User(Base):
     __tablename__ = 'users'
@@ -119,6 +153,7 @@ def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):
         db_session.add(rating)
         db_session.commit()
 
+
 def write_to_user(username: str, password: str, engine, Session):
     User.metadata.create_all(engine)
 
@@ -127,6 +162,126 @@ def write_to_user(username: str, password: str, engine, Session):
         user.set_password(password)
         db_session.add(user)
         db_session.commit()
+
+
+def write_to_ingredient(dishes_df: pd.DataFrame, engine, Session):
+    Ingredient.metadata.create_all(engine)
+
+    with Session() as db_session:
+        for _, row in dishes_df.iterrows():
+            try:
+                ingredients = Ingredient(
+                    menu_id=row.get('id'),
+                    ingredients_de=row.get('ingredients_de'),
+                    ingredients_en=row.get('ingredients_en')
+                    )
+                db_session.add(ingredients)
+            except ValueError as e:
+                print(f"Error converting values for row: {row.to_dict()}")
+                print(f"Error message: {str(e)}")
+                continue
+        db_session.commit()
+
+        
+def write_to_description(dishes_df: pd.DataFrame, engine, Session):
+    Description.metadata.create_all(engine)
+
+    with Session() as db_session:
+        for _, row in dishes_df.iterrows():
+            try:
+                description = Description(
+                    menu_id = row.get('id'),
+                    description_de = row.get('description_de'),
+                    description_en = row.get('description_en')
+                    )
+                db_session.add(description)                
+            except ValueError as e:
+                print(f"Error converting values for row: {row.to_dict()}")
+                print(f"Error message: {str(e)}")
+                continue
+        db_session.commit()
+
+
+def write_to_embedding(dishes_df: pd.DataFrame, engine, Session):
+    Embedding.metadata.create_all(engine)
+
+    with Session() as db_session:
+        for _, row in dishes_df.iterrows():
+            try:
+                embedding = Embedding(
+                    menu_id=row.get('id'),
+                    embedding =row.get('gpt_embedding'),
+                )
+                db_session.add(embedding)
+            except ValueError as e:
+                print(f"Error converting values for row: {row.to_dict()}")
+                print(f"Error message: {str(e)}")
+                continue
+        db_session.commit()
+        
+
+def write_to_recipe(dishes_df: pd.DataFrame, engine, Session):
+    Recipe.metadata.create_all(engine)
+
+    with Session() as db_session:
+        for _, row in dishes_df.iterrows():
+            try:
+                recipe = Recipe(
+                    menu_id=row.get('id'),
+                    recipe_de=row.get('recipe_de'),
+                    recipe_en=row.get('recipe_en')
+                )
+                db_session.add(recipe)
+            except ValueError as e:
+                print(f"Error converting values for row: {row.to_dict()}")
+                print(f"Error message: {str(e)}")
+                continue
+        db_session.commit()
+        
+
+def write_to_taste(dishes_df: pd.DataFrame, engine, Session):
+    Taste.metadata.create_all(engine)
+
+    with Session() as db_session:
+        for _, row in dishes_df.iterrows():
+            try:
+                taste = Taste(
+                    menu_id=row.get('id'),
+                    taste_de=row.get('taste_de'),
+                    taste_en=row.get('taste_en')
+                )
+                db_session.add(taste)
+            except ValueError as e:
+                print(f"Error converting values for row: {row.to_dict()}")
+                print(f"Error message: {str(e)}")
+                continue
+        db_session.commit()
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        +
+        
+
 
 
 # create a new table called directory, that includes the abbreviations saved in additives and allergens and their corresponding written out form
