@@ -164,122 +164,89 @@ def write_to_user(username: str, password: str, engine, Session):
         db_session.commit()
 
 
-def write_to_ingredient(dishes_df: pd.DataFrame, engine, Session):
+def write_to_ingredient(dishes_df: pd.DataFrame, engine, session):
     Ingredient.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                ingredients = Ingredient(
-                    menu_id=row.get('id'),
-                    ingredients_de=row.get('ingredients_de'),
-                    ingredients_en=row.get('ingredients_en')
-                    )
-                db_session.add(ingredients)
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
+    for _, row in dishes_df.iterrows():
+        try:
+            ingredients = Ingredient(
+                menu_id=row.get('id'),
+                ingredients_de=row.get('ingredients_de'),
+                ingredients_en=row.get('ingredients_en')
+            )
+            session.add(ingredients)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
 
-        
-def write_to_description(dishes_df: pd.DataFrame, engine, Session):
+
+def write_to_description(dishes_df: pd.DataFrame, engine, session):
     Description.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                description = Description(
-                    menu_id = row.get('id'),
-                    description_de = row.get('description_de'),
-                    description_en = row.get('description_en')
-                    )
-                db_session.add(description)                
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
+    for _, row in dishes_df.iterrows():
+        try:
+            description = Description(
+                menu_id=row.get('id'),
+                description_de=row.get('description_de'),
+                description_en=row.get('description_en')
+            )
+            session.add(description)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
 
 
-def write_to_embedding(dishes_df: pd.DataFrame, engine, Session):
+def write_to_embedding(dishes_df: pd.DataFrame, engine, session):
     Embedding.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                embedding = Embedding(
-                    menu_id=row.get('id'),
-                    embedding =row.get('gpt_embedding'),
-                )
-                db_session.add(embedding)
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
-        
+    for _, row in dishes_df.iterrows():
+        try:
+            embedding = Embedding(
+                menu_id=row.get('id'),
+                embedding=row.get('gpt_embedding'),
+            )
+            session.add(embedding)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
 
-def write_to_recipe(dishes_df: pd.DataFrame, engine, Session):
+
+def write_to_recipe(dishes_df: pd.DataFrame, engine, session):
     Recipe.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                recipe = Recipe(
-                    menu_id=row.get('id'),
-                    recipe_de=row.get('recipe_de'),
-                    recipe_en=row.get('recipe_en')
-                )
-                db_session.add(recipe)
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
-        
+    for _, row in dishes_df.iterrows():
+        try:
+            recipe = Recipe(
+                menu_id=row.get('id'),
+                recipe_de=row.get('recipe_de'),
+                recipe_en=row.get('recipe_en')
+            )
+            session.add(recipe)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
 
-def write_to_taste(dishes_df: pd.DataFrame, engine, Session):
+
+def write_to_taste(dishes_df: pd.DataFrame, engine, session):
     Taste.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                taste = Taste(
-                    menu_id=row.get('id'),
-                    taste_de=row.get('taste_de'),
-                    taste_en=row.get('taste_en')
-                )
-                db_session.add(taste)
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
+    for _, row in dishes_df.iterrows():
+        try:
+            taste = Taste(
+                menu_id=row.get('id'),
+                taste_de=row.get('taste_de'),
+                taste_en=row.get('taste_en')
+            )
+            session.add(taste)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        +
         
 
 

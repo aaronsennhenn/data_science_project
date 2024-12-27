@@ -2,8 +2,16 @@ from sqlalchemy.orm import Session
 from .db_write import Dish, Directory, setup_database_connection, User, Rating
 from typing import List
 from sqlalchemy import func
-import datetime 
+import datetime
+import pandas as pd
 
+def convert_dblist_to_df(db_list):
+    dict_list = [vars(obj) for obj in db_list]
+    for dictionary in dict_list:
+        dictionary.pop('_sa_instance_state', None)
+    df = pd.DataFrame(dict_list)        
+    return df
+        
 def get_user_by_username(session: Session, username: str):
     return session.query(User).filter_by(username=username).first()
 
