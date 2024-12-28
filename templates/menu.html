@@ -55,7 +55,6 @@
                 <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Analysis</a>
                 <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">About</a>
                 <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a>  
-                <!--  <a href="/logout" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Logout</a>  -->
             </nav>
         </div>
     </div>
@@ -67,6 +66,7 @@
             <div class="flex-1">
                 <p class="text-left">Select a Mensa:</p>
                 <select name="selected_mensa" id="mensa-dropdown" class="w-full">
+                    <option value="all" {% if selected_mensa == 'all' %} selected {% endif %}>All Mensas</option>
                     {% for mensa in available_mensas %}
                         <option value="{{ mensa }}" {% if selected_mensa == mensa %} selected {% endif %}>{{ mensa }}</option>
                     {% endfor %}
@@ -123,117 +123,113 @@
         </div>
         {% else %}
         <div class="grid grid-cols-1 gap-6">
-            {% set current_headline = "" %}
-            {% for dish in dishes %}
-            {% if current_headline != (dish.menuLineEng if dish.menuLineEng else dish.menuLine) %}
-            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
-                {% if "Main Dishes" in headlines %}
-                    Main Dishes
-                {% elif "Side Dishes" in headlines %}
-                    Side Dishes
-                {% elif "Desserts" in headlines %}
-                    Desserts
-                {% endif %}
-            </h2>
-            <!-- Check if we need to display a new headline -->
-            {% set current_headline = (dish.menuLineEng if dish.menuLineEng else dish.menuLine) %}
-            {% endif %}
-            <div class="card w-full">
-                <div class="card-body flex justify-between p-6">
-                    <div class="flex-grow space-y-4">
-                        <!-- Here a headline shall be added for which kind of dish it is -->
-                        <h3 class="card-title menu-line text-2xl font-bold">{{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}</h3>
-                        <h5 class="card-title menu-name text-xl">{{ dish.menuEng if dish.menuEng else dish.menu }}</h5>
-                        <div class="text-lg font-medium text-gray-700">
-                            {% if request.form.getlist('selected_price') %}
-                                {% if 'studentPrice' in request.form.getlist('selected_price') %}
+            {% for course, course_dishes in dishes.items() %}
+                <!-- Course headline -->
+                <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+                    {{ course }}
+                </h2>
+                {% for dish in course_dishes %}
+                <div class="card w-full">
+                    <div class="card-body flex justify-between p-6">
+                        <div class="flex-grow space-y-4">
+                            {% if selected_mensa == 'all' %}
+                                            <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
+                            {% endif %}    
+                            <h3 class="card-title menu-line text-2xl font-bold">{{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}</h3>
+                            <h5 class="card-title menu-name text-xl">
+                                {{ dish.menuEng if dish.menuEng else dish.menu }}
+                            </h5>                        
+                            <div class="text-lg font-medium text-gray-700">
+                                {% if request.form.getlist('selected_price') %}
+                                    {% if 'studentPrice' in request.form.getlist('selected_price') %}
+                                        <div>Student Price: {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}</div>
+                                    {% endif %}
+                                    {% if 'guestPrice' in request.form.getlist('selected_price') %}
+                                        <div>Guest Price: {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}</div>
+                                    {% endif %}
+                                {% else %}
                                     <div>Student Price: {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}</div>
-                                {% endif %}
-                                {% if 'guestPrice' in request.form.getlist('selected_price') %}
                                     <div>Guest Price: {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}</div>
                                 {% endif %}
-                            {% else %}
-                                <div>Student Price: {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}</div>
-                                <div>Guest Price: {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}</div>
-                            {% endif %}
-                        </div>                        
-                        <!-- Icons on selected meats -->
-                        <div class="flex gap-2 mb-2">
-                            {% if 'F' in dish.icons %}<span class="icon-tooltip" data-tooltip="Fish"><img src="{{ url_for('static', filename='images/icon_fish.png') }}" alt="Fish" class="h-6"></span>{% endif %}
-                            {% if 'G' in dish.icons %}<span class="icon-tooltip" data-tooltip="Poultry"><img src="{{ url_for('static', filename='images/icon_poultry.png') }}" alt="Poultry" class="h-6"></span>{% endif %}
-                            {% if 'K' in dish.icons %}<span class="icon-tooltip" data-tooltip="Veal"><img src="{{ url_for('static', filename='images/icon_veal.png') }}" alt="Veal" class="h-6"></span>{% endif %}
-                            {% if 'L' in dish.icons %}<span class="icon-tooltip" data-tooltip="Lamb"><img src="{{ url_for('static', filename='images/icon_lamb.png') }}" alt="Lamb" class="h-6"></span>{% endif %}
-                            {% if 'R' in dish.icons %}<span class="icon-tooltip" data-tooltip="Beef"><img src="{{ url_for('static', filename='images/icon_beef.png') }}" alt="Beef" class="h-6"></span>{% endif %}
-                            {% if 'S' in dish.icons %}<span class="icon-tooltip" data-tooltip="Pork"><img src="{{ url_for('static', filename='images/icon_pork.png') }}" alt="Pork" class="h-6"></span>{% endif %}
-                            {% if 'W' in dish.icons %}<span class="icon-tooltip" data-tooltip="Game"><img src="{{ url_for('static', filename='images/icon_game.png') }}" alt="Game" class="h-6"></span>{% endif %}
-                            {% if 'top' in dish.icons %}<span class="icon-tooltip" data-tooltip="Top"><img src="{{ url_for('static', filename='images/icon_recommendation.png') }}" alt="Top" class="h-6"></span>{% endif %}
-                            {% if 'V' in dish.icons %}<span class="icon-tooltip" data-tooltip="Vegetarian"><img src="{{ url_for('static', filename='images/icon_vegetarian.png') }}" alt="Vegetarian" class="h-6"></span>{% endif %}
-                            {% if 'vegan' in dish.icons %}<span class="icon-tooltip" data-tooltip="Vegan"><img src="{{ url_for('static', filename='images/icon_vegan.png') }}" alt="Vegan" class="h-6"></span>{% endif %}
-                            {% if 'vital' in dish.icons %}<span class="icon-tooltip" data-tooltip="Vital"><img src="{{ url_for('static', filename='images/icon_mensavital.png') }}" alt="Vital" class="h-6"></span>{% endif %}
-                        </div>                        
-                        <!-- Allergens -->
-                        <p class="text-sm text-gray-500">
-                            Allergens:
-                            {% if dish.allergens %}
-                                {% set found_allergens = [] %}
-                                {% for allergen in dish.allergens.split(',') %}
-                                    {% set allergen_code = allergen.strip() %}
-                                    {% if allergen_code in allergens_dict and allergens_dict[allergen_code] %}
-                                        {% set _ = found_allergens.append(allergens_dict[allergen_code]) %}
+                            </div>                        
+                            <!-- Icons on selected meats -->
+                            <div class="flex gap-2 mb-2">
+                                {% if 'F' in dish.icons %}<span class="icon-tooltip" data-tooltip="Fish"><img src="{{ url_for('static', filename='images/icon_fish.png') }}" alt="Fish" class="h-6"></span>{% endif %}
+                                {% if 'G' in dish.icons %}<span class="icon-tooltip" data-tooltip="Poultry"><img src="{{ url_for('static', filename='images/icon_poultry.png') }}" alt="Poultry" class="h-6"></span>{% endif %}
+                                {% if 'K' in dish.icons %}<span class="icon-tooltip" data-tooltip="Veal"><img src="{{ url_for('static', filename='images/icon_veal.png') }}" alt="Veal" class="h-6"></span>{% endif %}
+                                {% if 'L' in dish.icons %}<span class="icon-tooltip" data-tooltip="Lamb"><img src="{{ url_for('static', filename='images/icon_lamb.png') }}" alt="Lamb" class="h-6"></span>{% endif %}
+                                {% if 'R' in dish.icons %}<span class="icon-tooltip" data-tooltip="Beef"><img src="{{ url_for('static', filename='images/icon_beef.png') }}" alt="Beef" class="h-6"></span>{% endif %}
+                                {% if 'S' in dish.icons %}<span class="icon-tooltip" data-tooltip="Pork"><img src="{{ url_for('static', filename='images/icon_pork.png') }}" alt="Pork" class="h-6"></span>{% endif %}
+                                {% if 'W' in dish.icons %}<span class="icon-tooltip" data-tooltip="Game"><img src="{{ url_for('static', filename='images/icon_game.png') }}" alt="Game" class="h-6"></span>{% endif %}
+                                {% if 'top' in dish.icons %}<span class="icon-tooltip" data-tooltip="Top"><img src="{{ url_for('static', filename='images/icon_recommendation.png') }}" alt="Top" class="h-6"></span>{% endif %}
+                                {% if 'V' in dish.icons %}<span class="icon-tooltip" data-tooltip="Vegetarian"><img src="{{ url_for('static', filename='images/icon_vegetarian.png') }}" alt="Vegetarian" class="h-6"></span>{% endif %}
+                                {% if 'vegan' in dish.icons %}<span class="icon-tooltip" data-tooltip="Vegan"><img src="{{ url_for('static', filename='images/icon_vegan.png') }}" alt="Vegan" class="h-6"></span>{% endif %}
+                                {% if 'vital' in dish.icons %}<span class="icon-tooltip" data-tooltip="Vital"><img src="{{ url_for('static', filename='images/icon_mensavital.png') }}" alt="Vital" class="h-6"></span>{% endif %}
+                            </div>                        
+                            <!-- Allergens -->
+                            <p class="text-sm text-gray-500">
+                                Allergens:
+                                {% if dish.allergens %}
+                                    {% set found_allergens = [] %}
+                                    {% for allergen in dish.allergens.split(',') %}
+                                        {% set allergen_code = allergen.strip() %}
+                                        {% if allergen_code in allergens_dict and allergens_dict[allergen_code] %}
+                                            {% set _ = found_allergens.append(allergens_dict[allergen_code]) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if found_allergens %}
+                                        {{ found_allergens|join(', ') }}
+                                    {% else %}
+                                        /
                                     {% endif %}
-                                {% endfor %}
-                                {% if found_allergens %}
-                                    {{ found_allergens|join(', ') }}
                                 {% else %}
                                     /
                                 {% endif %}
-                            {% else %}
-                                /
-                            {% endif %}
-                        </p>
-                        <!-- Additives -->
-                        <p class="text-sm text-gray-500">
-                            Additives:
-                            {% if dish.additives %}
-                                {% set found_additives = [] %}
-                                {% for additive in dish.additives.split(',') %}
-                                    {% set additive_code = additive.strip() %}
-                                    {% if additive_code in additives_dict and additives_dict[additive_code] %}
-                                        {% set _ = found_additives.append(additives_dict[additive_code]) %}
+                            </p>
+                            <!-- Additives -->
+                            <p class="text-sm text-gray-500">
+                                Additives:
+                                {% if dish.additives %}
+                                    {% set found_additives = [] %}
+                                    {% for additive in dish.additives.split(',') %}
+                                        {% set additive_code = additive.strip() %}
+                                        {% if additive_code in additives_dict and additives_dict[additive_code] %}
+                                            {% set _ = found_additives.append(additives_dict[additive_code]) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if found_additives %}
+                                        {{ found_additives|join(', ') }}
+                                    {% else %}
+                                        /
                                     {% endif %}
-                                {% endfor %}
-                                {% if found_additives %}
-                                    {{ found_additives|join(', ') }}
                                 {% else %}
                                     /
                                 {% endif %}
-                            {% else %}
-                                /
-                            {% endif %}
-                        </p>
-                    </div>
-                    <!-- Descriptions -->
-                    <!-- Recipes -->
-                    <!-- Ratings -->
-                    <div class="flex flex-col items-end ml-8">
-                        <div class="rating mt-4 text-4xl">
-                            <input type="radio" id="star5_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="5" />
-                            <label for="star5_{{ dish.menuLine }}">&#9733;</label>
-                            <input type="radio" id="star4_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="4" />
-                            <label for="star4_{{ dish.menuLine }}" >&#9733;</label>
-                            <input type="radio" id="star3_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="3" />
-                            <label for="star3_{{ dish.menuLine }}">&#9733;</label>
-                            <input type="radio" id="star2_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="2" />
-                            <label for="star2_{{ dish.menuLine }}">&#9733;</label>
-                            <input type="radio" id="star1_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="1" />
-                            <label for="star1_{{ dish.menuLine }}">&#9733;</label>
+                            </p>
                         </div>
-                        <button class="submit-rating mt-2" data-menu-line="{{ dish.menuLine }}" data-id="{{ dish.id }}">Submit Rating</button>
-                        <p class="rating-feedback mt-2 text-sm text-green-600 hidden">Rating received!</p>
-                    </div>
+                        <!-- Descriptions -->
+                        <!-- Recipes -->
+                        <!-- Ratings -->
+                        <div class="flex flex-col items-end ml-8">
+                            <div class="rating mt-4 text-4xl">
+                                <input type="radio" id="star5_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="5" />
+                                <label for="star5_{{ dish.menuLine }}">&#9733;</label>
+                                <input type="radio" id="star4_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="4" />
+                                <label for="star4_{{ dish.menuLine }}" >&#9733;</label>
+                                <input type="radio" id="star3_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="3" />
+                                <label for="star3_{{ dish.menuLine }}">&#9733;</label>
+                                <input type="radio" id="star2_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="2" />
+                                <label for="star2_{{ dish.menuLine }}">&#9733;</label>
+                                <input type="radio" id="star1_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="1" />
+                                <label for="star1_{{ dish.menuLine }}">&#9733;</label>
+                            </div>
+                            <button class="submit-rating mt-2" data-menu-line="{{ dish.menuLine }}" data-id="{{ dish.id }}">Submit Rating</button>
+                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">Rating received!</p>
+                        </div>
                     <!-- Images -->
                 </div>
             </div>
+            {% endfor %}
             {% endfor %}
         </div>
     {% endif %}

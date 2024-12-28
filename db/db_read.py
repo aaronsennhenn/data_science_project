@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course
 from typing import List
 from sqlalchemy import func
 import datetime
@@ -21,12 +21,33 @@ def get_dishes_by_date_location(session: Session, date, location) -> List[Dish]:
 def get_all_dishes(session: Session) -> List[Dish]:
     return session.query(Dish).all()
 
+def get_dishes_by_date(session: Session, date) -> List[Dish]:
+    return session.query(Dish).filter(Dish.menuDate == date).all()
+
 def get_image_path(dish_id: int, session: Session) -> str:
     dish = session.query(Dish).filter_by(id=dish_id).first()
     return dish.image_path if dish else None
 
 def get_meat_options(session: Session) -> List[str]:
     return session.query(Dish.meats).distinct().all()
+
+def get_course_eng(session: Session, date, menuline, menu, location) -> str:
+    course = session.query(Course.course_eng).filter(
+        Course.menuDate == date,
+        Course.menuLine == menuline,
+        Course.menu == menu,
+        Course.location == location
+    ).first()
+    return course[0] if course else None
+
+def get_course(session: Session, date, menuline, menu, location) -> str:
+    course = session.query(Course.course).filter(
+        Course.menuDate == date,
+        Course.menuLine == menuline,
+        Course.menu == menu,
+        Course.location == location
+    ).first()
+    return course[0] if course else None
 
 from datetime import datetime, timedelta
 
@@ -206,12 +227,12 @@ def get_written_forms(session):
     
     for entry in directory_entries:
         if entry.additives:
-            additives_dict[entry.additives] = entry.additives_written
+            additives_dict[entry.additives] = entry.additives_written_eng
         if entry.allergens:
-            allergens_dict[entry.allergens] = entry.allergens_written
+            allergens_dict[entry.allergens] = entry.allergens_written_eng
             
     return additives_dict, allergens_dict
 
 def get_user_name(db_session, username):
     return db_session.query(User).filter_by(username=username).first()
-    
+
