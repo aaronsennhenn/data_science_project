@@ -258,30 +258,6 @@ def write_to_taste(dishes_df: pd.DataFrame, engine, Session):
         db_session.commit()
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        +
-        
-
 
 
 # create a new table called directory, that includes the abbreviations saved in additives and allergens and their corresponding written out form

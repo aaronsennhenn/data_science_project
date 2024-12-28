@@ -156,17 +156,23 @@ def menu():
         # When user filters, get filtered values
         if request.method == 'POST':
             mensa_name = request.form.get('selected_mensa')
-            date = request.form.get('selected_date')
+            date_temp = request.form.get('selected_date')
             selected_diet_meat = request.form.get('selected_diet_meat')
             selected_price = request.form.get('selected_price')
 
             # get rating from user and selected dish with mensa
             rating, menu_id = request.form.get('rating'), request.form.get('id')
+            print(rating, menu_id)
 
-            # write rating and id to database
-            if rating and user_name:
+            # write rating and id to database. If user is not logged in, still safe the rating but with NA username
+            if rating:
                 write_to_rating(menu_id, rating, user_name, engine, Session)
 
+            # only udate the date variable, if a date is selected
+            if date_temp:
+                date = date_temp
+
+            print(date)
         # Query dishes for respective mensa and date
         dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
         menu_data = []
