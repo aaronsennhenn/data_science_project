@@ -14,8 +14,22 @@
     <!-- Navigation Bar -->
     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
         <nav>
-            <div class="nav-container">
+            <div class="nav-container flex justify-between items-center">
                 <div class="text-2xl font-bold text-indigo-600">MENSA APP.</div>
+                
+                <!-- Language Buttons - Centered -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
+                    <a href="{{ url_for('set_language', lang='en') }}" 
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        EN
+                    </a>
+                    <a href="{{ url_for('set_language', lang='de') }}"
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        DE
+                    </a>
+                </div>
+
+                <!-- Menu Toggle -->
                 <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -34,44 +48,53 @@
                 </svg>
             </button>
             <nav class="mt-8">
-                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Home</a>
-                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Menu</a>
-                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Analysis</a>
-                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">About</a>
-                <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
+                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
+                </a>
+                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
+                </a>
+                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
+                </a>
+                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Über uns{% else %}About{% endif %}
+                </a>
+                <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a>
             </nav>
         </div>
     </div>
 
+
     <!-- Main Content -->
     <main class="flex-grow flex flex-col items-center px-4 py-4">
         <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
-            <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">Analysis</h1>
-            <p class="text-gray-600 text-center">Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias</p>
+            <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}</h1>
+            <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Kennzahlen, Preiseinblicke und Trends in Tübinger Mensen und Cafeterien{% else %}Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias{% endif %}</p>
         </div>
 
         <!-- Key Metrics Section -->
         <section class="mb-12 w-full">
-            <h2 class="text-xl font-semibold text-gray-800 mb-6">Key Metrics</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Wichtige Kennzahlen{% else %}Key Metrics{% endif %}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Data Inception</h3>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Datenerhebung{% else %}Data Inception{% endif %}</h3>
                     <p class="text-2xl font-bold text-gray-900">{{ first_updated_date }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Total Menus</h3>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Menus{% else %}Total Menus{% endif %}</h3>
                     <p class="text-2xl font-bold text-gray-900">{{ total_menus }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Total Mensas</h3>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Mensen{% else %}Total Mensas{% endif %}</h3>
                     <p class="text-2xl font-bold text-gray-900">{{ total_mensas }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Total Ratings</h3>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Bewertungen{% else %}Total Ratings{% endif %}</h3>
                     <p class="text-2xl font-bold text-gray-900">{{ total_ratings }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Covered Area</h3>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Analysiertes Gebiet{% else %}Covered Area{% endif %}</h3>
                     <a href="https://www.google.com/maps/place/Tübingen" target="_blank" class="location-link">
                         Tübingen
                     </a>
@@ -80,19 +103,33 @@
         </section>
 
         <section class="mb-12 w-full">
-            <h2 class="text-xl font-semibold text-gray-800 mb-6">Weekly Analytics</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Wöchentliche Analyse{% else %}Weekly Analytics{% endif %}</h2>
             
             <!-- Mensa Details -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Menu Options</h3>
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
+                    {% if session.get('language') == 'de' %}Menüoptionen{% else %}Menu Options{% endif %}
+                </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {% for mensa in names_available_mensas %}
                     <div class="p-4 bg-gray-50 rounded-lg">
                         <div class="flex flex-col items-center">
                             <div class="w-full mb-4">
                                 <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
-                                <p class="text-sm font-medium text-gray-600">Menus Count: {{ dish_count_per_mensa[mensa] }}</p>
-                                <p class="text-sm font-medium text-gray-600">Menu Line Distribution: </p>
+                                <p class="text-sm font-medium text-gray-600">
+                                    {% if session.get('language') == 'de' %}
+                                        Anzahl Menüs: {{ dish_count_per_mensa[mensa] }}
+                                    {% else %}
+                                        Menus Count: {{ dish_count_per_mensa[mensa] }}
+                                    {% endif %}
+                                </p>
+                                <p class="text-sm font-medium text-gray-600">
+                                    {% if session.get('language') == 'de' %}
+                                        Menükategorienverteilung:
+                                    {% else %}
+                                        Menu Line Distribution:
+                                    {% endif %}
+                                </p>
                             </div>
                             <div id="pie-chart-{{ loop.index }}" class="shadow-sm rounded-lg" style="width: 200px; height: 200px;"></div>
                         </div>
@@ -103,17 +140,23 @@
             
                 <!-- Price Analysis -->
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 w-full">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Price Analysis</h3>
-                    <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">Average Prices</h4>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Preisanalyse{% else %}Price Analysis{% endif %}</h3>
+                    <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Durchschnittliche Preise{% else %}Average Prices{% endif %}</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {% for mensa in names_available_mensas %}
                         <div class="p-4 bg-gray-50 rounded-lg">
                             <div class="flex flex-col">
                                 <div class="w-full mb-4">
                                     <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
-                                    {% for menu_line, price in mensa_average_prices[mensa].items()|sort %}
+                                    {% for menuLine, price in mensa_average_prices[mensa].items()|sort %}
                                     <div class="mt-2">
-                                        <p class="text-sm font-medium text-gray-600">{{ menu_line }}</p>
+                                        <p class="text-sm font-medium text-gray-600">
+                                            {% if session.get('language') == 'de' %}
+                                                {{ menuLine }}
+                                            {% else %}
+                                                {{ menuLineEng if menuLineEng else menuLine }}
+                                            {% endif %}
+                                        </p>
                                         <p class="font-medium">€{{ price }}</p>
                                     </div>
                                     {% endfor %}
@@ -121,19 +164,27 @@
                             </div>
                         </div>
                         {% endfor %}
-                    </div>
+                    </div>                
 
                 <!-- Lowest Prices Column -->
-                <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">Lowest Prices</h4>
+                <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Geringste Preise{% else %}Lowest Prices{% endif %} </h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {% for mensa in names_available_mensas %}
                         <div class="p-4 bg-gray-50 rounded-lg">
                             <div class="flex flex-col">
                                 <div class="w-full mb-4">
                                     <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
-                                    {% for menu_line, price in mensa_lowest_prices[mensa].items() %}
+                                    {% for menuLine, price in mensa_lowest_prices[mensa].items() %}
                                     <div class="mt-2">
-                                        <p class="text-sm font-medium text-gray-600">{{ menu_line }}</p>
+                                        <p class="text-sm font-medium text-gray-600">
+                                            {% if session.get('language') == 'de' %}
+                                                {% if menuLine == 'Student Price' %}Studentenpreis
+                                                {% elif menuLine == 'Guest Price' %}Gästepreis
+                                                {% else %}{{ menuLine }}{% endif %}
+                                            {% else %}
+                                                {{ menuLine }}
+                                            {% endif %}
+                                        </p>
                                         <p class="font-medium">€{{ price }}</p>
                                     </div>
                                     {% endfor %}
@@ -148,11 +199,11 @@
     </section>
 
     <section class="mb-12 w-full max-w-full px-4">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">Total Analytics</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Gesamtanalyse{% else %} Total Analytics{% endif %}</h2>
         
         <!-- Mensa Details -->
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-            <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">Price Development</h3>
+            <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Preisentwicklung{% else %} Price Development{% endif %}</h3>
             <div id="price-development-plots" class="w-full h-[600px]"></div>
         </div>
     </section>

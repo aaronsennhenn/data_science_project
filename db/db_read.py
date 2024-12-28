@@ -219,19 +219,23 @@ def get_menu_line_distribution(session: Session) -> dict:
 
 # Get directory values of additives and allergens 
 def get_written_forms(session):
-    """Get written forms of additives and allergens from Directory"""
     additives_dict = {}
+    additives_dict_eng = {}
     allergens_dict = {}
+    allergens_dict_eng = {}
     
     directory_entries = session.query(Directory).all()
     
     for entry in directory_entries:
         if entry.additives:
-            additives_dict[entry.additives] = entry.additives_written_eng
+            additives_dict[entry.additives] = entry.additives_written
+            additives_dict_eng[entry.additives] = entry.additives_written_eng
         if entry.allergens:
-            allergens_dict[entry.allergens] = entry.allergens_written_eng
+            allergens_dict[entry.allergens] = entry.allergens_written
+            allergens_dict_eng[entry.allergens] = entry.allergens_written_eng
             
-    return additives_dict, allergens_dict
+    return additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng
+
 
 def get_user_name(db_session, username):
     return db_session.query(User).filter_by(username=username).first()

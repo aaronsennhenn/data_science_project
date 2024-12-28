@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.utils import translate_text_first_word_capitalized
+from db.utils import translate_text_first_word_capitalized, translate_text_all_capitalized
 
 Base = declarative_base()
 
@@ -26,6 +26,16 @@ class Dish(Base):
     icons = Column(String, nullable=True)
     allergens = Column(String, nullable=True)
     additives = Column(String, nullable=True)
+
+class DishEng(Base):
+    __tablename__ = 'dishes_eng'
+
+    id = Column(Integer, primary_key=True)
+    menuDate = Column(Date, nullable=True)
+    menuLineEng = Column(String, nullable=True)
+    menuEng = Column(String, nullable=True)
+    locationEng = Column(String, nullable=True)
+    meatsEng = Column(String, nullable=True)
 
 class Rating(Base):
     __tablename__ = 'rating'
@@ -160,6 +170,33 @@ def write_to_db(filtered_df: pd.DataFrame, engine, Session):
         write_to_course(engine, Session)
         
         db_session.commit()
+
+# Save translations of dishes in a separate table (api calls avoided)
+def write_to_dishes_eng(engine, Session):
+    DishEng.metadata.create_all(engine)
+    
+    with Session() as db_session:
+        dishes = db_session.query(Dish).all()
+        
+        for dish in dishes:
+            # Check if translation already exists
+            existing = db_session.query(DishEng).filter(
+                DishEng.menuDate == dish.menuDate,
+                DishEng.menuEng == translate_text_first_word_capitalized(dish.menu)
+            ).first()
+            
+            if not existing:
+                dish_eng = DishEng(
+                    menuDate=dish.menuDate,
+                    menuLineEng=translate_text_all_capitalized(dish.menuLine),
+                    menuEng=translate_text_first_word_capitalized(dish.menu),
+                    locationEng=translate_text_all_capitalized(dish.location),
+                    meatsEng= dish.meats
+                )
+                db_session.add(dish_eng)
+        
+        db_session.commit()
+    
 
 # This table contains the user ratings, the menu_id of the rated meal, a timestamp, and the user_id if he is logged in
 def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):

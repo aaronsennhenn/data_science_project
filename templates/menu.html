@@ -18,8 +18,22 @@
     <!-- Header -->
     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
         <nav>
-            <div class="nav-container">
+            <div class="nav-container flex justify-between items-center">
                 <div class="text-2xl font-bold text-indigo-600">MENSA APP.</div>
+                
+                <!-- Language Buttons - Centered -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
+                    <a href="{{ url_for('set_language', lang='en') }}" 
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        EN
+                    </a>
+                    <a href="{{ url_for('set_language', lang='de') }}"
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        DE
+                    </a>
+                </div>
+
+                <!-- Menu Toggle -->
                 <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -50,68 +64,124 @@
             <p class="text-center text-gray-700 font-medium mb-6">You are not logged in.</p>
             {% endif %}
             <nav class="mt-8">
-                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Home</a>
-                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Menu</a>
-                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Analysis</a>
-                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">About</a>
-                <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a>  
-                <a href="/logout" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Logout</a>
+                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
+                </a>
+                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
+                </a>
+                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
+                </a>
+                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Über uns{% else %}About{% endif %}
+                </a>
+                <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a>
             </nav>
         </div>
     </div>
 
 <main class="flex-grow flex flex-col items-center px-4 py-4">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
-        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">Choose your menu based on your preferences</h1>
+        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
+            {% if session.get('language') == 'de' %}
+                Speisekarte
+            {% else %}
+                Menu
+            {% endif %}
+        </h1>
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+            {% if session.get('language') == 'de' %}
+                Wählen Sie Ihr Menü nach Ihren Vorlieben
+            {% else %}
+                Choose your menu based on your preferences
+            {% endif %}
+        </h2>
         <form action="{{ url_for('menu') }}" method="POST" class="flex flex-wrap gap-4" id="filter-form">
             <div class="flex-1">
-                <p class="text-left">Select a Mensa:</p>
+                <p class="text-left">
+                    {% if session.get('language') == 'de' %}
+                        Mensa:
+                    {% else %}
+                        Mensa:
+                    {% endif %}
+                </p>
                 <select name="selected_mensa" id="mensa-dropdown" class="w-full">
-                    <option value="all" {% if selected_mensa == 'all' %} selected {% endif %}>All Mensas</option>
+                    <option value="all" {% if selected_mensa == 'all' %} selected {% endif %}>
+                        {% if session.get('language') == 'de' %}
+                            Alle Mensen
+                        {% else %}
+                            All Mensas
+                        {% endif %}
+                    </option>
                     {% for mensa in available_mensas %}
                         <option value="{{ mensa }}" {% if selected_mensa == mensa %} selected {% endif %}>{{ mensa }}</option>
                     {% endfor %}
-                </select>
+                </select>                
             </div>
 
             <div class="flex-1">
-                <p class="text-left">Select a Date:</p>
+                <p class="text-left">
+                    {% if session.get('language') == 'de' %}
+                    Datum:
+                {% else %}
+                    Date:
+                {% endif %}</p>
                 <input type="date" id="date_selector" name="selected_date" class="bg-violet-500 text-black px-4 py-2 rounded-md shadow hover:bg-violet-600 transition w-full" value="{{ selected_date }}" min="{{ available_dates[0] }}" max="{{ available_dates[-1] }}" />
             </div>
             <div class="flex-1">
-                <p class="text-left">Select a Diet or Meat:</p>
+                <p class="text-left">
+                {% if session.get('language') == 'de' %}
+                    Diät oder Fleischsorte:
+                {% else %}
+                    Diet or Meat:
+                {% endif %}
+                </p>
                 <div class="radio-group">
                     <input type="checkbox" id="diet_omnivore" name="selected_diet_meat" value="omnivore" />
-                    <label for="diet_omnivore">Omnivore</label>
+                    <label for="diet_omnivore">{% if session.get('language') == 'de' %}Allesesser{% else %}Omnivore{% endif %}</label>
                     <input type="checkbox" id="diet_vegan" name="selected_diet_meat" value="vegan" />
-                    <label for="diet_vegan">Vegan</label>
+                    <label for="diet_vegan">{% if session.get('language') == 'de' %}Vegan{% else %}Vegan{% endif %}</label>
                     <input type="checkbox" id="diet_vegetarian" name="selected_diet_meat" value="V" />
-                    <label for="diet_vegetarian">Vegetarian</label>
+                    <label for="diet_vegetarian">{% if session.get('language') == 'de' %}Vegetarisch{% else %}Vegetarian{% endif %}</label>
                     <input type="checkbox" id="meat_beef" name="selected_diet_meat" value="R" />
-                    <label for="meat_beef">Beef</label>
+                    <label for="meat_beef">{% if session.get('language') == 'de' %}Rindfleisch{% else %}Beef{% endif %}</label>
                     <input type="checkbox" id="meat_poultry" name="selected_diet_meat" value="G" />
-                    <label for="meat_poultry">Poultry</label>
+                    <label for="meat_poultry">{% if session.get('language') == 'de' %}Geflügel{% else %}Poultry{% endif %}</label>
                     <input type="checkbox" id="meat_wild" name="selected_diet_meat" value="W" />
-                    <label for="meat_wild">Game</label>
+                    <label for="meat_wild">{% if session.get('language') == 'de' %}Wild{% else %}Game{% endif %}</label>
                     <input type="checkbox" id="meat_fish" name="selected_diet_meat" value="F" />
-                    <label for="meat_fish">Fish</label>
+                    <label for="meat_fish">{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}</label>
                     <input type="checkbox" id="meat_pork" name="selected_diet_meat" value="S" />
-                    <label for="meat_pork">Pork</label>
+                    <label for="meat_pork">{% if session.get('language') == 'de' %}Schweinefleisch{% else %}Pork{% endif %}</label>
                     <input type="checkbox" id="diet_mensavital" name="selected_diet_meat" value="mensaVital" />
-                    <label for="diet_mensavital">Vital</label>
+                    <label for="diet_mensavital">{% if session.get('language') == 'de' %}Vital{% else %}Vital{% endif %}</label>
                 </div>
+                
             </div>       
             <div class="flex-1">
-                <p class="text-left">Select a Price:</p>
+                <p class="text-left">
+                {% if session.get('language') == 'de' %}
+                    Preis:
+                {% else %}
+                    Price:
+                {% endif %}
+                </p>
                 <div class="radio-group">
                     <input type="checkbox" id="price_student" name="selected_price" value="studentPrice" />
-                    <label for="price_student">Student</label>
+                    <label for="price_student">{% if request.args.get('lang') == 'de' %}Student{% else %}Student{% endif %}</label>
                     <input type="checkbox" id="price_guest" name="selected_price" value="guestPrice" />
-                    <label for="price_guest">Guest</label>
+                    <label for="price_guest">{% if request.args.get('lang') == 'de' %}Gast{% else %}Guest{% endif %}</label>
                 </div>
             </div>            
             <div class="w-full">
-                <button type="submit" class="bg-violet-500 text-white px-4 py-2 rounded-md shadow hover:bg-violet-600 transition">Submit</button>
+                <button type="submit" class="bg-violet-500 text-white px-4 py-2 rounded-md shadow hover:bg-violet-600 transition">
+                {% if session.get('language') == 'de' %}
+                    Senden
+                {% else %}
+                    Submit
+                {% endif %}
+                </button>
             </div>
         </form>
     </div>
@@ -120,40 +190,89 @@
     <div class="container mt-8 w-full">
         {% if no_results %}
         <div class="text-2xl font-bold text-center">
+        {% if session.get('language') == 'de' %}
+            Es wurden keine Daten für die ausgewählten Optionen gefunden!
+        {% else %}
             No data was found for the selected options!
+        {% endif %}
         </div>
         {% else %}
         <div class="grid grid-cols-1 gap-6">
             {% for course, course_dishes in dishes.items() %}
                 <!-- Course headline -->
                 <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+                    {% if session.get('language') == 'de' %}
                     {{ course }}
+                    {% else %}
+                    {{ course_eng }}
+                    {% endif %}
                 </h2>
                 {% for dish in course_dishes %}
                 <div class="card w-full">
                     <div class="card-body flex justify-between p-6">
                         <div class="flex-grow space-y-4">
                             {% if selected_mensa == 'all' %}
-                                            <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
-                            {% endif %}    
-                            <h3 class="card-title menu-line text-2xl font-bold">{{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}</h3>
+                            <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
+                            {% endif %}  
+                            <!-- If lang == de then we use in dishes table menuLine, and menu
+                             If lang == en then we use in dishes_eng table menuLineEng and menuEng -->  
+                             <h3 class="card-title menu-line text-2xl font-bold">
+                                {% if session.get('language') == 'de' %}
+                                    {{ dish.menuLine }}
+                                {% else %}
+                                    {{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}
+                                {% endif %}
+                            </h3>
                             <h5 class="card-title menu-name text-xl">
-                                {{ dish.menuEng if dish.menuEng else dish.menu }}
-                            </h5>                        
+                                {% if session.get('language') == 'de' %}
+                                    {{ dish.menu }}
+                                {% else %}
+                                    {{ dish.menuEng if dish.menuEng else dish.menu }}
+                                {% endif %}
+                            </h5>                                
+                            <!-- Price results remain the same for en and de-->                    
                             <div class="text-lg font-medium text-gray-700">
                                 {% if request.form.getlist('selected_price') %}
                                     {% if 'studentPrice' in request.form.getlist('selected_price') %}
-                                        <div>Student Price: {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}</div>
+                                        <div>
+                                            {% if session.get('language') == 'de' %}
+                                                Studentenpreis: 
+                                            {% else %}
+                                                Student Price: 
+                                            {% endif %}
+                                            {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
+                                        </div>
                                     {% endif %}
                                     {% if 'guestPrice' in request.form.getlist('selected_price') %}
-                                        <div>Guest Price: {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}</div>
+                                        <div>
+                                            {% if session.get('language') == 'de' %}
+                                                Gästepreis: 
+                                            {% else %}
+                                                Guest Price: 
+                                            {% endif %}
+                                            {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
+                                        </div>
                                     {% endif %}
                                 {% else %}
-                                    <div>Student Price: {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}</div>
-                                    <div>Guest Price: {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}</div>
+                                    <div>
+                                        {% if session.get('language') == 'de' %}
+                                            Studentenpreis: 
+                                        {% else %}
+                                            Student Price: 
+                                        {% endif %}
+                                        {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
+                                    </div>
+                                    <div>
+                                        {% if session.get('language') == 'de' %}
+                                            Gästepreis: 
+                                        {% else %}
+                                            Guest Price: 
+                                        {% endif %}
+                                        {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
+                                    </div>
                                 {% endif %}
-                            </div>                        
-                            <!-- Icons on selected meats -->
+                            </div>                                                  
+                            <!-- Icons on selected meats remain the same for en and de -->
                             <div class="flex gap-2 mb-2">
                                 {% if 'F' in dish.icons %}<span class="icon-tooltip" data-tooltip="Fish"><img src="{{ url_for('static', filename='images/icon_fish.png') }}" alt="Fish" class="h-6"></span>{% endif %}
                                 {% if 'G' in dish.icons %}<span class="icon-tooltip" data-tooltip="Poultry"><img src="{{ url_for('static', filename='images/icon_poultry.png') }}" alt="Poultry" class="h-6"></span>{% endif %}
@@ -169,13 +288,17 @@
                             </div>                        
                             <!-- Allergens -->
                             <p class="text-sm text-gray-500">
-                                Allergens:
+                                {% if session.get('language') == 'de' %}Allergene{% else %}Allergens{% endif %}:
                                 {% if dish.allergens %}
                                     {% set found_allergens = [] %}
                                     {% for allergen in dish.allergens.split(',') %}
                                         {% set allergen_code = allergen.strip() %}
-                                        {% if allergen_code in allergens_dict and allergens_dict[allergen_code] %}
-                                            {% set _ = found_allergens.append(allergens_dict[allergen_code]) %}
+                                        {% if allergen_code in allergens_dict %}
+                                            {% if session.get('language') == 'de' %}
+                                                {% set _ = found_allergens.append(allergens_dict[allergen_code]) %}
+                                            {% else %}
+                                                {% set _ = found_allergens.append(allergens_dict_eng[allergen_code]) %}
+                                            {% endif %}
                                         {% endif %}
                                     {% endfor %}
                                     {% if found_allergens %}
@@ -187,15 +310,20 @@
                                     /
                                 {% endif %}
                             </p>
+
                             <!-- Additives -->
                             <p class="text-sm text-gray-500">
-                                Additives:
+                                {% if session.get('language') == 'de' %}Zusatzstoffe{% else %}Additives{% endif %}:
                                 {% if dish.additives %}
                                     {% set found_additives = [] %}
                                     {% for additive in dish.additives.split(',') %}
                                         {% set additive_code = additive.strip() %}
-                                        {% if additive_code in additives_dict and additives_dict[additive_code] %}
-                                            {% set _ = found_additives.append(additives_dict[additive_code]) %}
+                                        {% if additive_code in additives_dict %}
+                                            {% if session.get('language') == 'de' %}
+                                                {% set _ = found_additives.append(additives_dict[additive_code]) %}
+                                            {% else %}
+                                                {% set _ = found_additives.append(additives_dict_eng[additive_code]) %}
+                                            {% endif %}
                                         {% endif %}
                                     {% endfor %}
                                     {% if found_additives %}
@@ -207,7 +335,7 @@
                                     /
                                 {% endif %}
                             </p>
-                        </div>
+                        </div> 
                         <!-- Descriptions -->
                         <!-- Recipes -->
                         <!-- Ratings -->
@@ -224,8 +352,20 @@
                                 <input type="radio" id="star1_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="1" />
                                 <label for="star1_{{ dish.menuLine }}">&#9733;</label>
                             </div>
-                            <button class="submit-rating mt-2" data-menu-line="{{ dish.menuLine }}" data-id="{{ dish.id }}">Submit Rating</button>
-                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">Rating received!</p>
+                            <button class="submit-rating mt-2" data-menu-line="{{ dish.menuLine }}" data-id="{{ dish.id }}">
+                                {% if session.get('language') == 'de' %}
+                                    Bewertung senden
+                                {% else %}
+                                    Submit Rating
+                                {% endif %}
+                            </button>
+                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                                {% if session.get('language') == 'de' %}
+                                    Bewertung erhalten!
+                                {% else %}
+                                    Rating received!
+                                {% endif %}
+                            </p>
                         </div>
                     <!-- Images -->
                 </div>
