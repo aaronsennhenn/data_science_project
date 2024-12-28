@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import setup_database_connection, Dish, Base, User, write_to_rating, write_to_directory,write_to_user
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines
+from db.db_write import setup_database_connection, Dish, Base, User, Course, write_to_rating, write_to_user, write_to_course
+from db.db_read import get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -143,7 +143,7 @@ def menu():
         available_mensas = list(set([mensa for mensas in data.values() for mensa in mensas]))
 
         # set default values
-        mensa_name = request.args.get('selected_mensa', available_mensas[0])
+        mensa_name = request.args.get('selected_mensa', 'all')  # Changed default to 'all'
         date = available_dates[0]
         selected_diet_meat = 'omnivore'
         selected_price = "studentPrice"
@@ -172,9 +172,12 @@ def menu():
             if date_temp:
                 date = date_temp
 
-            print(date)
-        # Query dishes for respective mensa and date
-        dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
+        # Query dishes based on mensa selection
+        if mensa_name == 'all':
+            dishes = get_dishes_by_date(db_session, datetime.strptime(date, '%Y-%m-%d').date())
+        else:
+            dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
+
         menu_data = []
         for dish in dishes:
             menu_data.append({
@@ -186,36 +189,31 @@ def menu():
                 'additives': dish.additives,
                 'menuLine': translate_text_all_capitalized(dish.menuLine),
                 'meats': dish.meats,
-                'icons': dish.icons
+                'icons': dish.icons,
+                'location': dish.location,
+                'course_eng': get_course_eng(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location)
+
             })
         
-        # Determine the lowest price among dishes
-        #    lowest_price_dish = min(menu_data, key=lambda x: x['studentPrice'] if x['studentPrice'] != -1 else float('inf'), default=None)
-        #    lowest_price_id = lowest_price_dish['id'] if lowest_price_dish else None
-
-        # Filter dishes based on selected diet or meat
-        if selected_diet_meat and 'omnivore' not in selected_diet_meat:
-            menu_data = [dish for dish in menu_data if any(icon in dish['icons'] for icon in selected_diet_meat)]
-
-        # Determine unique menu lines and their types
-            unique_menu_lines = get_unique_menu_lines(db_session, date, mensa_name)
-            main_dishes_keywords = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan',  'Auswahlgericht', 'Auswahlgericht vegan 2', 'Auswahlgericht 2', 'Auswahlgericht veget.', 'Auswahlgericht vegan', 'mensaVital vegetarisch']
-            side_dishes_keywords = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Beilagen SB']
-            dessert_keywords = [ 'Dessert SB', 'Dessert vorport.']
-
-            headlines = []
-            for line in unique_menu_lines:
-                if any(keyword in line for keyword in main_dishes_keywords):
-                    headlines.append("Main Dishes")
-                elif any(keyword in line for keyword in side_dishes_keywords):
-                    headlines.append("Side Dishes")
-                elif any(keyword in line for keyword in dessert_keywords):
-                    headlines.append("Desserts")
-            
-            headlines_set = set(headlines)  # Remove duplicates
+        # Group dishes by course_eng
+        grouped_menu_data = {}
+        for dish in menu_data:
+            course = dish['course_eng']
+            if course not in grouped_menu_data:
+                grouped_menu_data[course] = []
+            grouped_menu_data[course].append(dish)
         
-        # If no dishes found, set no_results flag
-        if not menu_data:
+        # Then filter the grouped dishes based on selected diet or meat
+        if selected_diet_meat and 'omnivore' not in selected_diet_meat:
+            filtered_grouped_data = {}
+            for course, dishes in grouped_menu_data.items():
+                filtered_dishes = [dish for dish in dishes if any(icon in dish['icons'] for icon in selected_diet_meat)]
+                if filtered_dishes:  # Only include courses that have dishes after filtering
+                    filtered_grouped_data[course] = filtered_dishes
+            grouped_menu_data = filtered_grouped_data
+
+        # Check for no results after filtering
+        if not grouped_menu_data:
             no_results = True
 
         # encode selected weekday to display
@@ -224,7 +222,7 @@ def menu():
     return render_template('menu.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,
-                         dishes=menu_data,
+                         dishes=grouped_menu_data,
                          selected_mensa=mensa_name,
                          selected_date=date,
                          selected_weekday=selected_weekday,
@@ -233,8 +231,7 @@ def menu():
                          additives_dict=additives_dict,
                          allergens_dict=allergens_dict,
                          username=user_name,
-                         no_results = no_results,
-                         headlines=headlines_set)
+                         no_results=no_results)
 
 
 @app.route('/analysis')
@@ -433,5 +430,6 @@ def check_image(filename):
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)
-#        write_to_directory(engine, Session) This will add data to the directory
+        #write_to_course(engine, Session)
+        #write_to_directory(engine, Session) 
     app.run()

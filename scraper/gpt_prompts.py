@@ -4,18 +4,25 @@ import nltk
 import re
 from nltk.corpus import stopwords
 import json
+from secret import OPENAI_KEY
 
-OPENAI_KEY = "***REMOVED_OPENAI_KEY***"
+
+def initialize_openai_client(api_key):
+    os.environ["OPENAI_API_KEY"] = api_key
+    client = OpenAI()
+    return client
+
+#Setup client
 os.environ["OPENAI_API_KEY"] = OPENAI_KEY
 client = OpenAI()
 
 
-#Define stop words
-nltk.download('stopwords')
-stop_words = set(stopwords.words('german'))
-
 #Function to clean text
 def preprocess_text(text):
+
+    nltk.download('stopwords')
+    stop_words = set(stopwords.words('german'))
+    
     text = re.sub(r"\[.*?\]", "", text).strip() # remove special characters
     text = text.lower()  # Convert to lowercase
     text = re.sub(r"[^a-zäöüß\s]", "", text)
@@ -132,6 +139,8 @@ def embedding_extraction(df,column):
         
     return df
 
+
+#Descriptions
 def generate_description(df, column):
     description_en_list = []
     description_de_list = []
@@ -332,7 +341,7 @@ def generate_recipe(df, column):
 
 
 ## Run all prompts
-def run_all_prompts(df, column):
+def all_prompts(df, column):
     
     df = ingredient_extraction(df, column)
     df = embedding_extraction(df, column)

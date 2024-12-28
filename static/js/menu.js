@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const submitRatingButtons = document.querySelectorAll('.submit-rating');
+    const mensaDropdown = document.getElementById('mensa-dropdown');
 
     submitRatingButtons.forEach(button => {
         button.addEventListener('click', function () {
@@ -28,6 +29,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 body: formData,
             })
         });
+    });
+
+    // Handle mensa selection
+    mensaDropdown.addEventListener('change', function() {
+        const form = document.getElementById('filter-form');
+        if (this.value === 'all') {
+            // Submit form to refresh with all mensa results
+            form.submit();
+        }
     });
 
     // Handle omnivore checkbox

@@ -7,6 +7,7 @@ import sys
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
+from db.utils import translate_text_first_word_capitalized
 
 Base = declarative_base()
 
@@ -39,8 +40,10 @@ class Directory(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     additives = Column(String, nullable=True)
     additives_written = Column(String, nullable=True)
+    additives_written_eng = Column(String, nullable=True)
     allergens = Column(String, nullable=True)
-    allergens_written = Column(String, nullable=True)   
+    allergens_written = Column(String, nullable=True)
+    allergens_written_eng = Column(String, nullable=True)
     
 class Ingredient(Base):
     __tablename__ = 'ingredients'
@@ -88,7 +91,18 @@ class User(Base):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-                                   
+
+class Course(Base):
+    __tablename__ = 'course'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)  # Add this line
+    menuDate = Column(Date, nullable=True)
+    menuLine = Column(String, nullable=True)
+    menu = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    course = Column(String, nullable=True)
+    course_eng = Column(String, nullable=True)
+
 def setup_database_connection(user, password, host, port):
     try:
         connection_string = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/postgres"
@@ -142,6 +156,9 @@ def write_to_db(filtered_df: pd.DataFrame, engine, Session):
                 print(f"Error converting values for row: {row}")
                 print(f"Error message: {str(e)}")
                 continue
+
+        write_to_course(engine, Session)
+        
         db_session.commit()
 
 # This table contains the user ratings, the menu_id of the rated meal, a timestamp, and the user_id if he is logged in
@@ -164,101 +181,88 @@ def write_to_user(username: str, password: str, engine, Session):
         db_session.commit()
 
 
-def write_to_ingredient(dishes_df: pd.DataFrame, engine, Session):
+def write_to_ingredient(dishes_df: pd.DataFrame, engine, session):
     Ingredient.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                ingredients = Ingredient(
-                    menu_id=row.get('id'),
-                    ingredients_de=row.get('ingredients_de'),
-                    ingredients_en=row.get('ingredients_en')
-                    )
-                db_session.add(ingredients)
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
+    for _, row in dishes_df.iterrows():
+        try:
+            ingredients = Ingredient(
+                menu_id=row.get('id'),
+                ingredients_de=row.get('ingredients_de'),
+                ingredients_en=row.get('ingredients_en')
+            )
+            session.add(ingredients)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
 
-        
-def write_to_description(dishes_df: pd.DataFrame, engine, Session):
+
+def write_to_description(dishes_df: pd.DataFrame, engine, session):
     Description.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                description = Description(
-                    menu_id = row.get('id'),
-                    description_de = row.get('description_de'),
-                    description_en = row.get('description_en')
-                    )
-                db_session.add(description)                
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
+    for _, row in dishes_df.iterrows():
+        try:
+            description = Description(
+                menu_id=row.get('id'),
+                description_de=row.get('description_de'),
+                description_en=row.get('description_en')
+            )
+            session.add(description)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
 
 
-def write_to_embedding(dishes_df: pd.DataFrame, engine, Session):
+def write_to_embedding(dishes_df: pd.DataFrame, engine, session):
     Embedding.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                embedding = Embedding(
-                    menu_id=row.get('id'),
-                    embedding =row.get('gpt_embedding'),
-                )
-                db_session.add(embedding)
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
-        
+    for _, row in dishes_df.iterrows():
+        try:
+            embedding = Embedding(
+                menu_id=row.get('id'),
+                embedding=row.get('gpt_embedding'),
+            )
+            session.add(embedding)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
 
-def write_to_recipe(dishes_df: pd.DataFrame, engine, Session):
+
+def write_to_recipe(dishes_df: pd.DataFrame, engine, session):
     Recipe.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                recipe = Recipe(
-                    menu_id=row.get('id'),
-                    recipe_de=row.get('recipe_de'),
-                    recipe_en=row.get('recipe_en')
-                )
-                db_session.add(recipe)
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
-        
+    for _, row in dishes_df.iterrows():
+        try:
+            recipe = Recipe(
+                menu_id=row.get('id'),
+                recipe_de=row.get('recipe_de'),
+                recipe_en=row.get('recipe_en')
+            )
+            session.add(recipe)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
 
-def write_to_taste(dishes_df: pd.DataFrame, engine, Session):
+
+def write_to_taste(dishes_df: pd.DataFrame, engine, session):
     Taste.metadata.create_all(engine)
 
-    with Session() as db_session:
-        for _, row in dishes_df.iterrows():
-            try:
-                taste = Taste(
-                    menu_id=row.get('id'),
-                    taste_de=row.get('taste_de'),
-                    taste_en=row.get('taste_en')
-                )
-                db_session.add(taste)
-            except ValueError as e:
-                print(f"Error converting values for row: {row.to_dict()}")
-                print(f"Error message: {str(e)}")
-                continue
-        db_session.commit()
-        
-        
-
+    for _, row in dishes_df.iterrows():
+        try:
+            taste = Taste(
+                menu_id=row.get('id'),
+                taste_de=row.get('taste_de'),
+                taste_en=row.get('taste_en')
+            )
+            session.add(taste)
+        except ValueError as e:
+            print(f"Error converting values for row: {row.to_dict()}")
+            print(f"Error message: {str(e)}")
+            continue
 
 # create a new table called directory, that includes the abbreviations saved in additives and allergens and their corresponding written out form
 def write_to_directory(engine, Session):
@@ -285,7 +289,6 @@ def write_to_directory(engine, Session):
     }
     
     with Session() as db_session:
-        # Get unique additives and allergens from dishes table
         unique_additives = db_session.query(Dish.additives).distinct().all()
         unique_allergens = db_session.query(Dish.allergens).distinct().all()
         
@@ -296,9 +299,12 @@ def write_to_directory(engine, Session):
                 for code in codes:
                     existing = db_session.query(Directory).filter_by(additives=code).first()
                     if not existing:
+                        german_text = additives_map.get(code, None)
+                        english_text = translate_text_first_word_capitalized(german_text) if german_text else None
                         directory_entry = Directory(
                             additives=code,
-                            additives_written=additives_map.get(code, None)
+                            additives_written=german_text,
+                            additives_written_eng=english_text
                         )
                         db_session.add(directory_entry)
         
@@ -309,10 +315,63 @@ def write_to_directory(engine, Session):
                 for code in codes:
                     existing = db_session.query(Directory).filter_by(allergens=code).first()
                     if not existing:
+                        german_text = allergens_map.get(code, None)
+                        english_text = translate_text_first_word_capitalized(german_text) if german_text else None
                         directory_entry = Directory(
                             allergens=code,
-                            allergens_written=allergens_map.get(code, None)
+                            allergens_written=german_text,
+                            allergens_written_eng=english_text
                         )
                         db_session.add(directory_entry)
                 
+        db_session.commit()
+
+
+def write_to_course(engine, Session):
+    Course.metadata.create_all(engine)
+    
+    with Session() as db_session:
+        dishes = db_session.query(Dish).all()
+        
+        for dish in dishes:
+            existing = db_session.query(Course).filter(
+                Course.menuDate == dish.menuDate,
+                Course.menuLine == dish.menuLine,
+                Course.menu == dish.menu,
+                Course.location == dish.location
+            ).first()
+            
+            if not existing:
+                main_dishes = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan', 
+                             'Auswahlgericht', 'Auswahlgericht vegan 2', 'Auswahlgericht 2',
+                             'Auswahlgericht veget.', 'Auswahlgericht vegan', 'mensaVital vegetarisch']
+                
+                side_dishes = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Beilagen SB']
+                
+                desserts = ['Dessert SB', 'Dessert vorport.']
+                
+                course = None
+                course_eng = None
+                
+                if dish.menuLine in main_dishes:
+                    course = "Hauptspeise"
+                    course_eng = "Main Dish"
+                elif dish.menuLine in side_dishes:
+                    course = "Beilage"
+                    course_eng = "Side Dish"
+                elif dish.menuLine in desserts:
+                    course = "Nachspeise"
+                    course_eng = "Dessert"
+                
+                if course and course_eng:
+                    new_course = Course(
+                        menuDate=dish.menuDate,
+                        menuLine=dish.menuLine,
+                        menu=dish.menu,
+                        location=dish.location,
+                        course=course,
+                        course_eng=course_eng
+                    )
+                    db_session.add(new_course)
+        
         db_session.commit()
