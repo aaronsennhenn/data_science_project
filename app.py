@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
+from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
 from db.db_read import get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
@@ -190,11 +190,15 @@ def menu():
 
             # get rating from user and selected dish with mensa
             rating, menu_id = request.form.get('rating'), request.form.get('id')
-            print(rating, menu_id)
 
             # write rating and id to database. If user is not logged in, still safe the rating but with NA username
             if rating:
+                # write rating to database
                 write_to_rating(menu_id, rating, user_name, engine, Session)
+
+                # update user vector based on new rating if rating is submitted and user is logged in 
+                if user_name:
+                    update_user_vector(user_name, engine, Session)
 
             # only udate the date variable, if a date is selected
             if date_temp:
