@@ -1,7 +1,25 @@
 document.addEventListener('DOMContentLoaded', function () {
     const submitRatingButtons = document.querySelectorAll('.submit-rating');
     const mensaDropdown = document.getElementById('mensa-dropdown');
+    const expandButtons = document.querySelectorAll('.expand-button');
 
+    expandButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const content = this.previousElementSibling;
+            const isExpanded = content.classList.contains('expanded');
+            
+            if (isExpanded) {
+                content.style.height = '8rem';
+                content.classList.remove('expanded');
+                this.textContent = this.getAttribute('data-expand-text');
+            } else {
+                content.style.height = content.scrollHeight + 'px';
+                content.classList.add('expanded');
+                this.textContent = this.getAttribute('data-collapse-text');
+            }
+        });
+    });
+    
     submitRatingButtons.forEach(button => {
         button.addEventListener('click', function () {
             const menuLine = this.getAttribute('data-menu-line');
