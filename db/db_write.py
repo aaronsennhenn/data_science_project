@@ -35,7 +35,6 @@ class DishEng(Base):
     menuLineEng = Column(String, nullable=True)
     menuEng = Column(String, nullable=True)
     locationEng = Column(String, nullable=True)
-    meatsEng = Column(String, nullable=True)
 
 class Rating(Base):
     __tablename__ = 'rating'
@@ -54,6 +53,9 @@ class Directory(Base):
     allergens = Column(String, nullable=True)
     allergens_written = Column(String, nullable=True)
     allergens_written_eng = Column(String, nullable=True)
+    meats = Column(String, nullable=True)
+    meats_written = Column(String, nullable=True)
+    meats_written_eng = Column(String, nullable=True)
     
 class Ingredient(Base):
     __tablename__ = 'ingredients'
@@ -190,8 +192,7 @@ def write_to_dishes_eng(engine, Session):
                     menuDate=dish.menuDate,
                     menuLineEng=translate_text_all_capitalized(dish.menuLine),
                     menuEng=translate_text_first_word_capitalized(dish.menu),
-                    locationEng=translate_text_all_capitalized(dish.location),
-                    meatsEng= dish.meats
+                    locationEng=translate_text_all_capitalized(dish.location)
                 )
                 db_session.add(dish_eng)
         
@@ -324,11 +325,26 @@ def write_to_directory(engine, Session):
         'So': 'Soja',
         'Nu-a': 'Mandeln'
     }
+
+    meats_map = {
+        'R': 'Rind',
+        'S': 'Schwein',
+        'G': 'Geflügel',
+        'F': 'Fisch',
+        'W': 'Wild',
+        'L': 'Lamm',
+        'K': 'Kalb',
+        'V': 'Vegetarisch',
+        'vegan': 'Vegan', 
+        'top': 'Empfehlung',
+        'vital': 'Vital'
+    }
     
     with Session() as db_session:
         unique_additives = db_session.query(Dish.additives).distinct().all()
         unique_allergens = db_session.query(Dish.allergens).distinct().all()
-        
+        unique_meats = db_session.query(Dish.meats).distinct().all()
+
         # Process additives
         for additive in unique_additives:
             if additive[0]:
@@ -358,6 +374,22 @@ def write_to_directory(engine, Session):
                             allergens=code,
                             allergens_written=german_text,
                             allergens_written_eng=english_text
+                        )
+                        db_session.add(directory_entry)
+
+        # Process meats
+        for meat in unique_meats:
+            if meat[0]:
+                codes = [code.strip() for code in meat[0].split(',')]
+                for code in codes:
+                    existing = db_session.query(Directory).filter_by(meats=code).first()
+                    if not existing:
+                        german_text = meats_map.get(code, None)
+                        english_text = translate_text_first_word_capitalized(german_text) if german_text else None
+                        directory_entry = Directory(
+                            meats=code,
+                            meats_written=german_text,
+                            meats_written_eng=english_text
                         )
                         db_session.add(directory_entry)
                 

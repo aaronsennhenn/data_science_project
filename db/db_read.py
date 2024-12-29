@@ -223,6 +223,8 @@ def get_written_forms(session):
     additives_dict_eng = {}
     allergens_dict = {}
     allergens_dict_eng = {}
+    meats_dict = {}
+    meats_dict_eng = {}
     
     directory_entries = session.query(Directory).all()
     
@@ -233,8 +235,11 @@ def get_written_forms(session):
         if entry.allergens:
             allergens_dict[entry.allergens] = entry.allergens_written
             allergens_dict_eng[entry.allergens] = entry.allergens_written_eng
+        if entry.meats:
+                meats_dict[entry.meats] = entry.meats_written
+                meats_dict_eng[entry.meats] = entry.meats_written_eng
             
-    return additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng
+    return additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng
 
 
 def get_user_name(db_session, username):
