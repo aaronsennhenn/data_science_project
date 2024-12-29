@@ -342,20 +342,26 @@
                                 <h4 class="text-lg font-semibold mb-2">
                                     {% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}
                                 </h4>
+                                <div class="description-content h-32 overflow-hidden">
                                 <div class="text-gray-800 font-medium mb-2 text-left text-base">
                                     {% if session.get('language') == 'de' %}
                                         {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
                                     {% else %}
                                         {{ dish.description_en if dish.description_en else 'No description available' }}
                                     {% endif %}
-                                </div>   
+                                </div>  
+                            </div>
+                            <button class="expand-button mt-2 text-sm text-gray-500 hover:text-gray-700" data-expand-text="{% if session.get('language') == 'de' %}Mehr anzeigen{% else %}Show more{% endif %}" data-collapse-text="{% if session.get('language') == 'de' %}Weniger anzeigen{% else %}Show less{% endif %}">
+                                {% if session.get('language') == 'de' %}Mehr anzeigen{% else %}Show more{% endif %}
+                            </button>  
                         </div>
                         
                         <!-- Recipe -->
                         <div class="w-1/2">
-                                <h4 class="text-lg font-semibold mb-2">
+                            <h4 class="text-lg font-semibold mb-2">
                                     {% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}
-                                </h4>
+                            </h4>
+                            <div class="recipe-content h-32 overflow-hidden">
                                 {% if session.get('language') == 'de' and dish.recipe_de %}
                                     {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
                                     {% if recipe_parts|length > 1 %}
@@ -424,18 +430,22 @@
                                     <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
                                 {% endif %}
                             </div>
-                        </div>                        
-                        <!-- Ratings -->
-                        <div class="col-span-1">
+                            <button class="expand-button mt-2 text-sm text-gray-500 hover:text-gray-700" data-expand-text="{% if session.get('language') == 'de' %}Mehr anzeigen{% else %}Show more{% endif %}" data-collapse-text="{% if session.get('language') == 'de' %}Weniger anzeigen{% else %}Show less{% endif %}">
+                                {% if session.get('language') == 'de' %}Mehr anzeigen{% else %}Show more{% endif %}
+                            </button> 
+                        </div>
+                        </div>              
+                        <div class="col-span-1 flex flex-col items-end">
                             <!-- Images -->
-                            <div class="mb-4">
-                                <img src="{{ url_for('static', filename='images/menu_1.png') }}" alt="Coffee Shop" class="w-full h-auto rounded-lg shadow-md">
-                            </div>
+                            <div class="mb-4 max-w-xs mx-auto">
+                                <img src="{{ url_for('static', filename='images/menu_1.png') }}" alt="Coffee Shop" class="w-full h-auto rounded-lg shadow-md object-cover">
+                            </div> 
+                            <!-- Ratings -->
                             <div class="rating mt-4 text-4xl">
                                 <input type="radio" id="star5_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="5" />
                                 <label for="star5_{{ dish.menuLine }}">&#9733;</label>
                                 <input type="radio" id="star4_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="4" />
-                                <label for="star4_{{ dish.menuLine }}" >&#9733;</label>
+                                <label for="star4_{{ dish.menuLine }}">&#9733;</label>
                                 <input type="radio" id="star3_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="3" />
                                 <label for="star3_{{ dish.menuLine }}">&#9733;</label>
                                 <input type="radio" id="star2_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="2" />
@@ -457,7 +467,7 @@
                                     Rating received!
                                 {% endif %}
                             </p>
-                        </div>
+                        </div>                                                
                     </div>           
                         <!-- Allergens -->
                         <p class="text-sm text-gray-500">
