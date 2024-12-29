@@ -7,6 +7,8 @@ import sys
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
+from db.utils import translate_text_first_word_capitalized, translate_text_all_capitalized
+import numpy as np
 
 Base = declarative_base()
 
@@ -26,6 +28,15 @@ class Dish(Base):
     allergens = Column(String, nullable=True)
     additives = Column(String, nullable=True)
 
+class DishEng(Base):
+    __tablename__ = 'dishes_eng'
+
+    id = Column(Integer, primary_key=True)
+    menuDate = Column(Date, nullable=True)
+    menuLineEng = Column(String, nullable=True)
+    menuEng = Column(String, nullable=True)
+    locationEng = Column(String, nullable=True)
+
 class Rating(Base):
     __tablename__ = 'rating'
     id = Column(Integer, primary_key=True)
@@ -39,8 +50,13 @@ class Directory(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     additives = Column(String, nullable=True)
     additives_written = Column(String, nullable=True)
+    additives_written_eng = Column(String, nullable=True)
     allergens = Column(String, nullable=True)
-    allergens_written = Column(String, nullable=True)   
+    allergens_written = Column(String, nullable=True)
+    allergens_written_eng = Column(String, nullable=True)
+    meats = Column(String, nullable=True)
+    meats_written = Column(String, nullable=True)
+    meats_written_eng = Column(String, nullable=True)
     
 class Ingredient(Base):
     __tablename__ = 'ingredients'
@@ -80,15 +96,30 @@ class User(Base):
     __tablename__ = 'users'
     
     id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    password_hash = Column(String(512), nullable=True)
+    username = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=True)
+    user_vector = Column(String, nullable=True)
+
+    def add_vector(self, vector):
+        self.user_vector = vector
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-                                   
+
+class Course(Base):
+    __tablename__ = 'course'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)  # Add this line
+    menuDate = Column(Date, nullable=True)
+    menuLine = Column(String, nullable=True)
+    menu = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    course = Column(String, nullable=True)
+    course_eng = Column(String, nullable=True)
+
 def setup_database_connection(user, password, host, port):
     try:
         connection_string = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/postgres"
@@ -142,7 +173,36 @@ def write_to_db(filtered_df: pd.DataFrame, engine, Session):
                 print(f"Error converting values for row: {row}")
                 print(f"Error message: {str(e)}")
                 continue
+
+        write_to_course(engine, Session)
+        
         db_session.commit()
+
+# Save translations of dishes in a separate table (api calls avoided)
+def write_to_dishes_eng(engine, Session):
+    DishEng.metadata.create_all(engine)
+    
+    with Session() as db_session:
+        dishes = db_session.query(Dish).all()
+        
+        for dish in dishes:
+            # Check if translation already exists
+            existing = db_session.query(DishEng).filter(
+                DishEng.menuDate == dish.menuDate,
+                DishEng.menuEng == translate_text_first_word_capitalized(dish.menu)
+            ).first()
+            
+            if not existing:
+                dish_eng = DishEng(
+                    menuDate=dish.menuDate,
+                    menuLineEng=translate_text_all_capitalized(dish.menuLine),
+                    menuEng=translate_text_first_word_capitalized(dish.menu),
+                    locationEng=translate_text_all_capitalized(dish.location)
+                )
+                db_session.add(dish_eng)
+        
+        db_session.commit()
+    
 
 # This table contains the user ratings, the menu_id of the rated meal, a timestamp, and the user_id if he is logged in
 def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):
@@ -160,6 +220,7 @@ def write_to_user(username: str, password: str, engine, Session):
     with Session() as db_session:
         user = User(username=username)
         user.set_password(password)
+        user.add_vector(vector = None)
         db_session.add(user)
         db_session.commit()
 
@@ -246,10 +307,6 @@ def write_to_taste(dishes_df: pd.DataFrame, engine, session):
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
             continue
-        
-        
-
-
 
 # create a new table called directory, that includes the abbreviations saved in additives and allergens and their corresponding written out form
 def write_to_directory(engine, Session):
@@ -274,12 +331,26 @@ def write_to_directory(engine, Session):
         'So': 'Soja',
         'Nu-a': 'Mandeln'
     }
+
+    meats_map = {
+        'R': 'Rind',
+        'S': 'Schwein',
+        'G': 'Geflügel',
+        'F': 'Fisch',
+        'W': 'Wild',
+        'L': 'Lamm',
+        'K': 'Kalb',
+        'V': 'Vegetarisch',
+        'vegan': 'Vegan', 
+        'top': 'Empfehlung',
+        'vital': 'Vital'
+    }
     
     with Session() as db_session:
-        # Get unique additives and allergens from dishes table
         unique_additives = db_session.query(Dish.additives).distinct().all()
         unique_allergens = db_session.query(Dish.allergens).distinct().all()
-        
+        unique_meats = db_session.query(Dish.meats).distinct().all()
+
         # Process additives
         for additive in unique_additives:
             if additive[0]:
@@ -287,9 +358,12 @@ def write_to_directory(engine, Session):
                 for code in codes:
                     existing = db_session.query(Directory).filter_by(additives=code).first()
                     if not existing:
+                        german_text = additives_map.get(code, None)
+                        english_text = translate_text_first_word_capitalized(german_text) if german_text else None
                         directory_entry = Directory(
                             additives=code,
-                            additives_written=additives_map.get(code, None)
+                            additives_written=german_text,
+                            additives_written_eng=english_text
                         )
                         db_session.add(directory_entry)
         
@@ -300,10 +374,145 @@ def write_to_directory(engine, Session):
                 for code in codes:
                     existing = db_session.query(Directory).filter_by(allergens=code).first()
                     if not existing:
+                        german_text = allergens_map.get(code, None)
+                        english_text = translate_text_first_word_capitalized(german_text) if german_text else None
                         directory_entry = Directory(
                             allergens=code,
-                            allergens_written=allergens_map.get(code, None)
+                            allergens_written=german_text,
+                            allergens_written_eng=english_text
+                        )
+                        db_session.add(directory_entry)
+
+        # Process meats
+        for meat in unique_meats:
+            if meat[0]:
+                codes = [code.strip() for code in meat[0].split(',')]
+                for code in codes:
+                    existing = db_session.query(Directory).filter_by(meats=code).first()
+                    if not existing:
+                        german_text = meats_map.get(code, None)
+                        english_text = translate_text_first_word_capitalized(german_text) if german_text else None
+                        directory_entry = Directory(
+                            meats=code,
+                            meats_written=german_text,
+                            meats_written_eng=english_text
                         )
                         db_session.add(directory_entry)
                 
+        db_session.commit()
+
+
+def write_to_course(engine, Session):
+    Course.metadata.create_all(engine)
+    
+    with Session() as db_session:
+        dishes = db_session.query(Dish).all()
+        
+        for dish in dishes:
+            existing = db_session.query(Course).filter(
+                Course.menuDate == dish.menuDate,
+                Course.menuLine == dish.menuLine,
+                Course.menu == dish.menu,
+                Course.location == dish.location
+            ).first()
+            
+            if not existing:
+                main_dishes = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan', 
+                             'Auswahlgericht', 'Auswahlgericht vegan 2', 'Auswahlgericht 2',
+                             'Auswahlgericht veget.', 'Auswahlgericht vegan', 'mensaVital vegetarisch']
+                
+                side_dishes = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Beilagen SB']
+                
+                desserts = ['Dessert SB', 'Dessert vorport.']
+                
+                course = None
+                course_eng = None
+                
+                if dish.menuLine in main_dishes:
+                    course = "Hauptspeise"
+                    course_eng = "Main Dish"
+                elif dish.menuLine in side_dishes:
+                    course = "Beilage"
+                    course_eng = "Side Dish"
+                elif dish.menuLine in desserts:
+                    course = "Nachspeise"
+                    course_eng = "Dessert"
+                
+                if course and course_eng:
+                    new_course = Course(
+                        menuDate=dish.menuDate,
+                        menuLine=dish.menuLine,
+                        menu=dish.menu,
+                        location=dish.location,
+                        course=course,
+                        course_eng=course_eng
+                    )
+                    db_session.add(new_course)
+        
+        db_session.commit()
+
+
+def update_user_vector(username, engine, Session):
+    """
+    Recomputes the user vector for a specific user based on their ratings and embeddings,
+    and updates the user vector in the database.
+
+    Args:
+        username (str): The username of the user whose vector needs to be updated.
+    """
+    with Session() as db_session:
+        # Join the ratings and embeddings tables, filtering by the provided username
+        query = db_session.query(
+            Rating,
+            Embedding.embedding
+        ).outerjoin(
+            Embedding,
+            Rating.menu_id == Embedding.id
+        ).filter(
+            Rating.user_name == username  # Filter by the specific username
+        )
+
+        # Execute the query and fetch all results
+        results = query.all()
+
+        # Convert results to a DataFrame
+        data = [
+            {
+                **rating.__dict__,
+                "embedding": embedding
+            }
+            for rating, embedding in results
+        ]
+
+        # Remove SQLAlchemy state information
+        for item in data:
+            item.pop('_sa_instance_state', None)
+
+        # Create DataFrame
+        rating_with_embedding = pd.DataFrame(data)
+
+        # Convert string embeddings to NumPy arrays
+        rating_with_embedding['embedding'] = rating_with_embedding['embedding'].apply(
+            lambda x: np.array(eval(x)) if isinstance(x, str) else np.array(x)
+        )
+
+        # Extract embeddings and ratings
+        embeddings = np.stack(rating_with_embedding['embedding'].values)  # Convert to 2D array
+        ratings = rating_with_embedding['rating'].values  # Extract ratings (1-5 scale)
+
+        # Compute weighted embeddings
+        weighted_embeddings = embeddings * ratings[:, np.newaxis]
+
+        # Compute the weighted average user vector
+        user_vector = np.sum(weighted_embeddings, axis=0) / np.sum(ratings)
+
+        # Query the user in the database
+        user = db_session.query(User).filter_by(username=username).first()
+
+        # Update the user vector if the user exists
+        if user:
+            user.add_vector(str(user_vector.tolist()))  # Update user vector
+            db_session.add(user)
+
+        # Commit the changes
         db_session.commit()

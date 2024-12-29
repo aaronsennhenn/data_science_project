@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import setup_database_connection, Dish, Base, User, write_to_rating, write_to_directory,write_to_user
-from db.db_read import get_user_by_username, get_dishes_by_date_location, get_all_dishes, get_image_path, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines
+from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
+from db.db_read import get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -38,21 +38,33 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope':'openid profile email'})
 
+@app.route('/set_language/<lang>')
+def set_language(lang):
+    session['language'] = lang
+    session.permanent = True
+    return redirect(request.referrer or url_for('index'))
+
 @app.route('/', methods=['GET'])
 def index():
+    lang = session.get('language', 'en')
+    session['language'] = lang
+    session.permanent = True
     mensa_coordinates = {
-    "Mensa Morgenstelle": {"top": 20, "left": 30},
-    "Mensa Wilhelmstraße": {"top": 50, "left": 70},
-    "Cafeteria und Mensa Prinz Karl": {"top": 35, "left": 50},}
+        "Mensa Morgenstelle": {"top": 20, "left": 30, "text_offset": 0},
+        "Cafeteria Morgenstelle": {"top": 20, "left": 30, "text_offset": 30},
+        "Mensa Wilhelmstraße": {"top": 50, "left": 70, "text_offset": 0},
+        "Cafeteria Wilhelmstraße": {"top": 50, "left": 70, "text_offset": 30},
+        "Cafeteria und Mensa Prinz Karl": {"top": 35, "left": 50, "text_offset": 0}
+    }
     return render_template('index.html', mensa_coordinates=mensa_coordinates)
+
 
 @app.route('/about')
 def about():
+   lang = session.get('language', 'en')
+   session['language'] = lang
+   session.permanent = True
    return render_template('about.html')
-
-@app.route('/review')
-def review():
-   return render_template('review.html')
                                    
 # check username and password that user puts into form with db
 @app.route('/login', methods=['GET', 'POST'])
@@ -93,6 +105,9 @@ def register():
 # login for google
 @app.route('/login/google')
 def login_google():
+    lang = session.get('language', 'en')
+    session['language'] = lang
+    session.permanent = True
     try:
         redirect_url = url_for('authorize_google',_external=True)
         return google.authorize_redirect(redirect_url)
@@ -103,6 +118,9 @@ def login_google():
 # authorization form for google
 @app.route("/authorize/google")
 def authorize_google():
+    lang = session.get('language', 'en')
+    session['language'] = lang
+    session.permanent = True
     token = google.authorize_access_token()
     userinfo_endpoint = google.server_metadata['userinfo_endpoint']
     resp = google.get(userinfo_endpoint)
@@ -125,15 +143,25 @@ def authorize_google():
 
 @app.route("/logout")
 def logout():
+    lang = session.get('language', 'en')
+    session['language'] = lang
+    session.permanent = True
     session.pop('username', None)
     return redirect(url_for('menu'))
 
 @app.route('/menu', methods=['GET','POST'])
 def menu():
+    lang = session.get('language', 'en')
+    session['language'] = lang
+    session.permanent = True
     with Session() as db_session:
         # Get additives and allergens 
-        additives_dict, allergens_dict = get_written_forms(db_session)
+        additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng  = get_written_forms(db_session)
         
+        # Get descriptions and recipes
+        descriptions = get_descriptions(db_session)
+        recipes = get_recipes(db_session)
+
         # query available data for the next five days
         data = get_next_five_days_data(db_session)
 
@@ -143,7 +171,7 @@ def menu():
         available_mensas = list(set([mensa for mensas in data.values() for mensa in mensas]))
 
         # set default values
-        mensa_name = request.args.get('selected_mensa', available_mensas[0])
+        mensa_name = request.args.get('selected_mensa', 'all')  # Changed default to 'all'
         date = available_dates[0]
         selected_diet_meat = 'omnivore'
         selected_price = "studentPrice"
@@ -156,60 +184,82 @@ def menu():
         # When user filters, get filtered values
         if request.method == 'POST':
             mensa_name = request.form.get('selected_mensa')
-            date = request.form.get('selected_date')
+            date_temp = request.form.get('selected_date')
             selected_diet_meat = request.form.get('selected_diet_meat')
             selected_price = request.form.get('selected_price')
 
             # get rating from user and selected dish with mensa
             rating, menu_id = request.form.get('rating'), request.form.get('id')
 
-            # write rating and id to database
-            if rating and user_name:
+            # write rating and id to database. If user is not logged in, still safe the rating but with NA username
+            if rating:
+                # write rating to database
                 write_to_rating(menu_id, rating, user_name, engine, Session)
 
-        # Query dishes for respective mensa and date
-        dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
+                # update user vector based on new rating if rating is submitted and user is logged in 
+                if user_name:
+                    update_user_vector(user_name, engine, Session)
+
+            # only udate the date variable, if a date is selected
+            if date_temp:
+                date = date_temp
+
+        # Query dishes based on mensa selection
+        if mensa_name == 'all':
+            dishes = get_dishes_by_date(db_session, datetime.strptime(date, '%Y-%m-%d').date())
+        else:
+            dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
+
+        # In the menu() route, modify the menu_data creation:
         menu_data = []
         for dish in dishes:
+            # Get the English translations from dishes_eng table
+            dish_eng = db_session.query(DishEng).filter(
+                DishEng.menuDate == dish.menuDate,
+                DishEng.menuEng == translate_text_first_word_capitalized(dish.menu)
+            ).first()
+
             menu_data.append({
-                'id': dish.id,
-                'menu': translate_text_first_word_capitalized(dish.menu),
-                'studentPrice': dish.studentPrice,
-                'guestPrice': dish.guestPrice,
-                'allergens': dish.allergens,
-                'additives': dish.additives,
-                'menuLine': translate_text_all_capitalized(dish.menuLine),
-                'meats': dish.meats,
-                'icons': dish.icons
-            })
-        
-        # Determine the lowest price among dishes
-        #    lowest_price_dish = min(menu_data, key=lambda x: x['studentPrice'] if x['studentPrice'] != -1 else float('inf'), default=None)
-        #    lowest_price_id = lowest_price_dish['id'] if lowest_price_dish else None
+            'id': dish.id,
+            'menu': dish.menu,
+            'menuEng': dish_eng.menuEng if dish_eng else translate_text_first_word_capitalized(dish.menu),
+            'menuLine': dish.menuLine,
+            'menuLineEng': dish_eng.menuLineEng if dish_eng else translate_text_first_word_capitalized(dish.menuLine),
+            'studentPrice': dish.studentPrice,
+            'guestPrice': dish.guestPrice,
+            'allergens': dish.allergens,
+            'additives': dish.additives,
+            'meats': dish.meats,
+            'icons': dish.icons,
+            'location': dish.location,
+            'locationEng': dish_eng.locationEng if dish_eng else translate_text_first_word_capitalized(dish.location),
+            'course': get_course(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location),
+            'course_eng': get_course_eng(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location),
+            'description_de': descriptions.get(dish.id, {}).get('description_de', ''),
+            'description_en': descriptions.get(dish.id, {}).get('description_en', ''),
+            'recipe_de': recipes.get(dish.id, {}).get('recipe_de', ''),
+            'recipe_en': recipes.get(dish.id, {}).get('recipe_en', '')
+        })
 
-        # Filter dishes based on selected diet or meat
+        # Group dishes by course_eng
+        grouped_menu_data = {}
+        for dish in menu_data:
+            course_key = dish['course'] if lang == 'de' else dish['course_eng']
+            if course_key not in grouped_menu_data:
+                grouped_menu_data[course_key] = []
+            grouped_menu_data[course_key].append(dish)
+        
+        # Then filter the grouped dishes based on selected diet or meat
         if selected_diet_meat and 'omnivore' not in selected_diet_meat:
-            menu_data = [dish for dish in menu_data if any(icon in dish['icons'] for icon in selected_diet_meat)]
+            filtered_grouped_data = {}
+            for course, dishes in grouped_menu_data.items():
+                filtered_dishes = [dish for dish in dishes if any(icon in dish['icons'] for icon in selected_diet_meat)]
+                if filtered_dishes:  # Only include courses that have dishes after filtering
+                    filtered_grouped_data[course] = filtered_dishes
+            grouped_menu_data = filtered_grouped_data
 
-        # Determine unique menu lines and their types
-            unique_menu_lines = get_unique_menu_lines(db_session, date, mensa_name)
-            main_dishes_keywords = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan',  'Auswahlgericht', 'Auswahlgericht vegan 2', 'Auswahlgericht 2', 'Auswahlgericht veget.', 'Auswahlgericht vegan', 'mensaVital vegetarisch']
-            side_dishes_keywords = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Beilagen SB']
-            dessert_keywords = [ 'Dessert SB', 'Dessert vorport.']
-
-            headlines = []
-            for line in unique_menu_lines:
-                if any(keyword in line for keyword in main_dishes_keywords):
-                    headlines.append("Main Dishes")
-                elif any(keyword in line for keyword in side_dishes_keywords):
-                    headlines.append("Side Dishes")
-                elif any(keyword in line for keyword in dessert_keywords):
-                    headlines.append("Desserts")
-            
-            headlines_set = set(headlines)  # Remove duplicates
-        
-        # If no dishes found, set no_results flag
-        if not menu_data:
+        # Check for no results after filtering
+        if not grouped_menu_data:
             no_results = True
 
         # encode selected weekday to display
@@ -218,21 +268,30 @@ def menu():
     return render_template('menu.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,
-                         dishes=menu_data,
+                         dishes=grouped_menu_data,
                          selected_mensa=mensa_name,
                          selected_date=date,
                          selected_weekday=selected_weekday,
                          selected_price=selected_price,
                          selected_diet_meat=selected_diet_meat,
                          additives_dict=additives_dict,
+                         additives_dict_eng=additives_dict_eng,
                          allergens_dict=allergens_dict,
+                         allergens_dict_eng=allergens_dict_eng,
+                         meats_dict=meats_dict,
+                         meats_dict_eng=meats_dict_eng,
+                         descriptions=descriptions,
+                         recipes=recipes,
                          username=user_name,
-                         no_results = no_results,
-                         headlines=headlines_set)
+                         lang=lang,
+                         no_results=no_results)
 
 
 @app.route('/analysis')
 def analysis():
+    lang = session.get('language', 'en')
+    session['language'] = lang
+    session.permanent = True
     with Session() as db_session:
         total_mensas = get_total_mensas(db_session)
         total_ratings = get_total_ratings(db_session)
@@ -427,5 +486,7 @@ def check_image(filename):
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)
-#        write_to_directory(engine, Session) This will add data to the directory
+        #write_to_course(engine, Session)  #not needed to be rerunned
+        #write_to_directory(engine, Session) #need to be rerunned if more data in dishes is available
+        #write_to_dishes_eng(engine, Session)  #need to be rerunned if more data in dishes is available
     app.run()

@@ -16,8 +16,22 @@
     <!-- Navigation Bar -->
     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
         <nav>
-            <div class="nav-container">
+            <div class="nav-container flex justify-between items-center">
                 <div class="text-2xl font-bold text-indigo-600">MENSA APP.</div>
+                
+                <!-- Language Buttons - Centered -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
+                    <a href="{{ url_for('set_language', lang='en') }}" 
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        EN
+                    </a>
+                    <a href="{{ url_for('set_language', lang='de') }}"
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        DE
+                    </a>
+                </div>
+
+                <!-- Menu Toggle -->
                 <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -36,30 +50,52 @@
                 </svg>
             </button>
             <nav class="mt-8">
-                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Home</a>
-                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Menu</a>
-                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Analysis</a>
-                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">About</a>
-                <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a>                
+                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
+                </a>
+                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
+                </a>
+                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
+                </a>
+                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Über uns{% else %}About{% endif %}
+                </a>
+                <a href="/login" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">Login</a>
             </nav>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
-        <div class="content-wrapper max-w-4xl w-full p-8 bg-white rounded-xl shadow-sm border border-gray-100">
-            <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
+ <!-- Main Content -->
+<div class="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
+    <div class="content-wrapper max-w-4xl w-full p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
+            {% if session.get('language') == 'de' %}
+                Ihr digitaler Mensa-Guide
+            {% else %}
                 Your Digital Mensa Guide
-            </h1>
-            <p class="text-xl text-gray-600 mb-12 text-center leading-relaxed">
-                Discover the diverse culinary offerings across Tübingen's cafeterias and mensas. 
+            {% endif %}
+        </h1>
+        <p class="text-xl text-gray-600 mb-12 text-center leading-relaxed">
+            {% if session.get('language') == 'de' %}
+                Entdecken Sie die vielfältigen kulinarischen Angebote in den Cafeterien und Mensen Tübingens.
+                Erkunden Sie die Mensa-Szene Tübingens und gewinnen Sie Einblicke in Menümuster, Preise und aktuelle Trends.
+            {% else %}
+                Discover the diverse culinary offerings across Tübingen's cafeterias and mensas.
                 Explore Tübingen's mensa scene, uncovering menu patterns, pricing insights, and emerging trends.
-            </p>
-            <!-- Choose a Dining Facility Section with Image Map -->
-            <div class="mt-12 relative">
-                <h2 class="text-3xl font-semibold text-gray-800 mb-6 text-center">
-                   Locations
-                </h2>
+            {% endif %}
+        </p>        
+        
+        <!-- Locations Section -->
+        <div class="mt-12 relative">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6 text-center">
+                {% if session.get('language') == 'de' %}
+                    Standorte
+                {% else %}
+                    Locations
+                {% endif %}
+            </h2>
                 <!-- Container for the image -->
                 <div class="relative max-w-4xl mx-auto">
                     <!-- The map image -->
@@ -79,7 +115,7 @@
                             <!-- Mensa Name -->
                             <span 
                                 class="absolute text-sm bg-white text-gray-800 px-2 py-1 rounded shadow-lg mensa-label"
-                                style="top: 10%; left: 120%; white-space: nowrap;">
+                                style="top: {{ coordinates.text_offset }}px; left: 120%; white-space: nowrap;">
                                 {{ mensa_name }}
                             </span>
                         </a>

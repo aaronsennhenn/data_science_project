@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe
 from typing import List
 from sqlalchemy import func
 import datetime
@@ -21,12 +21,33 @@ def get_dishes_by_date_location(session: Session, date, location) -> List[Dish]:
 def get_all_dishes(session: Session) -> List[Dish]:
     return session.query(Dish).all()
 
+def get_dishes_by_date(session: Session, date) -> List[Dish]:
+    return session.query(Dish).filter(Dish.menuDate == date).all()
+
 def get_image_path(dish_id: int, session: Session) -> str:
     dish = session.query(Dish).filter_by(id=dish_id).first()
     return dish.image_path if dish else None
 
 def get_meat_options(session: Session) -> List[str]:
     return session.query(Dish.meats).distinct().all()
+
+def get_course_eng(session: Session, date, menuline, menu, location) -> str:
+    course = session.query(Course.course_eng).filter(
+        Course.menuDate == date,
+        Course.menuLine == menuline,
+        Course.menu == menu,
+        Course.location == location
+    ).first()
+    return course[0] if course else None
+
+def get_course(session: Session, date, menuline, menu, location) -> str:
+    course = session.query(Course.course).filter(
+        Course.menuDate == date,
+        Course.menuLine == menuline,
+        Course.menu == menu,
+        Course.location == location
+    ).first()
+    return course[0] if course else None
 
 from datetime import datetime, timedelta
 
@@ -198,20 +219,50 @@ def get_menu_line_distribution(session: Session) -> dict:
 
 # Get directory values of additives and allergens 
 def get_written_forms(session):
-    """Get written forms of additives and allergens from Directory"""
     additives_dict = {}
+    additives_dict_eng = {}
     allergens_dict = {}
+    allergens_dict_eng = {}
+    meats_dict = {}
+    meats_dict_eng = {}
     
     directory_entries = session.query(Directory).all()
     
     for entry in directory_entries:
         if entry.additives:
             additives_dict[entry.additives] = entry.additives_written
+            additives_dict_eng[entry.additives] = entry.additives_written_eng
         if entry.allergens:
             allergens_dict[entry.allergens] = entry.allergens_written
+            allergens_dict_eng[entry.allergens] = entry.allergens_written_eng
+        if entry.meats:
+                meats_dict[entry.meats] = entry.meats_written
+                meats_dict_eng[entry.meats] = entry.meats_written_eng
             
-    return additives_dict, allergens_dict
+    return additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng
+
 
 def get_user_name(db_session, username):
     return db_session.query(User).filter_by(username=username).first()
-    
+
+# Get descritoptions de and en based on menu_id and the corresponding description_de and description_en
+def get_descriptions(db_session):
+    descriptions = {}
+    description_entries = db_session.query(Description).all()
+    for entry in description_entries:
+        descriptions[entry.menu_id] = {
+            'description_de': entry.description_de,
+            'description_en': entry.description_en
+        }
+    return descriptions
+
+# Get recipes de and en based on menu_id and the corresponding recipe_de and recipe_en
+def get_recipes(db_session):
+    recipes = {}
+    recipe_entries = db_session.query(Recipe).all()
+    for entry in recipe_entries:
+        recipes[entry.menu_id] = {
+            'recipe_de': entry.recipe_de,
+            'recipe_en': entry.recipe_en
+        }
+    return recipes
