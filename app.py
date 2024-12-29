@@ -2,8 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng
-from db.db_read import get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines
+from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
+from db.db_read import get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -156,8 +156,12 @@ def menu():
     session.permanent = True
     with Session() as db_session:
         # Get additives and allergens 
-        additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng = get_written_forms(db_session)
+        additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng  = get_written_forms(db_session)
         
+        # Get descriptions and recipes
+        descriptions = get_descriptions(db_session)
+        recipes = get_recipes(db_session)
+
         # query available data for the next five days
         data = get_next_five_days_data(db_session)
 
@@ -226,12 +230,15 @@ def menu():
             'allergens': dish.allergens,
             'additives': dish.additives,
             'meats': dish.meats,
-            'meatsEng': dish_eng.meatsEng if dish_eng else translate_text_first_word_capitalized(dish.meats) if dish.meats else None,
             'icons': dish.icons,
             'location': dish.location,
             'locationEng': dish_eng.locationEng if dish_eng else translate_text_first_word_capitalized(dish.location),
             'course': get_course(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location),
-            'course_eng': get_course_eng(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location)
+            'course_eng': get_course_eng(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location),
+            'description_de': descriptions.get(dish.id, {}).get('description_de', ''),
+            'description_en': descriptions.get(dish.id, {}).get('description_en', ''),
+            'recipe_de': recipes.get(dish.id, {}).get('recipe_de', ''),
+            'recipe_en': recipes.get(dish.id, {}).get('recipe_en', '')
         })
 
         # Group dishes by course_eng
@@ -271,6 +278,10 @@ def menu():
                          additives_dict_eng=additives_dict_eng,
                          allergens_dict=allergens_dict,
                          allergens_dict_eng=allergens_dict_eng,
+                         meats_dict=meats_dict,
+                         meats_dict_eng=meats_dict_eng,
+                         descriptions=descriptions,
+                         recipes=recipes,
                          username=user_name,
                          lang=lang,
                          no_results=no_results)
@@ -475,7 +486,7 @@ def check_image(filename):
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)
-        #write_to_course(engine, Session)
-        #write_to_directory(engine, Session) 
-        #write_to_dishes_eng(engine, Session)
+        #write_to_course(engine, Session)  #not needed to be rerunned
+        #write_to_directory(engine, Session) #need to be rerunned if more data in dishes is available
+        #write_to_dishes_eng(engine, Session)  #need to be rerunned if more data in dishes is available
     app.run()

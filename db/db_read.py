@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe
 from typing import List
 from sqlalchemy import func
 import datetime
@@ -223,6 +223,8 @@ def get_written_forms(session):
     additives_dict_eng = {}
     allergens_dict = {}
     allergens_dict_eng = {}
+    meats_dict = {}
+    meats_dict_eng = {}
     
     directory_entries = session.query(Directory).all()
     
@@ -233,10 +235,34 @@ def get_written_forms(session):
         if entry.allergens:
             allergens_dict[entry.allergens] = entry.allergens_written
             allergens_dict_eng[entry.allergens] = entry.allergens_written_eng
+        if entry.meats:
+                meats_dict[entry.meats] = entry.meats_written
+                meats_dict_eng[entry.meats] = entry.meats_written_eng
             
-    return additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng
+    return additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng
 
 
 def get_user_name(db_session, username):
     return db_session.query(User).filter_by(username=username).first()
 
+# Get descritoptions de and en based on menu_id and the corresponding description_de and description_en
+def get_descriptions(db_session):
+    descriptions = {}
+    description_entries = db_session.query(Description).all()
+    for entry in description_entries:
+        descriptions[entry.menu_id] = {
+            'description_de': entry.description_de,
+            'description_en': entry.description_en
+        }
+    return descriptions
+
+# Get recipes de and en based on menu_id and the corresponding recipe_de and recipe_en
+def get_recipes(db_session):
+    recipes = {}
+    recipe_entries = db_session.query(Recipe).all()
+    for entry in recipe_entries:
+        recipes[entry.menu_id] = {
+            'recipe_de': entry.recipe_de,
+            'recipe_en': entry.recipe_en
+        }
+    return recipes
