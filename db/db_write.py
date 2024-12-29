@@ -460,6 +460,9 @@ def update_user_vector(username, engine, Session):
     Args:
         username (str): The username of the user whose vector needs to be updated.
     """
+    User.metadata.create_all(engine) 
+    Embedding.metadata.create_all(engine)
+
     with Session() as db_session:
         # Join the ratings and embeddings tables, filtering by the provided username
         query = db_session.query(

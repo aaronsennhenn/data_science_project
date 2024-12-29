@@ -199,7 +199,7 @@ def menu():
 
                 # update user vector based on new rating if rating is submitted and user is logged in and get new user vector
                 if user_name:
-                    update_user_vector(user_name, Session)
+                    update_user_vector(user_name, engine, Session)
                     user_vector = get_user_vector(user_name, db_session)
 
             # only udate the date variable, if a date is selected
