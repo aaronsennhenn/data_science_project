@@ -329,7 +329,126 @@
                                         <img src="{{ url_for('static', filename='images/icon_mensavital.png') }}" alt="Vital" class="h-6">
                                     </span>
                                 {% endif %}
-                            </div>                        
+                            </div>      
+                        <div class="flex justify-between items-start space-x-4 max-w-4xl mx-auto">
+                            <!-- Description -->
+                            <div class="w-1/3">
+                                <h4 class="text-lg font-semibold mb-2">
+                                    {% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}
+                                </h4>
+                                <p class="text-gray-600 text-left">
+                                    {% if session.get('language') == 'de' %}
+                                        {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
+                                    {% else %}
+                                        {{ dish.description_en if dish.description_en else 'No description available' }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        
+                            <!-- Recipe -->
+                            <div class="w-2/3">
+                                <h4 class="text-lg font-semibold mb-4">
+                                    {% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}
+                                </h4>
+                                {% if session.get('language') == 'de' and dish.recipe_de %}
+                                    {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
+                                    {% if recipe_parts|length > 1 %}
+                                        <div class="space-y-6">
+                                            <div class="text-gray-800 font-medium">{{ recipe_parts[0] }}</div>
+                                            {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
+                                            {% if ingredients_instructions|length > 1 %}
+                                                <div class="mt-4">
+                                                    <h5 class="font-medium mb-2">Zutaten:</h5>
+                                                    <ul class="list-disc pl-5 text-gray-600">
+                                                        {% for line in ingredients_instructions[0].split('\n') %}
+                                                            {% if line.strip().startswith('-') %}
+                                                                <li>{{ line.strip('- ') }}</li>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                                <div class="mt-4">
+                                                    <h5 class="font-medium mb-2">Anleitung:</h5>
+                                                    <ol class="list-decimal pl-5 text-gray-600">
+                                                        {% for line in ingredients_instructions[1].split('\n') %}
+                                                            {% if line.strip() and line.strip()[0].isdigit() %}
+                                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </ol>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-gray-600">Kein Rezept verfügbar</p>
+                                    {% endif %}
+                                {% elif dish.recipe_en %}
+                                    {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
+                                    {% if recipe_parts|length > 1 %}
+                                        <div class="space-y-6">
+                                            <div class="text-gray-800 font-medium">{{ recipe_parts[0] }}</div>
+                                            {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
+                                            {% if ingredients_instructions|length > 1 %}
+                                                <div class="mt-4">
+                                                    <h5 class="font-medium mb-2">Ingredients:</h5>
+                                                    <ul class="list-disc pl-5 text-gray-600">
+                                                        {% for line in ingredients_instructions[0].split('\n') %}
+                                                            {% if line.strip().startswith('-') %}
+                                                                <li>{{ line.strip('- ') }}</li>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                                <div class="mt-4">
+                                                    <h5 class="font-medium mb-2">Instructions:</h5>
+                                                    <ol class="list-decimal pl-5 text-gray-600">
+                                                        {% for line in ingredients_instructions[1].split('\n') %}
+                                                            {% if line.strip() and line.strip()[0].isdigit() %}
+                                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </ol>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <p class="text-gray-600">No recipe available</p>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="text-gray-600">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
+                                {% endif %}
+                            </div>
+                        </div>                        
+                        <!-- Ratings -->
+                        <div class="flex flex-col items-end ml-8">
+                            <div class="rating mt-4 text-4xl">
+                                <input type="radio" id="star5_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="5" />
+                                <label for="star5_{{ dish.menuLine }}">&#9733;</label>
+                                <input type="radio" id="star4_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="4" />
+                                <label for="star4_{{ dish.menuLine }}" >&#9733;</label>
+                                <input type="radio" id="star3_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="3" />
+                                <label for="star3_{{ dish.menuLine }}">&#9733;</label>
+                                <input type="radio" id="star2_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="2" />
+                                <label for="star2_{{ dish.menuLine }}">&#9733;</label>
+                                <input type="radio" id="star1_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="1" />
+                                <label for="star1_{{ dish.menuLine }}">&#9733;</label>
+                            </div>
+                            <button class="submit-rating mt-2" data-menu-line="{{ dish.menuLine }}" data-id="{{ dish.id }}">
+                                {% if session.get('language') == 'de' %}
+                                    Bewertung senden
+                                {% else %}
+                                    Submit Rating
+                                {% endif %}
+                            </button>
+                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                                {% if session.get('language') == 'de' %}
+                                    Bewertung erhalten!
+                                {% else %}
+                                    Rating received!
+                                {% endif %}
+                            </p>
+                        </div>
+                                      
                             <!-- Allergens -->
                             <p class="text-sm text-gray-500">
                                 {% if session.get('language') == 'de' %}Allergene{% else %}Allergens{% endif %}:
@@ -380,37 +499,6 @@
                                 {% endif %}
                             </p>
                         </div> 
-                        <!-- Descriptions -->
-                        <!-- Recipes -->
-                        <!-- Ratings -->
-                        <div class="flex flex-col items-end ml-8">
-                            <div class="rating mt-4 text-4xl">
-                                <input type="radio" id="star5_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="5" />
-                                <label for="star5_{{ dish.menuLine }}">&#9733;</label>
-                                <input type="radio" id="star4_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="4" />
-                                <label for="star4_{{ dish.menuLine }}" >&#9733;</label>
-                                <input type="radio" id="star3_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="3" />
-                                <label for="star3_{{ dish.menuLine }}">&#9733;</label>
-                                <input type="radio" id="star2_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="2" />
-                                <label for="star2_{{ dish.menuLine }}">&#9733;</label>
-                                <input type="radio" id="star1_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="1" />
-                                <label for="star1_{{ dish.menuLine }}">&#9733;</label>
-                            </div>
-                            <button class="submit-rating mt-2" data-menu-line="{{ dish.menuLine }}" data-id="{{ dish.id }}">
-                                {% if session.get('language') == 'de' %}
-                                    Bewertung senden
-                                {% else %}
-                                    Submit Rating
-                                {% endif %}
-                            </button>
-                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
-                                {% if session.get('language') == 'de' %}
-                                    Bewertung erhalten!
-                                {% else %}
-                                    Rating received!
-                                {% endif %}
-                            </p>
-                        </div>
                     <!-- Images -->
                 </div>
             </div>
