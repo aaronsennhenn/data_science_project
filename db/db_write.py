@@ -8,6 +8,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.utils import translate_text_first_word_capitalized, translate_text_all_capitalized
+import numpy as np
 
 Base = declarative_base()
 
@@ -93,8 +94,12 @@ class User(Base):
     __tablename__ = 'users'
     
     id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    password_hash = Column(String(512), nullable=True)
+    username = Column(String, unique=True, nullable=False)
+    password_hash = Column(String, nullable=True)
+    user_vector = Column(String, nullable=True)
+
+    def add_vector(self, vector):
+        self.user_vector = vector
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -214,6 +219,7 @@ def write_to_user(username: str, password: str, engine, Session):
     with Session() as db_session:
         user = User(username=username)
         user.set_password(password)
+        user.add_vector(vector = None)
         db_session.add(user)
         db_session.commit()
 
@@ -411,4 +417,70 @@ def write_to_course(engine, Session):
                     )
                     db_session.add(new_course)
         
+        db_session.commit()
+
+
+def update_user_vector(username, engine, Session):
+    """
+    Recomputes the user vector for a specific user based on their ratings and embeddings,
+    and updates the user vector in the database.
+
+    Args:
+        username (str): The username of the user whose vector needs to be updated.
+    """
+    with Session() as db_session:
+        # Join the ratings and embeddings tables, filtering by the provided username
+        query = db_session.query(
+            Rating,
+            Embedding.embedding
+        ).outerjoin(
+            Embedding,
+            Rating.menu_id == Embedding.id
+        ).filter(
+            Rating.user_name == username  # Filter by the specific username
+        )
+
+        # Execute the query and fetch all results
+        results = query.all()
+
+        # Convert results to a DataFrame
+        data = [
+            {
+                **rating.__dict__,
+                "embedding": embedding
+            }
+            for rating, embedding in results
+        ]
+
+        # Remove SQLAlchemy state information
+        for item in data:
+            item.pop('_sa_instance_state', None)
+
+        # Create DataFrame
+        rating_with_embedding = pd.DataFrame(data)
+
+        # Convert string embeddings to NumPy arrays
+        rating_with_embedding['embedding'] = rating_with_embedding['embedding'].apply(
+            lambda x: np.array(eval(x)) if isinstance(x, str) else np.array(x)
+        )
+
+        # Extract embeddings and ratings
+        embeddings = np.stack(rating_with_embedding['embedding'].values)  # Convert to 2D array
+        ratings = rating_with_embedding['rating'].values  # Extract ratings (1-5 scale)
+
+        # Compute weighted embeddings
+        weighted_embeddings = embeddings * ratings[:, np.newaxis]
+
+        # Compute the weighted average user vector
+        user_vector = np.sum(weighted_embeddings, axis=0) / np.sum(ratings)
+
+        # Query the user in the database
+        user = db_session.query(User).filter_by(username=username).first()
+
+        # Update the user vector if the user exists
+        if user:
+            user.add_vector(str(user_vector.tolist()))  # Update user vector
+            db_session.add(user)
+
+        # Commit the changes
         db_session.commit()
