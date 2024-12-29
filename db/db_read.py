@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding
 from typing import List
 from sqlalchemy import func
 import datetime
@@ -15,18 +15,25 @@ def convert_dblist_to_df(db_list):
 def get_user_by_username(session: Session, username: str):
     return session.query(User).filter_by(username=username).first()
 
+#def get_dishes_by_date_location(session: Session, date, location) -> List[Dish]:
+#    return session.query(Dish).filter_by(menuDate=date, location=location).all()
+
 def get_dishes_by_date_location(session: Session, date, location) -> List[Dish]:
-    return session.query(Dish).filter_by(menuDate=date, location=location).all()
+   return session.query(Dish,Embedding.embedding).outerjoin(Embedding,Dish.id == Embedding.menu_id).filter(Dish.menuDate == date,Dish.location == location).all()    
 
 def get_all_dishes(session: Session) -> List[Dish]:
     return session.query(Dish).all()
 
 def get_dishes_by_date(session: Session, date) -> List[Dish]:
-    return session.query(Dish).filter(Dish.menuDate == date).all()
+    return session.query(Dish,Embedding.embedding).outerjoin(Embedding,Dish.id == Embedding.menu_id).filter(Dish.menuDate == date).all()
 
 def get_image_path(dish_id: int, session: Session) -> str:
     dish = session.query(Dish).filter_by(id=dish_id).first()
     return dish.image_path if dish else None
+
+def get_user_vector(username: str, session: Session) -> List[float]:
+    user = session.query(User).filter_by(username=username).first()
+    return user.user_vector if user else None
 
 def get_meat_options(session: Session) -> List[str]:
     return session.query(Dish.meats).distinct().all()

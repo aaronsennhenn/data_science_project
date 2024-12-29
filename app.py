@@ -3,7 +3,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
-from db.db_read import get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes
+from db.db_read import get_user_vector, get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -11,7 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import json
-from db.utils import translate_text_all_capitalized, translate_text_first_word_capitalized
+from db.utils import translate_text_all_capitalized, translate_text_first_word_capitalized, compute_cosine_similarity
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
@@ -180,6 +180,7 @@ def menu():
 
         # if user logged in, get user_id
         user_name = session.get('username')
+        user_vector = get_user_vector(user_name, db_session)
 
         # When user filters, get filtered values
         if request.method == 'POST':
@@ -196,9 +197,10 @@ def menu():
                 # write rating to database
                 write_to_rating(menu_id, rating, user_name, engine, Session)
 
-                # update user vector based on new rating if rating is submitted and user is logged in 
+                # update user vector based on new rating if rating is submitted and user is logged in and get new user vector
                 if user_name:
-                    update_user_vector(user_name, engine, Session)
+                    update_user_vector(user_name, Session)
+                    user_vector = get_user_vector(user_name, db_session)
 
             # only udate the date variable, if a date is selected
             if date_temp:
@@ -212,7 +214,7 @@ def menu():
 
         # In the menu() route, modify the menu_data creation:
         menu_data = []
-        for dish in dishes:
+        for dish,embedding in dishes:
             # Get the English translations from dishes_eng table
             dish_eng = db_session.query(DishEng).filter(
                 DishEng.menuDate == dish.menuDate,
@@ -238,7 +240,8 @@ def menu():
             'description_de': descriptions.get(dish.id, {}).get('description_de', ''),
             'description_en': descriptions.get(dish.id, {}).get('description_en', ''),
             'recipe_de': recipes.get(dish.id, {}).get('recipe_de', ''),
-            'recipe_en': recipes.get(dish.id, {}).get('recipe_en', '')
+            'recipe_en': recipes.get(dish.id, {}).get('recipe_en', ''),
+            'recommendation_score': compute_cosine_similarity(embedding,user_vector) if user_vector else 0
         })
 
         # Group dishes by course_eng

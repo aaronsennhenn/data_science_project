@@ -467,7 +467,7 @@ def update_user_vector(username, engine, Session):
             Embedding.embedding
         ).outerjoin(
             Embedding,
-            Rating.menu_id == Embedding.id
+            Rating.menu_id == Embedding.menu_id
         ).filter(
             Rating.user_name == username  # Filter by the specific username
         )
