@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean
 from typing import List
 from sqlalchemy import func
 import datetime
@@ -55,6 +55,44 @@ def get_course(session: Session, date, menuline, menu, location) -> str:
         Course.location == location
     ).first()
     return course[0] if course else None
+
+    
+def load_dishes_table_for_filter_cleaning(Session):
+    """
+    Loads dishes from the Dish table that are not contained in the FiltersClean table (based on id)
+    and returns them as a DataFrame.
+
+    Args:
+        Session: SQLAlchemy session factory.
+
+    Returns:
+        pd.DataFrame: A DataFrame of dishes not present in FiltersClean.
+    """
+    with Session() as session:
+        # Query for dishes not in FiltersClean
+        dishes = session.query(
+            Dish.id,
+            Dish.menuLine,
+            Dish.menu,
+            Dish.icons
+        ).filter(
+            ~session.query(FiltersClean).filter(FiltersClean.menu_id == Dish.id).exists()
+        ).all()
+
+        # Convert results to a list of dictionaries
+        data = [
+            {
+                'id': dish.id,
+                'menuLine': dish.menuLine,
+                'menu': dish.menu,
+                'icons': dish.icons
+            }
+            for dish in dishes
+        ]
+        
+        # Return as a DataFrame
+        return pd.DataFrame(data)
+
 
 from datetime import datetime, timedelta
 

@@ -27,6 +27,13 @@ class Dish(Base):
     allergens = Column(String, nullable=True)
     additives = Column(String, nullable=True)
 
+class FiltersClean(Base):
+    __tablename__ = "filters_clean"
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
+    icons_clean = Column(String, nullable=True)
+
+
 class DishEng(Base):
     __tablename__ = 'dishes_eng'
     id = Column(Integer, primary_key=True)
@@ -212,6 +219,22 @@ def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):
         rating = Rating(menu_id=menu_id, rating=rating, user_name=user_name)
         db_session.add(rating)
         db_session.commit()
+
+def write_to_filters_clean(icons_df: pd.DataFrame, engine, session):
+    FiltersClean.metadata.create_all(engine) 
+
+    for _, row in icons_df.iterrows():
+        try:
+            icons = FiltersClean(
+                menu_id=int(row.get('id')),
+                icons_clean=str(row.get('icons_clean')),
+            )
+            session.add(icons)
+            session.commit()
+        except ValueError as e:
+            print(f"Error message: {str(e)}")
+            continue
+
 
 
 def write_to_user(username: str, password: str, engine, Session):
