@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mensa App - Your Digital Dining Guide</title>
+    <title>User</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/default.css') }}" rel="stylesheet">
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
     <!-- Background Image with Overlay -->
     <div class="bg-image fixed inset-0 z-0"></div>
-    <!-- Header -->
+
+    <!-- Navigation Bar -->
     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
         <nav>
             <div class="nav-container flex justify-between items-center">
@@ -21,11 +22,11 @@
                 <!-- Language Buttons - Centered -->
                 <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
                     <a href="{{ url_for('set_language', lang='en') }}" 
-                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                         EN
                     </a>
                     <a href="{{ url_for('set_language', lang='de') }}"
-                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                         DE
                     </a>
                 </div>
@@ -48,9 +49,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
+
             {% if username %}
             <div class="flex items-center space-x-3 mb-6">
                 <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-700">
+                    <!-- Optionally, you can add a user avatar here -->
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Logged in as:</p>
@@ -70,11 +73,11 @@
                 <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
                 </a>
-                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/about" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Über uns{% else %}About{% endif %}
                 </a>
                 {% if username %}
-                <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
+                    <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
                 {% else %}
                     <a href="{{ url_for('login') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
                 {% endif %}
@@ -82,81 +85,28 @@
         </div>
     </div>
 
- <!-- Main Content -->
-<div class="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
-    <div class="content-wrapper max-w-4xl w-full p-8 bg-white rounded-xl shadow-sm border border-gray-100">
-        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
-            {% if session.get('language') == 'de' %}
-                Ihr digitaler Mensa-Guide
-            {% else %}
-                Your Digital Mensa Guide
-            {% endif %}
-        </h1>
-        <p class="text-xl text-gray-600 mb-12 text-center leading-relaxed">
-            {% if session.get('language') == 'de' %}
-                Entdecken Sie die vielfältigen kulinarischen Angebote in den Cafeterien und Mensen Tübingens.
-                Erkunden Sie die Mensa-Szene Tübingens und gewinnen Sie Einblicke in Menümuster, Preise und aktuelle Trends.
-            {% else %}
-                Discover the diverse culinary offerings across Tübingen's cafeterias and mensas.
-                Explore Tübingen's mensa scene, uncovering menu patterns, pricing insights, and emerging trends.
-            {% endif %}
-        </p>        
-        
-        <!-- Locations Section -->
-        <div class="mt-12 relative">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-6 text-center">
-                {% if session.get('language') == 'de' %}
-                    Standorte
-                {% else %}
-                    Locations
-                {% endif %}
-            </h2>
-                <!-- Container for the image -->
-                <div class="relative max-w-4xl mx-auto">
-                    <!-- The map image -->
-                    <img src="{{ url_for('static', filename='images/map.jpg') }}" 
-                         alt="Map with Dining Facilities" 
-                         class="w-full h-auto rounded-lg shadow-sm">
-                    
-                    <!-- Markers on the map -->
-                    {% for mensa_name, coordinates in mensa_coordinates.items() %}
-                        <a href="{{ url_for('menu', selected_mensa=mensa_name) }}"
-                           class="absolute"
-                           style="top: {{ coordinates.top }}%; left: {{ coordinates.left }}%;">
-                            <!-- Marker Image -->
-                            <img src="{{ url_for('static', filename='images/marker.jpg') }}" 
-                                 alt="Marker for {{ mensa_name }}" 
-                                 class="w-8 h-8 marker">
-                            <!-- Mensa Name -->
-                            <span 
-                                class="absolute text-sm bg-white text-gray-800 px-2 py-1 rounded shadow-lg mensa-label"
-                                style="top: {{ coordinates.text_offset }}px; left: 120%; white-space: nowrap;">
-                                {{ mensa_name }}
-                            </span>
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
-
-        </div>
-    </div>
-
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center">
+        <h1>Welcome, {{ username }}!</h1> <!-- Display welcome message with username -->
+    </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-8 relative z-10">
-        <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+    <footer class="bg-white border-t border-gray-t py8 relative z10">
+        <div class=max-w7xl mx-auto px8 text-center text-gray600>
             &copy; 2024 MENSA APP. All rights reserved.
         </div>
     </footer>
+
+    <!-- JavaScript for sidebar toggle -->
     <script>
         const menuToggle = document.getElementById('menu-toggle');
         const closeMenu = document.getElementById('close-menu');
         const sidebar = document.getElementById('sidebar');
-    
+
         menuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('translate-x-full');
         });
-    
+
         closeMenu.addEventListener('click', () => {
             sidebar.classList.add('translate-x-full');
         });

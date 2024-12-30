@@ -49,6 +49,7 @@ def index():
     lang = session.get('language', 'en')
     session['language'] = lang
     session.permanent = True
+    user_name = session.get('username')
     mensa_coordinates = {
         "Mensa Morgenstelle": {"top": 20, "left": 30, "text_offset": 0},
         "Cafeteria Morgenstelle": {"top": 20, "left": 30, "text_offset": 30},
@@ -56,15 +57,15 @@ def index():
         "Cafeteria Wilhelmstraße": {"top": 50, "left": 70, "text_offset": 30},
         "Cafeteria und Mensa Prinz Karl": {"top": 35, "left": 50, "text_offset": 0}
     }
-    return render_template('index.html', mensa_coordinates=mensa_coordinates)
-
+    return render_template('index.html', username=user_name, mensa_coordinates=mensa_coordinates)
 
 @app.route('/about')
 def about():
    lang = session.get('language', 'en')
    session['language'] = lang
    session.permanent = True
-   return render_template('about.html')
+   username = session.get('username')  # Get the username from the session
+   return render_template('about.html', username=username)  # Pass username to the template
                                    
 # check username and password that user puts into form with db
 @app.route('/login', methods=['GET', 'POST'])
@@ -78,12 +79,12 @@ def login():
             
             if user and user.check_password(password):
                 session['username'] = username
-                return redirect(url_for("menu"))
+                return redirect(url_for("user_page"))
             else:
                 error_message = "Your username or password is wrong!"
                 return render_template('login.html', error=error_message)
                 
-    return render_template('login.html')
+    return render_template('login.html', username=session.get('username'))
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -99,7 +100,7 @@ def register():
         write_to_user(username, password, engine, Session)
         
         session['username'] = username
-        return redirect(url_for('menu'))
+        return redirect(url_for('user_page'))
 
 
 # login for google
@@ -147,7 +148,19 @@ def logout():
     session['language'] = lang
     session.permanent = True
     session.pop('username', None)
-    return redirect(url_for('menu'))
+    return redirect(url_for('index'))
+
+
+@app.route('/user')
+def user_page():
+    lang = session.get('language', 'en')
+    session['language'] = lang
+    session.permanent = True
+    user_name = session.get('username')  # Get username from session
+    if not user_name:
+        return redirect(url_for('login'))  # Redirect to login if not logged in
+    return render_template('user.html', username=user_name)  # Render the personal page
+
 
 @app.route('/menu', methods=['GET','POST'])
 def menu():
@@ -302,6 +315,7 @@ def analysis():
     lang = session.get('language', 'en')
     session['language'] = lang
     session.permanent = True
+    username = session.get('username')  # Get the username from the session
     with Session() as db_session:
         total_mensas = get_total_mensas(db_session)
         total_ratings = get_total_ratings(db_session)
@@ -481,7 +495,10 @@ def analysis():
                              top_three_dishes=top_three_dishes,
                              mensa_chart=mensa_chart,
                              dish_chart=dish_chart,
-                             menus_with_lowest_price=menus_with_lowest_price)
+                             menus_with_lowest_price=menus_with_lowest_price,
+                             username=username)
+    
+
 
 @app.route('/dish-clicked', methods=['POST'])
 def dish_clicked():
