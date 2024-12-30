@@ -1,3 +1,18 @@
+"""
+This script is responsible for cleaning and improving the icons column in the dishes table which includes filters that are used by the frontend. 
+The script is designed to be executed daily at 3:30 AM via a cronjob.
+
+Modules:
+- db.db_read load_dishes_table_for_filter_cleaning loads the menu and icon column from the dishes table which are not yet included in the CleanFilters table.
+- db.utils correct_icons function corrects the NA icon string rows based on patterns that we found in the data. E.g. if the menu name includes the string "vegan" than the dish is most likely vegan.
+- scraper.gpt_prompts classifies all the remaining main course dishes that are still NA into the predefined categories using chatgpt api
+
+
+Execution:
+This script is intended to be run as a cronjob every day at 3:30 AM.
+"""
+
+
 from db.db_read import setup_database_connection
 from secret import USER, PASSWORD, HOST, PORT
 import pandas as pd
