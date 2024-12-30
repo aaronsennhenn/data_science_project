@@ -3,7 +3,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
-from db.db_read import get_user_vector, get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes
+from db.db_read import get_user_vector, get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -308,8 +308,12 @@ def analysis():
         menu_line_distribution = get_menu_line_distribution(db_session)
         mensa_average_prices = get_average_prices_per_menuline_per_mensa(db_session)
         mensa_lowest_prices = get_lowest_prices_per_menuline_per_mensa(db_session)
+        top_three_mensas = get_top_three_mensas(db_session)
+        top_three_dishes = get_top_three_dishes(db_session)
+        menus_with_lowest_price = get_menu_with_lowest_price(db_session)
 
         # Define professional color scheme
+        lang = session.get('language', 'en')
         PLOT_COLORS = ['#4F46E5', '#6366F1', '#455d7a']
 
         fig = make_subplots(
@@ -366,7 +370,6 @@ def analysis():
         margin=dict(t=50, b=50, l=50, r=50)
         )
 
-
         fig.update_xaxes(
         gridcolor='rgba(0,0,0,0.1)',
         showline=True,
@@ -376,8 +379,6 @@ def analysis():
         tickformat="%Y-%m-%d",  # Show full date for each tick
         tickangle=45,  # Angle the dates for better readability
         tickmode="auto"
-        #ticktext=data['dates'],
-        #tickvals=data['dates']
         )
 
         fig.update_yaxes(
@@ -423,6 +424,37 @@ def analysis():
             
             pie_charts[mensa] = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
+        # Create top mensas chart
+        mensa_trace = {
+            'x': [item['location'] for item in top_three_mensas],
+            'y': [item['avg_rating'] for item in top_three_mensas],
+            'type': 'bar',
+            'marker': {
+                'color': ['#4F46E5', '#6366F1', '#818CF8']
+            }
+        }
+        mensa_layout = {
+            #'title': 'Top 3' if lang == 'de' else 'Top 3',
+            'xaxis': {'title': 'Mensa', 'tickangle': 0},
+            'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
+        }
+        mensa_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+
+        # Create top dishes chart
+        dish_trace = {
+            'x': [item['dish_name'] for item in top_three_dishes],
+            'y': [item['avg_rating'] for item in top_three_dishes],
+            'type': 'bar',
+            'marker': {
+                'color': ['#4F46E5', '#6366F1', '#818CF8']
+            }
+        }
+        dish_layout = {
+            #'title': 'Top 3' if lang == 'de' else 'Top 3',
+            'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 45},
+            'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
+        }
+        dish_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
 
         # Add pie_charts to the template context
         return render_template('analysis.html',
@@ -437,7 +469,12 @@ def analysis():
                              average_prices=average_prices,           
                              lowest_prices=lowest_prices,   
                              plot_json=plot_json,
-                             pie_charts=pie_charts)
+                             pie_charts=pie_charts,
+                             top_three_mensas=top_three_mensas,
+                             top_three_dishes=top_three_dishes,
+                             mensa_chart=mensa_chart,
+                             dish_chart=dish_chart,
+                             menus_with_lowest_price=menus_with_lowest_price)
 
 @app.route('/dish-clicked', methods=['POST'])
 def dish_clicked():

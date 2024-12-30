@@ -181,6 +181,35 @@ def get_lowest_prices_per_menuline_per_mensa(session: Session) -> dict:
             results[mensa][menu_line] = round(lowest_price, 2) if lowest_price else 0
     return results
 
+# Get menu and menu line and price of lowest price dish per each mensa (Dish.location)
+# Display all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) 
+def get_menu_with_lowest_price(session: Session) -> dict:
+    results = {}
+    for mensa in get_available_mensas(session):
+        lowest_price_dish = session.query(
+            Dish.menu,
+            Dish.menuLine,
+            Dish.pupilPrice,
+            Dish.studentPrice,
+            Dish.guestPrice,
+            ((Dish.pupilPrice + Dish.studentPrice + Dish.guestPrice) / 3).label('avg_price')
+        ).filter_by(location=mensa
+        ).order_by(func.coalesce(((Dish.pupilPrice + Dish.studentPrice + Dish.guestPrice) / 3), float('inf'))
+        ).first()
+        
+        if lowest_price_dish:
+            results[mensa] = {
+                'menu': lowest_price_dish.menu,
+                'menu_line': lowest_price_dish.menuLine,
+                'pupilPrice': lowest_price_dish.pupilPrice,
+                'studentPrice': lowest_price_dish.studentPrice,
+                'guestPrice': lowest_price_dish.guestPrice,
+                'avg_price': lowest_price_dish.avg_price
+            }
+        else:
+            results[mensa] = None
+    return results
+
 # Get price development per menu line (Dish.menuLine)
 def get_price_development(session: Session) -> dict:
     menu_lines = session.query(Dish.menuLine).distinct().all()
@@ -273,3 +302,84 @@ def get_recipes(db_session):
             'recipe_en': entry.recipe_en
         }
     return recipes
+
+#Get top three dishes of the week - on y-axis the rating average and on x-axis the dish name (menu)
+#table "rating" use menu_id and rating columns and then merge the table "dishes" to find with the menu_id the corresponding dish name saved in column menu
+def get_top_three_dishes(session: Session):
+    today = datetime.now().date()
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+
+    # Query to get top three dishes
+    top_dishes = session.query(
+        Dish.menu,
+        func.avg(Rating.rating).label('avg_rating')
+    ).join(Rating, Dish.id == Rating.menu_id
+    ).filter(
+        Dish.menuDate.between(start_of_week, end_of_week)
+    ).group_by(
+        Dish.id
+    ).order_by(
+        func.avg(Rating.rating).desc()
+    ).limit(3).all()
+    #Format result
+    result = [
+        {
+            'dish_name': dish.menu,
+            'avg_rating': round(dish.avg_rating, 2)
+        } for dish in top_dishes
+    ]
+    return result
+
+# #Testing
+# def get_top_three_dishes(session: Session):
+#     # Query to get top three dishes based on all ratings
+#     top_dishes = session.query(
+#         Dish.menu,
+#         func.avg(Rating.rating).label('avg_rating'),
+#         func.count(Rating.id).label('rating_count')
+#     ).join(Rating, Dish.id == Rating.menu_id
+#     ).group_by(
+#         Dish.id
+#     ).order_by(
+#         func.avg(Rating.rating).desc()
+#     ).limit(3).all()
+
+#     # Format result
+#     result = [
+#         {
+#             'dish_name': dish.menu,
+#             'avg_rating': round(dish.avg_rating, 2),
+#             'rating_count': dish.rating_count
+#         } for dish in top_dishes
+#     ]
+    
+#     return result
+
+
+#Get top three mensas of the week (ranked best first) - on y-axis the rating average and on x-axis the location (mensa)
+def get_top_three_mensas(session: Session):
+    # Get the start and end dates for the current week
+    today = datetime.now().date()
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    # Query to get top three mensas
+    top_mensas = session.query(
+        Dish.location,
+        func.avg(Rating.rating).label('avg_rating')
+    ).join(Rating, Dish.id == Rating.menu_id
+    ).filter(
+        Dish.menuDate.between(start_of_week, end_of_week)
+    ).group_by(
+        Dish.location
+    ).order_by(
+        func.avg(Rating.rating).desc()
+    ).limit(3).all()
+    #Format result
+    result = [
+        {
+            'location': mensa.location,
+            'avg_rating': round(mensa.avg_rating, 2)
+        } for mensa in top_mensas
+    ]
+    return result
