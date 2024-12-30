@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- To Dos: Highlight lowest price; Fix headlines; Add recipes; Add description; Add images;-->
+<!-- To Dos: Highlight lowest price; Add images;-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -81,6 +81,7 @@
         </div>
     </div>
 
+<!-- Main -->
 <main class="flex-grow flex flex-col items-center px-4 py-4">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
         <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
@@ -144,6 +145,8 @@
                     <label for="diet_vegan">{% if session.get('language') == 'de' %}Vegan{% else %}Vegan{% endif %}</label>
                     <input type="checkbox" id="diet_vegetarian" name="selected_diet_meat" value="V" />
                     <label for="diet_vegetarian">{% if session.get('language') == 'de' %}Vegetarisch{% else %}Vegetarian{% endif %}</label>
+                    <input type="checkbox" id="diet_mensavital" name="selected_diet_meat" value="mensaVital" />
+                    <label for="diet_mensavital">{% if session.get('language') == 'de' %}Vital{% else %}Vital{% endif %}</label>
                     <input type="checkbox" id="meat_beef" name="selected_diet_meat" value="R" />
                     <label for="meat_beef">{% if session.get('language') == 'de' %}Rind{% else %}Beef{% endif %}</label>
                     <input type="checkbox" id="meat_poultry" name="selected_diet_meat" value="G" />
@@ -154,8 +157,6 @@
                     <label for="meat_fish">{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}</label>
                     <input type="checkbox" id="meat_pork" name="selected_diet_meat" value="S" />
                     <label for="meat_pork">{% if session.get('language') == 'de' %}Schwein{% else %}Pork{% endif %}</label>
-                    <input type="checkbox" id="diet_mensavital" name="selected_diet_meat" value="mensaVital" />
-                    <label for="diet_mensavital">{% if session.get('language') == 'de' %}Vital{% else %}Vital{% endif %}</label>
                 </div>
                 
             </div>       
@@ -326,7 +327,7 @@
                                         <img src="{{ url_for('static', filename='images/icon_vegan.png') }}" alt="Vegan" class="h-6">
                                     </span>
                                 {% endif %}
-                                {% if 'vital' in dish.icons %}
+                                {% if 'mensaVital' in dish.icons %}
                                     <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vital{% else %}Vital{% endif %}">
                                         <img src="{{ url_for('static', filename='images/icon_mensavital.png') }}" alt="Vital" class="h-6">
                                     </span>

@@ -14,7 +14,6 @@ Base = declarative_base()
 
 class Dish(Base):
     __tablename__ = 'dishes'
-
     id = Column(Integer, primary_key=True)
     menuDate = Column(Date, nullable=True)
     menuLine = Column(String, nullable=True)
@@ -30,8 +29,8 @@ class Dish(Base):
 
 class DishEng(Base):
     __tablename__ = 'dishes_eng'
-
     id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
     menuDate = Column(Date, nullable=True)
     menuLineEng = Column(String, nullable=True)
     menuEng = Column(String, nullable=True)
@@ -194,6 +193,7 @@ def write_to_dishes_eng(engine, Session):
             
             if not existing:
                 dish_eng = DishEng(
+                    menu_id=dish.id,  # Add this line to include the menu_id
                     menuDate=dish.menuDate,
                     menuLineEng=translate_text_all_capitalized(dish.menuLine),
                     menuEng=translate_text_first_word_capitalized(dish.menu),

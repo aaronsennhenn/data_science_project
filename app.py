@@ -11,7 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import json
-from db.utils import translate_text_all_capitalized, translate_text_first_word_capitalized, compute_cosine_similarity
+from db.utils import compute_cosine_similarity
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
@@ -176,7 +176,6 @@ def menu():
         selected_diet_meat = 'omnivore'
         selected_price = "studentPrice"
         no_results = False 
-        headlines_set = set()
 
         # if user logged in, get user_id
         user_name = session.get('username')
@@ -218,15 +217,15 @@ def menu():
             # Get the English translations from dishes_eng table
             dish_eng = db_session.query(DishEng).filter(
                 DishEng.menuDate == dish.menuDate,
-                DishEng.menuEng == translate_text_first_word_capitalized(dish.menu)
+                DishEng.menu_id == dish.id
             ).first()
 
             menu_data.append({
             'id': dish.id,
             'menu': dish.menu,
-            'menuEng': dish_eng.menuEng if dish_eng else translate_text_first_word_capitalized(dish.menu),
+            'menuEng': dish_eng.menuEng if dish_eng and dish_eng.menuEng else None,
             'menuLine': dish.menuLine,
-            'menuLineEng': dish_eng.menuLineEng if dish_eng else translate_text_first_word_capitalized(dish.menuLine),
+            'menuLineEng': dish_eng.menuLineEng if dish_eng and dish_eng.menuLineEng else None,
             'studentPrice': dish.studentPrice,
             'guestPrice': dish.guestPrice,
             'allergens': dish.allergens,
@@ -234,7 +233,7 @@ def menu():
             'meats': dish.meats,
             'icons': dish.icons,
             'location': dish.location,
-            'locationEng': dish_eng.locationEng if dish_eng else translate_text_first_word_capitalized(dish.location),
+            'locationEng': dish_eng.locationEng if dish_eng else None,
             'course': get_course(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location),
             'course_eng': get_course_eng(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location),
             'description_de': descriptions.get(dish.id, {}).get('description_de', ''),
@@ -256,7 +255,15 @@ def menu():
         if selected_diet_meat and 'omnivore' not in selected_diet_meat:
             filtered_grouped_data = {}
             for course, dishes in grouped_menu_data.items():
-                filtered_dishes = [dish for dish in dishes if any(icon in dish['icons'] for icon in selected_diet_meat)]
+                filtered_dishes = []
+                for dish in dishes:
+                    # Split icons by comma and strip whitespace, normalize to lowercase
+                    icons = [icon.strip().lower() for icon in dish['icons'].split(',')] if dish['icons'] else []
+                    
+                    # Check if any selected diet/meat is present in the icons (case insensitive)
+                    if any(icon.lower() in icons for icon in selected_diet_meat):
+                        filtered_dishes.append(dish)
+                
                 if filtered_dishes:  # Only include courses that have dishes after filtering
                     filtered_grouped_data[course] = filtered_dishes
             grouped_menu_data = filtered_grouped_data
