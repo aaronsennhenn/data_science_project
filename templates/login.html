@@ -72,13 +72,10 @@
                     {% if session.get('language') == 'de' %}Über uns{% else %}About{% endif %}
                 </a>
                 {% if username %}
-                <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
-                    {% if session.get('language') == 'de' %}Abmelden{% else %}Logout{% endif %}
-                </a>
+                <a href="/user" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">{% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}</a> 
+                <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
-                        {% if session.get('language') == 'de' %}Anmelden{% else %}Login{% endif %}
-                    </a>
+                    <a href="{{ url_for('login') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
                 {% endif %}
             </nav>
         </div>
