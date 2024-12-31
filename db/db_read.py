@@ -1,9 +1,11 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng
 from typing import List
 from sqlalchemy import func
 import datetime
 import pandas as pd
+from sqlalchemy import or_
+
 
 def convert_dblist_to_df(db_list):
     dict_list = [vars(obj) for obj in db_list]
@@ -15,17 +17,54 @@ def convert_dblist_to_df(db_list):
 def get_user_by_username(session: Session, username: str):
     return session.query(User).filter_by(username=username).first()
 
-#def get_dishes_by_date_location(session: Session, date, location) -> List[Dish]:
-#    return session.query(Dish).filter_by(menuDate=date, location=location).all()
-
-def get_dishes_by_date_location(session: Session, date, location) -> List[Dish]:
-   return session.query(Dish,Embedding.embedding).outerjoin(Embedding,Dish.id == Embedding.menu_id).filter(Dish.menuDate == date,Dish.location == location).all()    
-
 def get_all_dishes(session: Session) -> List[Dish]:
     return session.query(Dish).all()
 
-def get_dishes_by_date(session: Session, date) -> List[Dish]:
-    return session.query(Dish,Embedding.embedding).outerjoin(Embedding,Dish.id == Embedding.menu_id).filter(Dish.menuDate == date).all()
+
+def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_diet_meat, selected_lang):
+
+    if mensa_name == "all":
+        query = db_session.query(Dish).filter(Dish.menuDate == date, Dish.menu != "NA")
+    else:
+        query = db_session.query(Dish).filter(Dish.menuDate == date, Dish.location == mensa_name, Dish.menu != "NA")
+
+
+    # join icons_clean for filtering
+    query = query.outerjoin(FiltersClean, Dish.id == FiltersClean.menu_id).add_columns(FiltersClean.icons_clean.label("icons_clean"))
+
+    # if user filters by meat or diet, apply filters on icons_clean column
+    if selected_diet_meat:
+        filters = [FiltersClean.icons_clean.ilike(f"%{icon}%") for icon in selected_diet_meat]
+        query = query.filter(or_(*filters))
+
+
+    # Join additional tables and add columns
+    query = (
+        query
+        .outerjoin(Recipe, Dish.id == Recipe.menu_id)
+        .outerjoin(Description, Dish.id == Description.menu_id)
+        .outerjoin(DishEng, Dish.id == DishEng.menu_id)
+        .outerjoin(Course, Dish.id == Course.id)
+        .add_columns(
+            # German columns
+            Recipe.recipe_de,
+            Description.description_de,
+            Course.course,
+            
+            # English columns (conditionally included)
+            DishEng.menuLineEng if selected_lang == "en" else None,
+            DishEng.menuEng if selected_lang == "en" else None,
+            Description.description_en if selected_lang == "en" else None,
+            Recipe.recipe_en if selected_lang == "en" else None,
+            Course.course_eng if selected_lang == "en" else None
+        )
+    )
+
+    
+    # join the embedding column to the filtered dataframe
+    query = query.outerjoin(Embedding, Dish.id == Embedding.menu_id).add_columns(Embedding.embedding)
+
+    return query.all()
 
 def get_image_path(dish_id: int, session: Session) -> str:
     dish = session.query(Dish).filter_by(id=dish_id).first()

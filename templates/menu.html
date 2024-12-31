@@ -144,23 +144,23 @@
                 {% endif %}
                 </p>
                 <div class="radio-group">
-                    <input type="checkbox" id="diet_omnivore" name="selected_diet_meat" value="omnivore" />
-                    <label for="diet_omnivore">{% if session.get('language') == 'de' %}Allesesser{% else %}Omnivore{% endif %}</label>
+                   <!-- <input type="checkbox" id="diet_omnivore" name="selected_diet_meat" value="omnivore" /> -->
+                   <!-- <label for="diet_omnivore">{% if session.get('language') == 'de' %}Allesesser{% else %}Omnivore{% endif %}</label> -->
                     <input type="checkbox" id="diet_vegan" name="selected_diet_meat" value="vegan" />
                     <label for="diet_vegan">{% if session.get('language') == 'de' %}Vegan{% else %}Vegan{% endif %}</label>
-                    <input type="checkbox" id="diet_vegetarian" name="selected_diet_meat" value="V" />
+                    <input type="checkbox" id="diet_vegetarian" name="selected_diet_meat" value="vegetarian" />
                     <label for="diet_vegetarian">{% if session.get('language') == 'de' %}Vegetarisch{% else %}Vegetarian{% endif %}</label>
                     <input type="checkbox" id="diet_mensavital" name="selected_diet_meat" value="mensaVital" />
                     <label for="diet_mensavital">{% if session.get('language') == 'de' %}Vital{% else %}Vital{% endif %}</label>
-                    <input type="checkbox" id="meat_beef" name="selected_diet_meat" value="R" />
+                    <input type="checkbox" id="meat_beef" name="selected_diet_meat" value="beef" />
                     <label for="meat_beef">{% if session.get('language') == 'de' %}Rind{% else %}Beef{% endif %}</label>
-                    <input type="checkbox" id="meat_poultry" name="selected_diet_meat" value="G" />
+                    <input type="checkbox" id="meat_poultry" name="selected_diet_meat" value="poultry" />
                     <label for="meat_poultry">{% if session.get('language') == 'de' %}Geflügel{% else %}Poultry{% endif %}</label>
-                    <input type="checkbox" id="meat_wild" name="selected_diet_meat" value="W" />
+                    <input type="checkbox" id="meat_wild" name="selected_diet_meat" value="game" />
                     <label for="meat_wild">{% if session.get('language') == 'de' %}Wild{% else %}Game{% endif %}</label>
-                    <input type="checkbox" id="meat_fish" name="selected_diet_meat" value="F" />
+                    <input type="checkbox" id="meat_fish" name="selected_diet_meat" value="fish" />
                     <label for="meat_fish">{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}</label>
-                    <input type="checkbox" id="meat_pork" name="selected_diet_meat" value="S" />
+                    <input type="checkbox" id="meat_pork" name="selected_diet_meat" value="pork" />
                     <label for="meat_pork">{% if session.get('language') == 'de' %}Schwein{% else %}Pork{% endif %}</label>
                 </div>
                 
@@ -282,37 +282,37 @@
                             </div>                                                  
                             <!-- Icons on selected meats-->
                             <div class="flex gap-2 mb-2">
-                                {% if 'F' in dish.icons %}
+                                {% if 'fish' in dish.icons %}
                                     <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}">
                                         <img src="{{ url_for('static', filename='images/icon_fish.png') }}" alt="Fish" class="h-6">
                                     </span>
                                 {% endif %}
-                                {% if 'G' in dish.icons %}
+                                {% if 'poultry' in dish.icons %}
                                     <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Geflügel{% else %}Poultry{% endif %}">
                                         <img src="{{ url_for('static', filename='images/icon_poultry.png') }}" alt="Poultry" class="h-6">
                                     </span>
                                 {% endif %}
-                                {% if 'K' in dish.icons %}
+                                {% if 'veal' in dish.icons %}
                                     <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Kalb{% else %}Veal{% endif %}">
                                         <img src="{{ url_for('static', filename='images/icon_veal.png') }}" alt="Veal" class="h-6">
                                     </span>
                                 {% endif %}
-                                {% if 'L' in dish.icons %}
+                                {% if 'lamb' in dish.icons %}
                                     <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Lamm{% else %}Lamb{% endif %}">
                                         <img src="{{ url_for('static', filename='images/icon_lamb.png') }}" alt="Lamb" class="h-6">
                                     </span>
                                 {% endif %}
-                                {% if 'R' in dish.icons %}
+                                {% if 'beef' in dish.icons %}
                                     <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Rind{% else %}Beef{% endif %}">
                                         <img src="{{ url_for('static', filename='images/icon_beef.png') }}" alt="Beef" class="h-6">
                                     </span>
                                 {% endif %}
-                                {% if 'S' in dish.icons %}
+                                {% if 'pork' in dish.icons %}
                                     <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Schwein{% else %}Pork{% endif %}">
                                         <img src="{{ url_for('static', filename='images/icon_pork.png') }}" alt="Pork" class="h-6">
                                     </span>
                                 {% endif %}
-                                {% if 'W' in dish.icons %}
+                                {% if 'game' in dish.icons %}
                                     <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Wild{% else %}Game{% endif %}">
                                         <img src="{{ url_for('static', filename='images/icon_game.png') }}" alt="Game" class="h-6">
                                     </span>
@@ -322,7 +322,7 @@
                                         <img src="{{ url_for('static', filename='images/icon_recommendation.png') }}" alt="Top" class="h-6">
                                     </span>
                                 {% endif %}
-                                {% if 'V' in dish.icons %}
+                                {% if 'vegetarian' in dish.icons %}
                                     <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vegetarisch{% else %}Vegetarian{% endif %}">
                                         <img src="{{ url_for('static', filename='images/icon_vegetarian.png') }}" alt="Vegetarian" class="h-6">
                                     </span>
@@ -444,7 +444,7 @@
                         <div class="col-span-1 flex flex-col items-end">
                             <!-- Images -->
                             <div class="mb-4 max-w-xs justify-end">
-                                <img src="{{ url_for('static', filename='images/menu_1.png') }}" alt="Coffee Shop" class="w-full h-auto rounded-lg shadow-md object-cover">
+                                <!-- <img src="{{ url_for('static', filename='images/menu_1.png') }}" alt="Coffee Shop" class="w-full h-auto rounded-lg shadow-md object-cover"> -->
                             </div> 
                             <!-- Ratings -->
                             <div class="rating mt-4 text-4xl flex justify-end">

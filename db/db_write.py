@@ -194,8 +194,7 @@ def write_to_dishes_eng(engine, Session):
         for dish in dishes:
             # Check if translation already exists
             existing = db_session.query(DishEng).filter(
-                DishEng.menuDate == dish.menuDate,
-                DishEng.menuEng == translate_text_first_word_capitalized(dish.menu)
+                DishEng.menu_id == dish.id,
             ).first()
             
             if not existing:

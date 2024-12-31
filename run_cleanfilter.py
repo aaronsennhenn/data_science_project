@@ -20,7 +20,27 @@ import numpy as np
 from scraper.gpt_prompts import classify_missing_filters
 from db.db_read import load_dishes_table_for_filter_cleaning
 from db.utils import correct_icons
-from db.db_write import write_to_filters_clean
+from db.db_write import write_to_filters_clean,FiltersClean
+
+
+
+replacement_dict = {
+            "F": "fish",
+            "G": "poultry",
+            "K": "veal",
+            "L": "lamb",
+            "R": "beef",
+            "S": "pork",
+            "W": "game",
+            "V": "vegetarian"
+        }
+
+# replace categories
+def replace_categories(icon_string):
+    if pd.isna(icon_string):
+        return None
+    # Split the string into parts, map replacements, and join back
+    return ", ".join(replacement_dict.get(part.strip(), part.strip()) for part in icon_string.split(","))
 
 
 def update_FiltersClean():
@@ -35,6 +55,9 @@ def update_FiltersClean():
         return
 
     dish.replace("NA", np.nan, inplace=True)
+
+    # Apply the function to the DataFrame
+    dish["icons"] = dish["icons"].apply(replace_categories)
 
     # vegan labels tend to be double 'Vegan, vegan'
     dish["icons"] = dish["icons"].apply(lambda x: "vegan" if "vegan" in str(x).lower() else x)

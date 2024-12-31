@@ -52,11 +52,11 @@ def correct_icons(dish_name,menuLine):
 
     # Determine the result based on matches
     if vegan_match and vegetarian_match:
-        return "V, vegan"
+        return "vegan"
     elif vegan_match:
-        return "V, vegan"
+        return "vegan"
     elif vegetarian_match:
-        return "V"
+        return "vegetarian"
     else: 
         # if dish is still not classified, assign label based on menu category
         vegan_menus = ["Auswahlgericht vegan 2", "Tagesmenü vegan"]
@@ -68,7 +68,7 @@ def correct_icons(dish_name,menuLine):
         if vegan_match:
             return "vegan"
         elif vegetarian_match:
-            return "V"
+            return "vegetarian"
         else:  
             return np.nan
 

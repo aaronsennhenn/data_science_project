@@ -367,8 +367,9 @@ def classify_missing_filters(dish_name):
     result_string = result[0].strip() if len(result) > 0 else ""
 
     # transform classification string into consistent format:
-    replacement_dict = {"fish": "F", "poultry": "G", "veal": "K", "lamb": "L", "beef": "R", "pork": "S", "game": "W","vegetarian":"V"}
-    return replacement_dict.get(result_string)  
+    #replacement_dict = {"fish": "F", "poultry": "G", "veal": "K", "lamb": "L", "beef": "R", "pork": "S", "game": "W","vegetarian":"V"}
+    # return replacement_dict.get(result_string)
+    return result_string  
 
 ## Run all prompts
 def all_prompts(df, column):
