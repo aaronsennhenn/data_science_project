@@ -3,7 +3,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
-from db.db_read import get_user_vector, get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes
+from db.db_read import get_user_vector, get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -156,10 +156,58 @@ def user_page():
     lang = session.get('language', 'en')
     session['language'] = lang
     session.permanent = True
-    user_name = session.get('username')  # Get username from session
+    user_name = session.get('username')
     if not user_name:
-        return redirect(url_for('login'))  # Redirect to login if not logged in
-    return render_template('user.html', username=user_name)  # Render the personal page
+        return redirect(url_for('login'))
+
+    db_session = Session()
+    try:
+        total_ratings = get_total_ratings_by_user(db_session, user_name)
+        first_rating_date = get_first_rating_date_of_user(db_session, user_name)
+        favorite_dishes = get_favorite_dishes_of_user(db_session, user_name, lang)
+        favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)
+
+        # Create top mensas chart
+        mensa_trace = {
+            'x': [mensa[0] for mensa in favorite_mensas],
+            'y': [mensa[1] for mensa in favorite_mensas],
+            'type': 'bar',
+            'marker': {
+                'color': ['#4F46E5', '#6366F1', '#818CF8']
+            }
+        }
+        mensa_layout = {
+            'xaxis': {'title': 'Mensa', 'tickangle': 45},
+            'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
+        }
+        mensa_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+
+        # Create top dishes chart
+        dish_trace = {
+            'x': [dish[0] for dish in favorite_dishes],
+            'y': [dish[1] for dish in favorite_dishes],
+            'type': 'bar',
+            'marker': {
+                'color': ['#4F46E5', '#6366F1', '#818CF8']
+            }
+        }
+        dish_layout = {
+            'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 45},
+            'yaxis': {'title': 'Bewertung' if lang == 'de' else 'Rating'}
+        }
+        dish_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+
+    finally:
+        db_session.close()
+
+    return render_template('user.html', 
+                           username=user_name, 
+                           total_ratings=total_ratings,
+                           first_rating_date=first_rating_date,
+                           favorite_dishes=favorite_dishes,
+                           favorite_mensas=favorite_mensas,
+                           mensa_chart=mensa_chart,
+                           dish_chart=dish_chart)
 
 
 @app.route('/menu', methods=['GET','POST'])

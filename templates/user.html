@@ -6,14 +6,12 @@
     <title>User</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/default.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/analysis.css') }}" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
-    <!-- Background Image with Overlay -->
-    <div class="bg-image fixed inset-0 z-0"></div>
-
-    <!-- Navigation Bar -->
+    <!-- Header -->
     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
         <nav>
             <div class="nav-container flex justify-between items-center">
@@ -40,7 +38,7 @@
             </div>
         </nav>
     </header>
-
+    
     <!-- Sidebar Navigation -->
     <div id="sidebar" class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-20">
         <div class="p-5">
@@ -49,11 +47,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
-
             {% if username %}
             <div class="flex items-center space-x-3 mb-6">
                 <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-700">
-                    <!-- Optionally, you can add a user avatar here -->
                 </div>
                 <div>
                     <p class="text-sm font-medium text-gray-600">Logged in as:</p>
@@ -73,7 +69,7 @@
                 <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
                 </a>
-                <a href="/about" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Über uns{% else %}About{% endif %}
                 </a>
                 {% if username %}
@@ -87,30 +83,75 @@
     </div>
 
     <!-- Main Content -->
-    <main class="flex-grow flex items-center justify-center">
-        <h1>Welcome, {{ username }}!</h1> <!-- Display welcome message with username -->
-    </main>
+    <!-- Main Content -->
+<main class="flex-grow flex flex-col items-center px-4 py-4">
+    <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
+        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Account Analyse{% else %}Account Analysis{% endif %}</h1>
+        <h2 class="text-xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Willkommen {% else %}Welcome {% endif %}{{ username }}!</h2> 
+        <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Ihre persönliche Mensa-Statistik{% else %}Your personal mensa statistics{% endif %}</p>
+    </div>
+
+    <!-- Key Metrics Section -->
+    <section class="mb-12 w-full">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre zentralen Kennzahlen{% else %}Your Key Metrics{% endif %}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Benutzerkontoerstellung{% else %}Account Start{% endif %}</h3>
+                <p class="text-2xl font-bold text-gray-900">{{ first_rating_date }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Bewertungsanzahl{% else %}Total Ratings{% endif %}</h3>
+                <p class="text-2xl font-bold text-gray-900">{{ total_ratings }}</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Analysiertes Gebiet{% else %}Covered Area{% endif %}</h3>
+                <a href="https://www.google.com/maps/place/Tübingen" target="_blank" class="location-link">
+                    Tübingen
+                </a>
+            </div>        
+        </div>
+    </section>
+
+    <section class="mb-12 w-full">
+          <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre Favoriten{% else %}Your Favorites{% endif %}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded-lg w-full">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Ihre Top Mensen{% else %}Your Top Mensas{% endif %}</h4>
+                    <div id="top-mensas-chart" style="width: 100%; height: 300px;"></div>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg w-full">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Ihre Top Menüs{% else %}Your Top Dishes{% endif %}</h4>
+                    <div id="top-dishes-chart" style="width: 100%; height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-t py8 relative z10">
-        <div class=max-w7xl mx-auto px8 text-center text-gray600>
+    <footer class="bg-white border-t border-gray-200 py-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
             &copy; 2024 MENSA APP. All rights reserved.
         </div>
     </footer>
-
-    <!-- JavaScript for sidebar toggle -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
-        const menuToggle = document.getElementById('menu-toggle');
-        const closeMenu = document.getElementById('close-menu');
-        const sidebar = document.getElementById('sidebar');
+        Plotly.newPlot('top-mensas-chart', {{ mensa_chart | safe }}.data, {{ mensa_chart | safe }}.layout);
+        Plotly.newPlot('top-dishes-chart', {{ dish_chart | safe }}.data, {{ dish_chart | safe }}.layout);
+    </script>
+    <script>
+            const menuToggle = document.getElementById('menu-toggle');
+            const closeMenu = document.getElementById('close-menu');
+            const sidebar = document.getElementById('sidebar');
 
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('translate-x-full');
-        });
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('translate-x-full');
+            });
 
-        closeMenu.addEventListener('click', () => {
-            sidebar.classList.add('translate-x-full');
-        });
+            closeMenu.addEventListener('click', () => {
+                sidebar.classList.add('translate-x-full');
+            });
     </script>
 </body>
 </html>

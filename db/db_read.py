@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean
+from .db_write import Dish, DishEng,  Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean
 from typing import List
 from sqlalchemy import func
 import datetime
@@ -421,3 +421,45 @@ def get_top_three_mensas(session: Session):
         } for mensa in top_mensas
     ]
     return result
+
+# Account Analysis
+# Get total number of ratings a user submitted
+def get_total_ratings_by_user(session: Session, username: str) -> int:
+    return session.query(func.count(Rating.id)).filter(Rating.user_name == username).scalar()
+
+# Get date of first rating of user
+def get_first_rating_date_of_user(session: Session, username: str) -> str:
+    first_rating = session.query(func.min(Rating.timestamp)).filter(Rating.user_name == username).scalar()
+    if first_rating:
+        return first_rating.strftime('%Y-%m-%d')
+    return None
+
+# Get favorite dishes (top 3) of user
+def get_favorite_dishes_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3):
+    favorite_dishes = session.query(
+        Dish.id,
+        Dish.menu,
+        DishEng.menuEng,
+        Rating.rating
+    ).join(Rating, Dish.id == Rating.menu_id
+    ).outerjoin(DishEng, Dish.id == DishEng.menu_id
+    ).filter(Rating.user_name == username
+    ).order_by(Rating.rating.desc()
+    ).limit(limit).all()
+
+    return [(dish.menuEng if lang == 'en' else dish.menu, dish.rating) for dish in favorite_dishes]
+
+# Get favorite mensas (top 3) of user
+def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3):
+    favorite_mensas = session.query(
+        Dish.location,
+        DishEng.locationEng,
+        func.avg(Rating.rating).label('avg_rating')
+    ).join(Rating, Dish.id == Rating.menu_id
+    ).outerjoin(DishEng, Dish.id == DishEng.menu_id
+    ).filter(Rating.user_name == username
+    ).group_by(Dish.location, DishEng.locationEng
+    ).order_by(func.avg(Rating.rating).desc()
+    ).limit(limit).all()
+
+    return [(mensa.locationEng if lang == 'en' else mensa.location, round(mensa.avg_rating, 2)) for mensa in favorite_mensas]
