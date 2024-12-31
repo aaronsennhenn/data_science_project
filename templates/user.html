@@ -83,7 +83,6 @@
     </div>
 
     <!-- Main Content -->
-    <!-- Main Content -->
 <main class="flex-grow flex flex-col items-center px-4 py-4">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
         <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Account Analyse{% else %}Account Analysis{% endif %}</h1>
@@ -112,9 +111,8 @@
         </div>
     </section>
 
-    <section class="mb-12 w-full">
-          <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-            <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre Favoriten{% else %}Your Favorites{% endif %}</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre Favoriten{% else %}Your Favorites{% endif %}</h2>
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="p-4 bg-gray-50 rounded-lg w-full">
                     <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Ihre Top Mensen{% else %}Your Top Mensas{% endif %}</h4>
@@ -126,7 +124,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section>    
 </main>
 
     <!-- Footer -->
