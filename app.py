@@ -3,7 +3,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
-from db.db_read import get_user_vector, get_dishes_by_date_location, get_dishes_by_date, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user
+from db.db_read import get_user_vector, get_dishes_by_date_location_filtered, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -246,9 +246,8 @@ def menu():
         if request.method == 'POST':
             mensa_name = request.form.get('selected_mensa')
             date_temp = request.form.get('selected_date')
-            selected_diet_meat = request.form.get('selected_diet_meat')
+            selected_diet_meat = request.form.getlist('selected_diet_meat')
             selected_price = request.form.get('selected_price')
-
             # get rating from user and selected dish with mensa
             rating, menu_id = request.form.get('rating'), request.form.get('id')
 
@@ -266,68 +265,41 @@ def menu():
             if date_temp:
                 date = date_temp
 
-        # Query dishes based on mensa selection
-        if mensa_name == 'all':
-            dishes = get_dishes_by_date(db_session, datetime.strptime(date, '%Y-%m-%d').date())
-        else:
-            dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
+        # filter dishes column and merge additional information. Also apply filter of the user directly in the sql query
+        dishes = get_dishes_by_date_location_filtered(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name, selected_diet_meat, session.get('language'))
 
-        # In the menu() route, modify the menu_data creation:
         menu_data = []
-        for dish,embedding in dishes:
-            # Get the English translations from dishes_eng table
-            dish_eng = db_session.query(DishEng).filter(
-                DishEng.menuDate == dish.menuDate,
-                DishEng.menu_id == dish.id
-            ).first()
 
+        for dish in dishes:
             menu_data.append({
-            'id': dish.id,
-            'menu': dish.menu,
-            'menuEng': dish_eng.menuEng if dish_eng and dish_eng.menuEng else None,
-            'menuLine': dish.menuLine,
-            'menuLineEng': dish_eng.menuLineEng if dish_eng and dish_eng.menuLineEng else None,
-            'studentPrice': dish.studentPrice,
-            'guestPrice': dish.guestPrice,
-            'allergens': dish.allergens,
-            'additives': dish.additives,
-            'meats': dish.meats,
-            'icons': dish.icons,
-            'location': dish.location,
-            'locationEng': dish_eng.locationEng if dish_eng else None,
-            'course': get_course(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location),
-            'course_eng': get_course_eng(db_session, dish.menuDate, dish.menuLine, dish.menu, dish.location),
-            'description_de': descriptions.get(dish.id, {}).get('description_de', ''),
-            'description_en': descriptions.get(dish.id, {}).get('description_en', ''),
-            'recipe_de': recipes.get(dish.id, {}).get('recipe_de', ''),
-            'recipe_en': recipes.get(dish.id, {}).get('recipe_en', ''),
-            'recommendation_score': compute_cosine_similarity(embedding,user_vector) if user_vector else 0
-        })
+                        'id': dish[0].id,
+                        'menu': dish[0].menu,
+                        'menuLine': dish[0].menuLine,
+                        'studentPrice': dish[0].studentPrice,
+                        'guestPrice': dish[0].guestPrice,
+                        'allergens': dish[0].allergens,
+                        'additives': dish[0].additives,
+                        'location': dish[0].location,
+                        'icons':dish[1],
+                        'receipe_de':dish[2],
+                        'description_de':dish[3],
+                        'course':dish[4],
+                        'menuLineEng':dish[5],
+                        'menuEng':dish[6],
+                        'description_en':dish[7],
+                        'recipe_en':dish[8],
+                        'course_eng':dish[9],
+                        'embedding':dish[10],
+                        'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0
+                        })
 
-        # Group dishes by course_eng
+        # Group dishes into a list of dicts
         grouped_menu_data = {}
         for dish in menu_data:
             course_key = dish['course'] if lang == 'de' else dish['course_eng']
             if course_key not in grouped_menu_data:
                 grouped_menu_data[course_key] = []
             grouped_menu_data[course_key].append(dish)
-        
-        # Then filter the grouped dishes based on selected diet or meat
-        if selected_diet_meat and 'omnivore' not in selected_diet_meat:
-            filtered_grouped_data = {}
-            for course, dishes in grouped_menu_data.items():
-                filtered_dishes = []
-                for dish in dishes:
-                    # Split icons by comma and strip whitespace, normalize to lowercase
-                    icons = [icon.strip().lower() for icon in dish['icons'].split(',')] if dish['icons'] else []
-                    
-                    # Check if any selected diet/meat is present in the icons (case insensitive)
-                    if any(icon.lower() in icons for icon in selected_diet_meat):
-                        filtered_dishes.append(dish)
-                
-                if filtered_dishes:  # Only include courses that have dishes after filtering
-                    filtered_grouped_data[course] = filtered_dishes
-            grouped_menu_data = filtered_grouped_data
 
         # Check for no results after filtering
         if not grouped_menu_data:
