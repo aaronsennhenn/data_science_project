@@ -338,7 +338,38 @@ def generate_recipe(df, column):
         
     return df
 
+def classify_missing_filters(dish_name):
+    """
+    This function classifies the dish into the predefined filter categories. It is only applied to those main dishes, where the mensa website information is lacking and where our correction does not work
+    No need to run this function in the 'all_prompts' function.
+    """
+    
+    # Create prompt to classify missing filter category
+    messages = [
+        {"role": "system", "content": (
+            "The string that I provide is a dish name. Please classify the dish into one of the following categories: vegan, vegetarian, fish, poultry, veal, lamb, beef, pork, game. Only return the classification string"
+        )},
+        {"role": "user", "content": (
+            f"{dish_name}"
+        )}
+    ]
 
+    # Send request using new `openai.ChatCompletion` interface
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=messages,
+        max_tokens=200,
+        temperature=0.2
+    )
+
+    # Extract ingredients and tokens used
+    result = completion.choices[0].message.content.strip().split("\n")
+    result_string = result[0].strip() if len(result) > 0 else ""
+
+    # transform classification string into consistent format:
+    #replacement_dict = {"fish": "F", "poultry": "G", "veal": "K", "lamb": "L", "beef": "R", "pork": "S", "game": "W","vegetarian":"V"}
+    # return replacement_dict.get(result_string)
+    return result_string  
 
 ## Run all prompts
 def all_prompts(df, column):

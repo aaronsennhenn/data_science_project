@@ -14,7 +14,6 @@ Base = declarative_base()
 
 class Dish(Base):
     __tablename__ = 'dishes'
-
     id = Column(Integer, primary_key=True)
     menuDate = Column(Date, nullable=True)
     menuLine = Column(String, nullable=True)
@@ -28,10 +27,17 @@ class Dish(Base):
     allergens = Column(String, nullable=True)
     additives = Column(String, nullable=True)
 
+class FiltersClean(Base):
+    __tablename__ = "filters_clean"
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
+    icons_clean = Column(String, nullable=True)
+
+
 class DishEng(Base):
     __tablename__ = 'dishes_eng'
-
     id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
     menuDate = Column(Date, nullable=True)
     menuLineEng = Column(String, nullable=True)
     menuEng = Column(String, nullable=True)
@@ -188,12 +194,12 @@ def write_to_dishes_eng(engine, Session):
         for dish in dishes:
             # Check if translation already exists
             existing = db_session.query(DishEng).filter(
-                DishEng.menuDate == dish.menuDate,
-                DishEng.menuEng == translate_text_first_word_capitalized(dish.menu)
+                DishEng.menu_id == dish.id,
             ).first()
             
             if not existing:
                 dish_eng = DishEng(
+                    menu_id=dish.id,  # Add this line to include the menu_id
                     menuDate=dish.menuDate,
                     menuLineEng=translate_text_all_capitalized(dish.menuLine),
                     menuEng=translate_text_first_word_capitalized(dish.menu),
@@ -212,6 +218,22 @@ def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):
         rating = Rating(menu_id=menu_id, rating=rating, user_name=user_name)
         db_session.add(rating)
         db_session.commit()
+
+def write_to_filters_clean(icons_df: pd.DataFrame, engine, session):
+    FiltersClean.metadata.create_all(engine) 
+
+    for _, row in icons_df.iterrows():
+        try:
+            icons = FiltersClean(
+                menu_id=int(row.get('id')),
+                icons_clean=str(row.get('icons_clean')),
+            )
+            session.add(icons)
+            session.commit()
+        except ValueError as e:
+            print(f"Error message: {str(e)}")
+            continue
+
 
 
 def write_to_user(username: str, password: str, engine, Session):
@@ -460,6 +482,9 @@ def update_user_vector(username, engine, Session):
     Args:
         username (str): The username of the user whose vector needs to be updated.
     """
+    User.metadata.create_all(engine) 
+    Embedding.metadata.create_all(engine)
+
     with Session() as db_session:
         # Join the ratings and embeddings tables, filtering by the provided username
         query = db_session.query(
@@ -467,7 +492,7 @@ def update_user_vector(username, engine, Session):
             Embedding.embedding
         ).outerjoin(
             Embedding,
-            Rating.menu_id == Embedding.id
+            Rating.menu_id == Embedding.menu_id
         ).filter(
             Rating.user_name == username  # Filter by the specific username
         )
