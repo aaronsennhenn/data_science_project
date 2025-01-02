@@ -4,7 +4,7 @@ from typing import List
 from sqlalchemy import func
 import datetime
 import pandas as pd
-from sqlalchemy import or_
+from sqlalchemy import or_,func
 
 
 def convert_dblist_to_df(db_list):
@@ -44,7 +44,7 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
         .outerjoin(Recipe, Dish.id == Recipe.menu_id)
         .outerjoin(Description, Dish.id == Description.menu_id)
         .outerjoin(DishEng, Dish.id == DishEng.menu_id)
-        .outerjoin(Course, Dish.id == Course.id)
+        .outerjoin(Course, Dish.id == Course.menu_id)
         .add_columns(
             # German columns
             Recipe.recipe_de,
@@ -63,6 +63,25 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
     
     # join the embedding column to the filtered dataframe
     query = query.outerjoin(Embedding, Dish.id == Embedding.menu_id).add_columns(Embedding.embedding)
+
+    # Compute average rating for menu_ids in the query
+    avg_rating_subquery = (
+        db_session.query(
+            Rating.menu_id.label("menu_id"),
+            func.round(func.avg(Rating.rating),2).label("average_rating"),
+            func.count(Rating.rating).label("rating_count")  # Count of ratings
+
+        )
+        .group_by(Rating.menu_id)
+        .subquery()
+    )
+
+    # Join the average rating to the main query
+    query = query.outerjoin(avg_rating_subquery, Dish.id == avg_rating_subquery.c.menu_id).add_columns(
+        avg_rating_subquery.c.average_rating.label("average_rating"),
+        avg_rating_subquery.c.rating_count.label("rating_count")
+
+    )
 
     return query.all()
 

@@ -79,7 +79,7 @@ def login():
             
             if user and user.check_password(password):
                 session['username'] = username
-                return redirect(url_for("user_page"))
+                return redirect(url_for("menu"))
             else:
                 error_message = "Your username or password is wrong!"
                 return render_template('login.html', error=error_message)
@@ -100,7 +100,7 @@ def register():
         write_to_user(username, password, engine, Session)
         
         session['username'] = username
-        return redirect(url_for('user_page'))
+        return redirect(url_for('menu'))
 
 
 # login for google
@@ -236,7 +236,8 @@ def menu():
         date = available_dates[0]
         selected_diet_meat = 'omnivore'
         selected_price = "studentPrice"
-        no_results = False 
+        no_results = False
+        recommendation_switch = None
 
         # if user logged in, get user_id
         user_name = session.get('username')
@@ -248,6 +249,8 @@ def menu():
             date_temp = request.form.get('selected_date')
             selected_diet_meat = request.form.getlist('selected_diet_meat')
             selected_price = request.form.get('selected_price')
+            recommendation_switch = request.form.get('recommendation_switch')
+
             # get rating from user and selected dish with mensa
             rating, menu_id = request.form.get('rating'), request.form.get('id')
 
@@ -290,8 +293,15 @@ def menu():
                         'recipe_en':dish[8],
                         'course_eng':dish[9],
                         'embedding':dish[10],
-                        'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0
+                        'average_rating':dish[11],
+                        'rating_count':dish[12],
+                        'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
+                        'is_top_recommendation_in_course': False  # Initialize to False
                         })
+        
+        # Sort dishes by recommendation score if recommendation switch is on
+        if recommendation_switch:
+            menu_data = sorted(menu_data, key=lambda x: x['recommendation_score'], reverse=True)
 
         # Group dishes into a list of dicts
         grouped_menu_data = {}
@@ -300,6 +310,17 @@ def menu():
             if course_key not in grouped_menu_data:
                 grouped_menu_data[course_key] = []
             grouped_menu_data[course_key].append(dish)
+
+        # find dish with highest recommendation score for dish group:
+        target_course_keys = 'Hauptspeise' if lang == 'de' else 'Main Dish'
+        for course_key, dishes in grouped_menu_data.items():
+            if course_key in target_course_keys:
+                # Find the dish with the highest recommendation score
+                top_dish = max(dishes, key=lambda x: x['recommendation_score'])
+                
+                # Set the flag only for the top dish in the target courses
+                for dish in dishes:
+                    dish['is_top_recommendation_in_course'] = dish == top_dish
 
         # Check for no results after filtering
         if not grouped_menu_data:
@@ -327,7 +348,8 @@ def menu():
                          recipes=recipes,
                          username=user_name,
                          lang=lang,
-                         no_results=no_results)
+                         no_results=no_results,
+                         recommendation_switch=recommendation_switch)
 
 
 @app.route('/analysis')

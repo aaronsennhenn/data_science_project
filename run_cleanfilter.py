@@ -20,7 +20,7 @@ import numpy as np
 from scraper.gpt_prompts import classify_missing_filters
 from db.db_read import load_dishes_table_for_filter_cleaning
 from db.utils import correct_icons
-from db.db_write import write_to_filters_clean,FiltersClean
+from db.db_write import write_to_filters_clean,FiltersClean,write_to_course,Course
 
 
 
@@ -81,6 +81,12 @@ def update_FiltersClean():
 
     with Session() as db_session:
         write_to_filters_clean(dish,engine,db_session)
+
+def update_Course():
+    engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
+    with Session() as db_session:
+        write_to_course(engine,db_session)
     
 if __name__ == "__main__":
     update_FiltersClean()
+    update_Course()
