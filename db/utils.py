@@ -33,7 +33,7 @@ def compute_cosine_similarity(user_vector_str, dish_embedding_str):
     # Compute cosine similarity
     score = cosine_similarity(user_vector.reshape(1, -1), dish_embedding.reshape(1, -1))[0, 0]
 
-    return score
+    return round(score,3)
 
 def correct_icons(dish_name,menuLine):
     if not dish_name:

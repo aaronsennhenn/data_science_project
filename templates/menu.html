@@ -179,7 +179,22 @@
                     <input type="checkbox" id="price_guest" name="selected_price" value="guestPrice" />
                     <label for="price_guest">{% if session.get('language') == 'de' %}Gast{% else %}Guest{% endif %}</label>
                 </div>
-            </div>            
+            </div>
+            <div class="flex-1">
+                <p class="text-left">
+                {% if session.get('language') == 'de' %}
+                    personalisierte Empfehlung:
+                {% else %}
+                    Personalized recommendation:
+                {% endif %}
+                </p>
+                <div class="radio-group">
+                    <label class="switch">
+                        <input type="checkbox" name="recommendation_switch" value="on">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
             <div class="w-full">
                 <button type="submit" class="bg-violet-500 text-white px-4 py-2 rounded-md shadow hover:bg-violet-600 transition">
                 {% if session.get('language') == 'de' %}
@@ -207,11 +222,7 @@
             {% for course, course_dishes in dishes.items() %}
                 <!-- Course headline -->
                 <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
-                    {% if session.get('language') == 'de' %}
                     {{ course }}
-                    {% else %}
-                    {{ course_eng }}
-                    {% endif %}
                 </h2>
                 {% for dish in course_dishes %}
                 <div class="card w-full">
@@ -238,48 +249,30 @@
                                     {{ dish.menuEng if dish.menuEng else dish.menu }}
                                 {% endif %}
                             </h5>                                
-                            <!-- Price results remain the same for en and de-->                    
+                            <!-- show either student or guest price -->                    
                             <div class="text-lg font-medium text-gray-700">
-                                {% if request.form.getlist('selected_price') %}
-                                    {% if 'studentPrice' in request.form.getlist('selected_price') %}
-                                        <div>
-                                            {% if session.get('language') == 'de' %}
-                                                Studentenpreis: 
-                                            {% else %}
-                                                Student Price: 
-                                            {% endif %}
-                                            {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
-                                        </div>
-                                        {% endif %}
-                                        {% if 'guestPrice' in request.form.getlist('selected_price') %}
-                                        <div>
-                                            {% if session.get('language') == 'de' %}
-                                                Gästepreis: 
-                                            {% else %}
-                                                Guest Price: 
-                                            {% endif %}
-                                            {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
-                                        </div>
-                                        {% endif %}
+                                {% if selected_price == 'studentPrice' or not selected_price %}
+                                    <div>
+                                        {% if session.get('language') == 'de' %}
+                                            Studentenpreis: 
                                         {% else %}
-                                        <div>
-                                            {% if session.get('language') == 'de' %}
-                                                Studentenpreis: 
-                                            {% else %}
-                                                Student Price: 
-                                            {% endif %}
-                                            {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
-                                        </div>
-                                        <div>
-                                            {% if session.get('language') == 'de' %}
-                                                Gästepreis: 
-                                            {% else %}
-                                                Guest Price: 
-                                            {% endif %}
-                                            {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
-                                        </div>
-                                {% endif %}
-                            </div>                                                  
+                                            Student Price: 
+                                        {% endif %}
+                                        {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    {% if selected_price == 'guestPrice' %}
+                                    <div>
+                                        {% if session.get('language') == 'de' %}
+                                            Gästepreis: 
+                                        {% else %}
+                                            Guest Price: 
+                                        {% endif %}
+                                        {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
+                                    </div>
+                                    {% endif %}
+                            </div> 
+                                                                         
                             <!-- Icons on selected meats-->
                             <div class="flex gap-2 mb-2">
                                 {% if 'fish' in dish.icons %}
@@ -446,6 +439,19 @@
                             <div class="mb-4 max-w-xs justify-end">
                                 <!-- <img src="{{ url_for('static', filename='images/menu_1.png') }}" alt="Coffee Shop" class="w-full h-auto rounded-lg shadow-md object-cover"> -->
                             </div> 
+                            <!-- display if dish is recommendet -->
+                            <div>
+                                {% if dish.is_top_recommendation_in_course and recommendation_switch %}
+                                    <p class="text-sm text-green-600">
+                                        {% if session.get('language') == 'de' %}
+                                            Wir empfehlen Ihnen dieses Hauptgericht basierend auf Ihren persönlichen Vorlieben!
+                                        {% else %}
+                                            We recommend this dish to you based on your personal preferences!
+                                        {% endif %}
+                                    </p>
+                                {% endif %}
+                            </div>
+
                             <!-- Ratings -->
                             <div class="rating mt-4 text-4xl flex justify-end">
                                 <input type="radio" id="star5_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="5" />
@@ -473,6 +479,42 @@
                                     Rating received!
                                 {% endif %}
                             </p>
+                            <div class="mt-4 p-2 bg-gray-200 text-gray-700 rounded">
+                                <!-- Average Rating and Count -->
+                                <span>
+                                    {% if dish.average_rating is not none %}
+                                        {{ dish.average_rating }}
+                                    {% else %}
+                                        0
+                                    {% endif %} 
+                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %} 
+
+                                    (
+                                    {% if dish.rating_count is not none %}
+                                        {{ dish.rating_count }}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                    )
+                                </span>
+
+
+                                
+                                <!-- Recommendation Score -->
+                                {% if recommendation_switch and course in ['Hauptspeise', 'Main Dish'] %}
+                                    <br> 
+                                    <span>
+                                        {% if session.get('language') == 'de' %}
+                                            Personalisierter Menu Score: {{ dish.recommendation_score }}
+                                        {% else %}
+                                            Personalized menu score: {{ dish.recommendation_score }}
+                                        {% endif %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+
                         </div>                                                
                     </div>           
                         <!-- Allergens -->
