@@ -12,7 +12,7 @@ def initialize_openai_client(api_key):
     client = OpenAI()
     return client
 
-#Setup client
+#Setup client manually
 os.environ["OPENAI_API_KEY"] = OPENAI_KEY
 client = OpenAI()
 
@@ -267,60 +267,65 @@ def classify_dish_taste(df, column):
     return df
 
 
-def generate_recipe(df, column):
+def generate_recipe(df, column, menuLine):
     recipe_en_list = []
     recipe_de_list = []
     tokens_list = []
+
+    # Define the dish filter
+    dish_filter = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Dessert vorport.', 'Dessert SB', 'Beilagen SB']
         
-    for dish in df[column]:
-        
-        # Handle non-string or empty entries in the column
-        if not isinstance(dish, str) or not dish.strip():
+    for dish, line in zip(df[column], df[menuLine]):
+        # Check if menuLine matches dish_filter or dish is invalid
+        if not isinstance(dish, str) or not dish.strip() or line in dish_filter:
             recipe_en_list.append("No recipe available.")
             recipe_de_list.append("Kein Rezept verfügbar.")
             tokens_list.append(0)
             continue
 
-        #Create prompt for generating a short recipe
-        messages_en = [
-            {"role": "system", "content": (
-                "You are a professional chef. Create a short and simple recipe for the following dish. "
-                "The recipe should include ingredients and step-by-step instructions, written in English, and suitable for a home cook."
-            )},
-            {"role": "user", "content": f"Please provide a short recipe for the dish: '{dish}'."}
-        ]
-    
+        # Create prompt for generating a short recipe in German
         messages_de = [
             {"role": "system", "content": (
-                "Sie sind ein Profikoch. Erstellen Sie ein kurzes und einfaches Rezept für das folgende Gericht. "
-                "Das Rezept sollte Zutaten und eine Schritt-für-Schritt-Anleitung enthalten, in deutscher Sprache verfasst und für einen Hausmann geeignet sein."
+               "Sie sind ein Profikoch. Erstellen Sie ein kurzes und einfaches Rezept für das folgende Gericht. "
+               "Das Rezept sollte Zutaten und eine Schritt-für-Schritt-Anleitung enthalten, in deutscher Sprache verfasst und für einen Hausmann geeignet sein. "
+               "Formatieren Sie das Rezept wie folgt: "
+               "Zutaten:\n- [Zutat 1]\n- [Zutat 2]\n\nAnleitung:\n1. [Schritt 1]\n2. [Schritt 2] "
+               "Stellen Sie sicher, dass die Zutaten und Anweisungen vollständig und klar sind, ohne mitten im Satz abzubrechen."
+               "Vermeiden Sie abschließende Bemerkungen wie 'Guten Appetit'. Geben Sie nur das Rezept an."
             )},
             {"role": "user", "content": f"Bitte geben Sie ein kurzes Rezept an für das Gericht: '{dish}'."}
         ]
-        
-    
-    
-        #Send request
-        completion_en = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages_en,
-            max_tokens=200,
-            temperature=0.5
-        )
 
         completion_de = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages_de,
-            max_tokens=200,
-            temperature=0.5
+            max_tokens=500,
+            temperature=0.1
         )
 
-   
-        #Extract recipe and tokens used
-        recipe_en = completion_en.choices[0].message.content.strip()
+        # Extract the German recipe and token usage
         recipe_de = completion_de.choices[0].message.content.strip()
-        tokens_used = completion_en.usage.total_tokens + completion_de.usage.total_tokens
-        
+        tokens_used = completion_de.usage.total_tokens
+
+        # Translate German recipe into English via follow-up prompt
+        translation_prompt = [
+            {"role": "system", "content": (
+                "You are an expert translator. Please translate the following German recipe into clear, natural English. "
+                "Maintain the format and tone, and ensure that the instructions are easy to follow."
+            )},
+            {"role": "user", "content": f"Translate this recipe:\n\n{recipe_de}"}
+        ]
+
+        translation_response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=translation_prompt,
+            max_tokens=500,
+            temperature=0.1
+        )
+
+        recipe_en = translation_response.choices[0].message.content.strip()
+        tokens_used += translation_response.usage.total_tokens
+
         # Append to lists
         recipe_en_list.append(recipe_en)
         recipe_de_list.append(recipe_de)
