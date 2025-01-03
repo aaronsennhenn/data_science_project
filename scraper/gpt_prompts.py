@@ -138,53 +138,62 @@ def embedding_extraction(df,column):
 
 
 #Descriptions
-def generate_description(df, column):
+def generate_description(df, column, menuLine):
     description_en_list = []
     description_de_list = []
     tokens_list = []
 
-    for menu in df[column]:
-        # Handle non-string or empty menu values
-        if not isinstance(menu, str) or not menu.strip():
+    # Define the dish filter
+    dish_filter = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Dessert vorport.', 'Dessert SB', 'Beilagen SB']
+        
+    for dish, line in zip(df[column], df[menuLine]):
+        # Check if menuLine matches dish_filter or menu is invalid
+        if not isinstance(dish, str) or not dish.strip() or line in dish_filter:
             description_en_list.append("No description available.")
             description_de_list.append("Keine Beschreibung verfügbar.")
             tokens_list.append(0)
             continue
 
-        cleaned_text = preprocess_text(menu)
-
-        # Create prompt for English description
-        messages_en = [
-            {"role": "system", "content": "Provide a short description of the dish in English for someone unfamiliar with it."},
-            {"role": "user", "content": f"Describe the dish: '{cleaned_text}'"}
-        ]
-
-        # Create prompt for German description
+        #Create prompt for German description
         messages_de = [
-            {"role": "system", "content": "Gib eine kurze Beschreibung des Gerichts auf Deutsch für jemanden, der es nicht kennt."},
-            {"role": "user", "content": f"Beschreibe das Gericht: '{cleaned_text}'"}
+            {"role": "system", "content": (
+                "Du bist ein Student. Gib eine kurze Beschreibung des Gerichts auf Deutsch."
+                "Verwende einen prägnanten und einfachen Ton."
+                "Beispiel für das Gericht Chili Con Carne: Ein herzhaftes, würziges Gericht aus Rinderhackfleisch, roten Bohnen, Tomaten, Zwiebeln, Knoblauch und Chili. Gewürzt mit Paprika, Kreuzkümmel und Chili für Schärfe und Geschmack."
+            )},
+            {"role": "user", "content": f"Beschreibe das Gericht: '{dish}'"}
         ]
-
-        # Send request for English description
-        completion_en = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages_en,
-            max_tokens=100,
-            temperature=0.2
-        )
 
         # Send request for German description
         completion_de = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages_de,
+            max_tokens=300,
+            temperature=0.01
+        )
+
+        #Extract descriptions and tokens
+        description_de = completion_de.choices[0].message.content.strip()
+        tokens_used = completion_de.usage.total_tokens
+
+        # Translate German description into English via follow-up prompt
+        translation_prompt = [
+            {"role": "system", "content": (
+                "You are an expert translator. Please translate the following German description into clear, natural English. "
+                "Maintain the format and tone, and ensure that the description is easy to understand."
+            )},
+            {"role": "user", "content": f"Translate this description:\n\n{description_de}"}
+        ]
+
+        translation_response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=translation_prompt,
             max_tokens=100,
             temperature=0.2
         )
 
-        # Extract descriptions and tokens
-        description_en = completion_en.choices[0].message.content.strip()
-        description_de = completion_de.choices[0].message.content.strip()
-        tokens_used = completion_en.usage.total_tokens + completion_de.usage.total_tokens
+        description_en = translation_response.choices[0].message.content.strip()
+        tokens_used += translation_response.usage.total_tokens
 
         # Append results
         description_en_list.append(description_en)
@@ -216,8 +225,6 @@ def classify_dish_taste(df, column):
             taste_de_list.append(None)
             tokens_list.append(0)
             continue
-
-        cleaned_text = preprocess_text(menu)
 
         # Create prompt for taste classification
         messages = [
