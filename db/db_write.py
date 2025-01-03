@@ -432,7 +432,7 @@ def write_to_course(engine, db_session):
         existing = db_session.query(Course).filter(Course.menu_id == dish.id).first()
         
         if not existing:
-            main_dishes = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan', 
+            main_dishes = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan', 'Tagesmenü vegetarisch','Angebot d. Tages veget.','mensaVital vegan',
                             'Auswahlgericht', 'Auswahlgericht vegan 2', 'Auswahlgericht 2',
                             'Auswahlgericht veget.', 'Auswahlgericht vegan', 'mensaVital vegetarisch']
             

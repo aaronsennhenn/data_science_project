@@ -109,3 +109,7 @@ if __name__ == "__main__":
     update_Course()
     update_embeddings()
     update_description()
+    # update taste
+    # update receipe
+    # update ingredients
+    # update dishes eng
