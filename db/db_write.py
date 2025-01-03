@@ -271,6 +271,7 @@ def write_to_description(dishes_df: pd.DataFrame, engine, session):
                 description_en=row.get('description_en')
             )
             session.add(description)
+            session.commit()
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -287,6 +288,8 @@ def write_to_embedding(dishes_df: pd.DataFrame, engine, session):
                 embedding=row.get('gpt_embedding'),
             )
             session.add(embedding)
+            session.commit()
+            
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -429,7 +432,7 @@ def write_to_course(engine, db_session):
         existing = db_session.query(Course).filter(Course.menu_id == dish.id).first()
         
         if not existing:
-            main_dishes = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan', 
+            main_dishes = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan', 'Tagesmenü vegetarisch','Angebot d. Tages veget.','mensaVital vegan',
                             'Auswahlgericht', 'Auswahlgericht vegan 2', 'Auswahlgericht 2',
                             'Auswahlgericht veget.', 'Auswahlgericht vegan', 'mensaVital vegetarisch']
             

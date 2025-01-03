@@ -17,10 +17,10 @@ from db.db_read import setup_database_connection
 from secret import USER, PASSWORD, HOST, PORT
 import pandas as pd
 import numpy as np
-from scraper.gpt_prompts import classify_missing_filters
+from scraper.gpt_prompts import classify_missing_filters,embedding_extraction,generate_description
 from db.db_read import load_dishes_table_for_filter_cleaning
 from db.utils import correct_icons
-from db.db_write import write_to_filters_clean,FiltersClean,write_to_course,Course
+from db.db_write import write_to_filters_clean,write_to_course,write_to_embedding, write_to_description
 
 
 
@@ -48,7 +48,7 @@ def update_FiltersClean():
     engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
 
     # load dishes where the icon column in FiltersClean table is not updated yet.
-    dish = load_dishes_table_for_filter_cleaning(Session)
+    dish = load_dishes_table_for_filter_cleaning(Session,"FiltersClean")
 
     # Stop the function if 'dish' is empty
     if dish.empty:
@@ -86,7 +86,30 @@ def update_Course():
     engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
     with Session() as db_session:
         write_to_course(engine,db_session)
-    
+
+def update_embeddings():
+    engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
+    df = load_dishes_table_for_filter_cleaning(Session,"Embedding")
+    if df.empty:
+        return
+
+    with Session() as db_session:
+        embeddings_df = embedding_extraction(df, 'menu')
+        write_to_embedding(embeddings_df, engine, db_session)
+
+def update_description():
+    engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
+    df = load_dishes_table_for_filter_cleaning(Session,"Description")
+    with Session() as db_session:
+        description_df = generate_description(df, 'menu')
+        write_to_description(description_df,engine,db_session)
+
 if __name__ == "__main__":
     update_FiltersClean()
     update_Course()
+    update_embeddings()
+    update_description()
+    # update taste
+    # update receipe
+    # update ingredients
+    # update dishes eng

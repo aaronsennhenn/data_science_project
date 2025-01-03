@@ -3,7 +3,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
-from db.db_read import get_user_vector, get_dishes_by_date_location_filtered, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user
+from db.db_read import get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime
 import plotly
@@ -242,6 +242,11 @@ def menu():
         # if user logged in, get user_id
         user_name = session.get('username')
         user_vector = get_user_vector(user_name, db_session)
+        if user_name:
+            random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(),lang,user_name,db_session) # initialize random dish
+        else:
+            random_dish = (None,None)
+
 
         # When user filters, get filtered values
         if request.method == 'POST':
@@ -253,7 +258,8 @@ def menu():
 
             # get rating from user and selected dish with mensa
             rating, menu_id = request.form.get('rating'), request.form.get('id')
-
+            print(rating, menu_id)
+            
             # write rating and id to database. If user is not logged in, still safe the rating but with NA username
             if rating:
                 # write rating to database
@@ -264,9 +270,12 @@ def menu():
                     update_user_vector(user_name, engine, Session)
                     user_vector = get_user_vector(user_name, db_session)
 
-            # only udate the date variable, if a date is selected
+            # only update the date variable, if a date is selected
             if date_temp:
                 date = date_temp
+
+            # query random dishes to collect user ratings
+            random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(),lang,user_name,db_session)
 
         # filter dishes column and merge additional information. Also apply filter of the user directly in the sql query
         dishes = get_dishes_by_date_location_filtered(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name, selected_diet_meat, session.get('language'))
@@ -349,7 +358,8 @@ def menu():
                          username=user_name,
                          lang=lang,
                          no_results=no_results,
-                         recommendation_switch=recommendation_switch)
+                         recommendation_switch=recommendation_switch,
+                         random_dish=random_dish)
 
 
 @app.route('/analysis')
@@ -559,27 +569,6 @@ def dish_clicked():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/mensa/<mensa_name>')
-def mensa_menu(mensa_name):
-    date = request.args.get('date')
-    
-    with Session() as db_session:
-        dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
-        
-        menu_data = []
-        for dish in dishes:
-            menu_data.append({
-                'menu': dish.menu,
-                'studentPrice': dish.studentPrice,
-                'guestPrice': dish.guestPrice,
-                'allergens': dish.allergens,
-                'additives': dish.additives
-            })
-            
-        return render_template('mensa_result.html',
-                             mensa_name=mensa_name,
-                             mensa_day=date,
-                             dishes=menu_data)
 
 @app.route('/check_image/<filename>')
 def check_image(filename):

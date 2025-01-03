@@ -86,6 +86,7 @@
         </div>
     </div>
 
+
 <!-- Main -->
 <main class="flex-grow flex flex-col items-center px-4 py-4">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
@@ -206,7 +207,50 @@
             </div>
         </form>
     </div>
-
+<!-- Rate more dishes button -->
+{% if username %}
+<div class="popup" id="popup-1">
+    <div class="overlay"></div>
+    <div class="content">
+        <div class="close-btn" onclick="togglePopup()">&times;</div>
+        {% if session.get('language') == 'de' %}
+            <h1>Bewerte Gerichte um eine bessere Empfehlung zu erhalten</h1>
+        {% else %}
+            <h1>Rate dishes to improve the recommendation</h1>
+        {% endif %}
+        <p>{{ random_dish[1] }}</p>
+        
+        <!-- Ratings -->
+        <div class="rating mt-4 text-4xl flex justify-end">
+            <input type="radio" id="star5_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="5" />
+            <label for="star5_{{ random_dish[1] }}">&#9733;</label>
+            <input type="radio" id="star4_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="4" />
+            <label for="star4_{{ random_dish[1] }}">&#9733;</label>
+            <input type="radio" id="star3_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="3" />
+            <label for="star3_{{ random_dish[1] }}">&#9733;</label>
+            <input type="radio" id="star2_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="2" />
+            <label for="star2_{{ random_dish[1] }}">&#9733;</label>
+            <input type="radio" id="star1_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="1" />
+            <label for="star1_{{ random_dish[1] }}">&#9733;</label>
+        </div>
+        <button class="submit-rating mt-2" data-menu-line="{{ random_dish[1] }}" data-id="{{ random_dish[0] }}">
+            {% if session.get('language') == 'de' %}
+                Bewertung senden
+            {% else %}
+                Submit Rating
+            {% endif %}
+        </button>
+        <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+            {% if session.get('language') == 'de' %}
+                Bewertung erhalten!
+            {% else %}
+                Rating received!
+            {% endif %}
+        </p>
+    </div>
+</div>
+<button class="rate-dishes-btn" onclick="togglePopup()">Rate More Dishes</button>
+{% endif %}
     <!-- Results section -->
     <div class="container mt-8 w-full">
         {% if no_results %}

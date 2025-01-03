@@ -5,7 +5,8 @@ import re
 from nltk.corpus import stopwords
 import json
 from secret import OPENAI_KEY
-
+nltk.download('stopwords')
+stop_words = set(stopwords.words('german'))
 
 def initialize_openai_client(api_key):
     os.environ["OPENAI_API_KEY"] = api_key
@@ -20,9 +21,6 @@ client = OpenAI()
 #Function to clean text
 def preprocess_text(text):
 
-    nltk.download('stopwords')
-    stop_words = set(stopwords.words('german'))
-    
     text = re.sub(r"\[.*?\]", "", text).strip() # remove special characters
     text = text.lower()  # Convert to lowercase
     text = re.sub(r"[^a-zäöüß\s]", "", text)
@@ -30,7 +28,6 @@ def preprocess_text(text):
     text = " ".join(text.split())
 
     # remove stopwords
-    stop_words = set(stopwords.words('german'))  # Replace 'german' with your language of choice
     words = text.split()
     filtered_words = [word for word in words if word.lower() not in stop_words]
     text = " ".join(filtered_words)
@@ -378,9 +375,6 @@ def classify_missing_filters(dish_name):
     result = completion.choices[0].message.content.strip().split("\n")
     result_string = result[0].strip() if len(result) > 0 else ""
 
-    # transform classification string into consistent format:
-    #replacement_dict = {"fish": "F", "poultry": "G", "veal": "K", "lamb": "L", "beef": "R", "pork": "S", "game": "W","vegetarian":"V"}
-    # return replacement_dict.get(result_string)
     return result_string  
 
 ## Run all prompts
