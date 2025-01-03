@@ -96,7 +96,8 @@ def get_random_dishes(selected_date, lang, user_name, db_session: Session):
             .outerjoin(Course, Course.menu_id == Dish.id)
             .where(Rating.menu_id == None,
                 Dish.menuDate != selected_date,
-                Course.course == "Hauptspeise"
+                Course.course == "Hauptspeise",
+                Dish.menu != None
             )
             .order_by(func.random())
             .limit(1)  # Limit to 1 random dish
@@ -108,7 +109,8 @@ def get_random_dishes(selected_date, lang, user_name, db_session: Session):
             .outerjoin(Course, Course.menu_id == DishEng.menu_id)
             .where(Rating.menu_id == None,
                 DishEng.menuDate != selected_date,
-                Course.course_eng == "Main Dish"
+                Course.course_eng == "Main Dish",
+                DishEng.menuEng != None
             )
             .order_by(func.random())
             .limit(1)  # Limit to 1 random dish

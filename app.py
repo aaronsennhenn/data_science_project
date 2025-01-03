@@ -329,10 +329,6 @@ def menu():
         if not grouped_menu_data:
             no_results = True
     
-    random_dish_serializable = {'id': random_dish[0],'name': random_dish[1]} if random_dish else None
-
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  # Check if it's an AJAX request
-        return jsonify({'random_dish': random_dish_serializable})
     return render_template('menu.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,

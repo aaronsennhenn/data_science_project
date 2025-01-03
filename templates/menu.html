@@ -240,6 +240,13 @@
                 Submit Rating
             {% endif %}
         </button>
+        <button class="submit-rating mt-2" onclick="location.href='/menu?popup=1';">
+            {% if session.get('language') == 'de' %}
+                Nächstes Gericht
+            {% else %}
+                Next Dish
+            {% endif %}
+        </button>
         <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
             {% if session.get('language') == 'de' %}
                 Bewertung erhalten!
