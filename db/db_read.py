@@ -4,7 +4,7 @@ from typing import List
 from sqlalchemy import func
 import datetime
 import pandas as pd
-from sqlalchemy import or_,func
+from sqlalchemy import or_,func,select
 
 
 def convert_dblist_to_df(db_list):
@@ -85,6 +85,40 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
 
     return query.all()
 
+def get_random_dishes(selected_date, lang, user_name, db_session: Session):
+    
+
+    # Query one random main dish that has not been rated by the user yet and is not on the selected date
+    if lang == "de":
+        query = (
+            select(Dish.id, Dish.menu)
+            .outerjoin(Rating, (Dish.id == Rating.menu_id) & (Rating.user_name == user_name))
+            .outerjoin(Course, Course.menu_id == Dish.id)
+            .where(Rating.menu_id == None,
+                Dish.menuDate != selected_date,
+                Course.course == "Hauptspeise"
+            )
+            .order_by(func.random())
+            .limit(1)  # Limit to 1 random dish
+        )
+    else:
+        query = (
+            select(DishEng.menu_id, DishEng.menuEng)
+            .outerjoin(Rating, (DishEng.menu_id == Rating.menu_id) & (Rating.user_name == user_name))
+            .outerjoin(Course, Course.menu_id == DishEng.menu_id)
+            .where(Rating.menu_id == None,
+                DishEng.menuDate != selected_date,
+                Course.course_eng == "Main Dish"
+            )
+            .order_by(func.random())
+            .limit(1)  # Limit to 1 random dish
+        )
+
+    # Execute the query
+    result = db_session.execute(query).fetchone()
+    return result
+
+
 def get_image_path(dish_id: int, session: Session) -> str:
     dish = session.query(Dish).filter_by(id=dish_id).first()
     return dish.image_path if dish else None
@@ -115,7 +149,7 @@ def get_course(session: Session, date, menuline, menu, location) -> str:
     return course[0] if course else None
 
     
-def load_dishes_table_for_filter_cleaning(Session):
+def load_dishes_table_for_filter_cleaning(Session, update_table):
     """
     Loads dishes from the Dish table that are not contained in the FiltersClean table (based on id)
     and returns them as a DataFrame.
@@ -126,15 +160,24 @@ def load_dishes_table_for_filter_cleaning(Session):
     Returns:
         pd.DataFrame: A DataFrame of dishes not present in FiltersClean.
     """
+
+    if update_table == "FiltersClean":
+        table = FiltersClean
+    elif update_table == "Embedding":
+        table = Embedding
+    elif update_table == "Description":
+        table = Description
+
+
     with Session() as session:
-        # Query for dishes not in FiltersClean
+        # Query for dishes not in update_table
         dishes = session.query(
             Dish.id,
             Dish.menuLine,
             Dish.menu,
             Dish.icons
         ).filter(
-            ~session.query(FiltersClean).filter(FiltersClean.menu_id == Dish.id).exists()
+            ~session.query(table).filter(table.menu_id == Dish.id).exists()
         ).all()
 
         # Convert results to a list of dictionaries

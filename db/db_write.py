@@ -271,6 +271,7 @@ def write_to_description(dishes_df: pd.DataFrame, engine, session):
                 description_en=row.get('description_en')
             )
             session.add(description)
+            session.commit()
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -287,6 +288,8 @@ def write_to_embedding(dishes_df: pd.DataFrame, engine, session):
                 embedding=row.get('gpt_embedding'),
             )
             session.add(embedding)
+            session.commit()
+            
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
