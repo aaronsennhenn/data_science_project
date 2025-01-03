@@ -3,9 +3,9 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
 from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
-from db.db_read import get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user
+from db.db_read import get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas
 from scraper.data_transform import collect_unique_meats
-from datetime import datetime
+from datetime import datetime, timedelta
 import plotly
 import plotly.express as px
 import plotly.graph_objects as go
@@ -216,36 +216,25 @@ def menu():
     session['language'] = lang
     session.permanent = True
     with Session() as db_session:
+        
         # Get additives and allergens 
         additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng  = get_written_forms(db_session)
-        
-        # Get descriptions and recipes
-        descriptions = get_descriptions(db_session)
-        recipes = get_recipes(db_session)
-
-        # query available data for the next five days
-        data = get_next_five_days_data(db_session)
-
-        # store dates and mensas in a list
-        available_dates = sorted([datetime.strptime(key.split(", ")[1], '%Y-%m-%d').strftime('%Y-%m-%d') 
-                                for key in data.keys()])
-        available_mensas = list(set([mensa for mensas in data.values() for mensa in mensas]))
-
+ 
         # set default values
-        mensa_name = request.args.get('selected_mensa', 'all')  # Changed default to 'all'
-        date = available_dates[0]
+        mensa_name = 'all'  # Changed default to 'all' to show dishes of all mensas
+        today = datetime.now().date()
+        available_dates = [(today + timedelta(days=x)).strftime('%Y-%m-%d') for x in range(5)]
+        date = today.strftime('%Y-%m-%d')
+        available_mensas = get_unique_mensas(db_session)
         selected_diet_meat = 'omnivore'
         selected_price = "studentPrice"
         no_results = False
         recommendation_switch = None
 
-        # if user logged in, get user_id
+        # if user is logged in, get user_id
         user_name = session.get('username')
         user_vector = get_user_vector(user_name, db_session)
-        if user_name:
-            random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(),lang,user_name,db_session) # initialize random dish
-        else:
-            random_dish = (None,None)
+
 
 
         # When user filters, get filtered values
@@ -259,7 +248,7 @@ def menu():
             # get rating from user and selected dish with mensa
             rating, menu_id = request.form.get('rating'), request.form.get('id')
             print(rating, menu_id)
-            
+
             # write rating and id to database. If user is not logged in, still safe the rating but with NA username
             if rating:
                 # write rating to database
@@ -274,8 +263,10 @@ def menu():
             if date_temp:
                 date = date_temp
 
-            # query random dishes to collect user ratings
-            random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(),lang,user_name,db_session)
+        if user_name:
+            random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(),lang,user_name,db_session) # initialize random dish
+        else:
+            random_dish = (None,None)
 
         # filter dishes column and merge additional information. Also apply filter of the user directly in the sql query
         dishes = get_dishes_by_date_location_filtered(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name, selected_diet_meat, session.get('language'))
@@ -311,16 +302,19 @@ def menu():
         # Sort dishes by recommendation score if recommendation switch is on
         if recommendation_switch:
             menu_data = sorted(menu_data, key=lambda x: x['recommendation_score'], reverse=True)
+        
 
-        # Group dishes into a list of dicts
+        # Group dishes into a list of dicts with course type as key. e.g. main dish, dessert, site dish
         grouped_menu_data = {}
         for dish in menu_data:
-            course_key = dish['course'] if lang == 'de' else dish['course_eng']
+            course_key = dish.get('course') if lang == 'de' else dish.get('course_eng')
+            if not course_key:  # Skip if course_key is None or empty
+                continue
             if course_key not in grouped_menu_data:
                 grouped_menu_data[course_key] = []
             grouped_menu_data[course_key].append(dish)
 
-        # find dish with highest recommendation score for dish group:
+        # find dish with highest recommendation score for course type and set flag
         target_course_keys = 'Hauptspeise' if lang == 'de' else 'Main Dish'
         for course_key, dishes in grouped_menu_data.items():
             if course_key in target_course_keys:
@@ -334,17 +328,17 @@ def menu():
         # Check for no results after filtering
         if not grouped_menu_data:
             no_results = True
+    
+    random_dish_serializable = {'id': random_dish[0],'name': random_dish[1]} if random_dish else None
 
-        # encode selected weekday to display
-        selected_weekday = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
-            
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  # Check if it's an AJAX request
+        return jsonify({'random_dish': random_dish_serializable})
     return render_template('menu.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,
                          dishes=grouped_menu_data,
                          selected_mensa=mensa_name,
                          selected_date=date,
-                         selected_weekday=selected_weekday,
                          selected_price=selected_price,
                          selected_diet_meat=selected_diet_meat,
                          additives_dict=additives_dict,
@@ -353,8 +347,6 @@ def menu():
                          allergens_dict_eng=allergens_dict_eng,
                          meats_dict=meats_dict,
                          meats_dict_eng=meats_dict_eng,
-                         descriptions=descriptions,
-                         recipes=recipes,
                          username=user_name,
                          lang=lang,
                          no_results=no_results,

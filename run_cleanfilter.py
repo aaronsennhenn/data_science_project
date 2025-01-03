@@ -17,10 +17,10 @@ from db.db_read import setup_database_connection
 from secret import USER, PASSWORD, HOST, PORT
 import pandas as pd
 import numpy as np
-from scraper.gpt_prompts import classify_missing_filters,embedding_extraction,generate_description
+from scraper.gpt_prompts import classify_missing_filters,embedding_extraction,generate_description,classify_dish_taste,generate_recipe,ingredient_extraction
 from db.db_read import load_dishes_table_for_filter_cleaning
 from db.utils import correct_icons
-from db.db_write import write_to_filters_clean,write_to_course,write_to_embedding, write_to_description
+from db.db_write import write_to_filters_clean,write_to_course,write_to_embedding, write_to_description, write_to_taste, write_to_recipe, write_to_ingredient,write_to_dishes_eng
 
 
 
@@ -35,6 +35,9 @@ replacement_dict = {
             "V": "vegetarian"
         }
 
+engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
+
+
 # replace categories
 def replace_categories(icon_string):
     if pd.isna(icon_string):
@@ -44,8 +47,6 @@ def replace_categories(icon_string):
 
 
 def update_FiltersClean():
-
-    engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
 
     # load dishes where the icon column in FiltersClean table is not updated yet.
     dish = load_dishes_table_for_filter_cleaning(Session,"FiltersClean")
@@ -83,13 +84,12 @@ def update_FiltersClean():
         write_to_filters_clean(dish,engine,db_session)
 
 def update_Course():
-    engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
     with Session() as db_session:
         write_to_course(engine,db_session)
 
 def update_embeddings():
-    engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
     df = load_dishes_table_for_filter_cleaning(Session,"Embedding")
+
     if df.empty:
         return
 
@@ -98,18 +98,52 @@ def update_embeddings():
         write_to_embedding(embeddings_df, engine, db_session)
 
 def update_description():
-    engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
     df = load_dishes_table_for_filter_cleaning(Session,"Description")
+
+    if df.empty:
+        return
+
     with Session() as db_session:
         description_df = generate_description(df, 'menu')
         write_to_description(description_df,engine,db_session)
+
+def update_taste():
+    df = load_dishes_table_for_filter_cleaning(Session,"Taste")
+
+    if df.empty:
+        return
+    
+    with Session() as db_session:
+        taste_df = classify_dish_taste(df, 'menu')
+        write_to_taste(taste_df, engine,db_session)
+
+def update_recipe():
+    df = load_dishes_table_for_filter_cleaning(Session,"Recipe")
+
+    if df.empty:
+        return
+    
+    with Session() as db_session:
+        recipe_df = generate_recipe(df, 'menu', 'menuLine')
+        write_to_recipe(recipe_df, engine,db_session)
+
+def update_ingredients():
+    df = load_dishes_table_for_filter_cleaning(Session,"Ingredient")
+
+    if df.empty:
+        return
+    
+    with Session() as db_session:
+        ingredients_df = ingredient_extraction(df, 'menu')
+        write_to_ingredient(ingredients_df, engine,db_session)
+
 
 if __name__ == "__main__":
     update_FiltersClean()
     update_Course()
     update_embeddings()
     update_description()
-    # update taste
-    # update receipe
-    # update ingredients
-    # update dishes eng
+    update_taste()
+    update_recipe()
+    update_ingredients()
+    write_to_dishes_eng(engine,Session)

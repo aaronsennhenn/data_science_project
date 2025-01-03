@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng, Taste, Ingredient
 from typing import List
 from sqlalchemy import func
 import datetime
 import pandas as pd
-from sqlalchemy import or_,func,select
+from sqlalchemy import or_,func,select,desc
 
 
 def convert_dblist_to_df(db_list):
@@ -167,6 +167,12 @@ def load_dishes_table_for_filter_cleaning(Session, update_table):
         table = Embedding
     elif update_table == "Description":
         table = Description
+    elif update_table == "Taste":
+        table = Taste
+    elif update_table == "Recipe":
+        table = Recipe
+    elif update_table == "Ingredient":
+        table = Ingredient
 
 
     with Session() as session:
@@ -202,7 +208,7 @@ def get_next_five_days_data(session: Session) -> dict:
     date_range = [today + timedelta(days=x) for x in range(5)]
 
     # MANUALLY FIX DATES OVER CHRISTMAS PERIOD BECAUSE MENSA IS CLOSED. MUST BE REMOVED AFTER CHRISTMAS
-    date_range = [datetime(2024, 12, 17), datetime(2024, 12, 18), datetime(2024, 12, 19), datetime(2024, 12, 20)]
+    #date_range = [datetime(2024, 12, 17), datetime(2024, 12, 18), datetime(2024, 12, 19), datetime(2024, 12, 20)]
     
     results = {}
     for date in date_range:
@@ -211,6 +217,9 @@ def get_next_five_days_data(session: Session) -> dict:
         results[date.strftime('%A, %Y-%m-%d')] = locations
     
     return results
+
+def get_unique_mensas(session: Session) -> List[str]:
+    return [mensa.location for mensa in session.query(Dish.location).distinct()]
 
 # Get total number of mensas (Dish.location)
 def get_total_mensas(session: Session) -> int:

@@ -22,9 +22,9 @@ document.addEventListener('DOMContentLoaded', function () {
     
     submitRatingButtons.forEach(button => {
         button.addEventListener('click', function () {
-            const menuLine = this.getAttribute('data-menu-line');
+            //const menuLine = this.getAttribute('data-menu-line');
             const id = this.getAttribute('data-id');
-            const rating = document.querySelector(`input[name="rating_${menuLine}"]:checked`).value;
+            const rating = document.querySelector(`input[name="rating_${id}"]:checked`).value;
 
             if (rating) {
                 const feedback = this.nextElementSibling;
@@ -46,8 +46,55 @@ document.addEventListener('DOMContentLoaded', function () {
                 method: 'POST',
                 body: formData,
             })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                // After the POST request, send a GET request to fetch the updated random dish
+                return fetch('/menu');
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                // After the POST request, send a GET request to fetch the updated random dish
+                return fetch('/menu', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update the random_dish variable
+                data = data.random_dish;
+                // Update the button attributes dynamically
+                const submitButton = document.querySelector('.submit-rating');
+                submitButton.setAttribute('data-id', data.id); // Update data-id
+                document.getElementById('random-dish-name').textContent = data.name;
+
+            
+                // Update other dependent elements if necessary
+                const popupContent = document.getElementById('popup-content');
+                popupContent.innerHTML = `
+                    <input type="radio" id="star5_${data.id}" name="rating_${data.id}" value="5" />
+                    <label for="star5_${data.id}">&#9733;</label>
+                    <input type="radio" id="star4_${data.id}" name="rating_${data.id}" value="4" />
+                    <label for="star4_${data.id}">&#9733;</label>
+                    <input type="radio" id="star3_${data.id}" name="rating_${data.id}" value="3" />
+                    <label for="star3_${data.id}">&#9733;</label>
+                    <input type="radio" id="star2_${data.id}" name="rating_${data.id}" value="2" />
+                    <label for="star2_${data.id}">&#9733;</label>
+                    <input type="radio" id="star1_${data.id}" name="rating_${data.id}" value="1" />
+                    <label for="star1_${data.id}">&#9733;</label>
+                `;
+            })
+            .catch(error => console.error('Error:', error));
+                      
         });
     });
+
+ 
 
     // Handle mensa selection
     mensaDropdown.addEventListener('change', function() {

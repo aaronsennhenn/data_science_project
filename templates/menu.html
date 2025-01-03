@@ -218,22 +218,22 @@
         {% else %}
             <h1>Rate dishes to improve the recommendation</h1>
         {% endif %}
-        <p>{{ random_dish[1] }}</p>
+        <p id="random-dish-name">{{ random_dish[1] }}</p>
         
         <!-- Ratings -->
         <div class="rating mt-4 text-4xl flex justify-end">
-            <input type="radio" id="star5_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="5" />
-            <label for="star5_{{ random_dish[1] }}">&#9733;</label>
-            <input type="radio" id="star4_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="4" />
-            <label for="star4_{{ random_dish[1] }}">&#9733;</label>
-            <input type="radio" id="star3_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="3" />
-            <label for="star3_{{ random_dish[1] }}">&#9733;</label>
-            <input type="radio" id="star2_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="2" />
-            <label for="star2_{{ random_dish[1] }}">&#9733;</label>
-            <input type="radio" id="star1_{{ random_dish[1] }}" name="rating_{{ random_dish[1] }}" value="1" />
-            <label for="star1_{{ random_dish[1] }}">&#9733;</label>
+            <input type="radio" id="star5_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="5" />
+            <label for="star5_{{ random_dish[0] }}">&#9733;</label>
+            <input type="radio" id="star4_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="4" />
+            <label for="star4_{{ random_dish[0] }}">&#9733;</label>
+            <input type="radio" id="star3_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="3" />
+            <label for="star3_{{ random_dish[0] }}">&#9733;</label>
+            <input type="radio" id="star2_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="2" />
+            <label for="star2_{{ random_dish[0] }}">&#9733;</label>
+            <input type="radio" id="star1_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="1" />
+            <label for="star1_{{ random_dish[0] }}">&#9733;</label>
         </div>
-        <button class="submit-rating mt-2" data-menu-line="{{ random_dish[1] }}" data-id="{{ random_dish[0] }}">
+        <button class="submit-rating mt-2" data-id="{{ random_dish[0] }}">
             {% if session.get('language') == 'de' %}
                 Bewertung senden
             {% else %}
@@ -498,18 +498,18 @@
 
                             <!-- Ratings -->
                             <div class="rating mt-4 text-4xl flex justify-end">
-                                <input type="radio" id="star5_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="5" />
-                                <label for="star5_{{ dish.menuLine }}">&#9733;</label>
-                                <input type="radio" id="star4_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="4" />
-                                <label for="star4_{{ dish.menuLine }}">&#9733;</label>
-                                <input type="radio" id="star3_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="3" />
-                                <label for="star3_{{ dish.menuLine }}">&#9733;</label>
-                                <input type="radio" id="star2_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="2" />
-                                <label for="star2_{{ dish.menuLine }}">&#9733;</label>
-                                <input type="radio" id="star1_{{ dish.menuLine }}" name="rating_{{ dish.menuLine }}" value="1" />
-                                <label for="star1_{{ dish.menuLine }}">&#9733;</label>
+                                <input type="radio" id="star5_{{ dish.id }}" name="rating_{{ dish.id }}" value="5" />
+                                <label for="star5_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star4_{{ dish.id }}" name="rating_{{ dish.id }}" value="4" />
+                                <label for="star4_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star3_{{ dish.id }}" name="rating_{{ dish.id }}" value="3" />
+                                <label for="star3_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star2_{{ dish.id }}" name="rating_{{ dish.id }}" value="2" />
+                                <label for="star2_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
+                                <label for="star1_{{ dish.id }}">&#9733;</label>
                             </div>
-                            <button class="submit-rating mt-2" data-menu-line="{{ dish.menuLine }}" data-id="{{ dish.id }}">
+                            <button class="submit-rating mt-2" data-id="{{ dish.id }}">
                                 {% if session.get('language') == 'de' %}
                                     Bewertung senden
                                 {% else %}

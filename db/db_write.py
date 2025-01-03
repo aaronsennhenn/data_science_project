@@ -206,13 +206,24 @@ def write_to_dishes_eng(engine, Session):
         db_session.commit()
     
 
-# This table contains the user ratings, the menu_id of the rated meal, a timestamp, and the user_id if he is logged in
+
+
 def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):
-    Rating.metadata.create_all(engine) 
+    Rating.metadata.create_all(engine)
 
     with Session() as db_session:
-        rating = Rating(menu_id=menu_id, rating=rating, user_name=user_name)
-        db_session.add(rating)
+        # Check if the user already gave a rating for the menu_id
+        existing_rating = db_session.query(Rating).filter_by(menu_id=menu_id, user_name=user_name).first()
+
+        if existing_rating and user_name:
+            # Update the existing rating
+            existing_rating.rating = rating
+        else:
+            # Add a new rating if none exists
+            new_rating = Rating(menu_id=menu_id, rating=rating, user_name=user_name)
+            db_session.add(new_rating)
+
+        # Commit the changes
         db_session.commit()
 
 def write_to_filters_clean(icons_df: pd.DataFrame, engine, session):
@@ -254,6 +265,8 @@ def write_to_ingredient(dishes_df: pd.DataFrame, engine, session):
                 ingredients_en=row.get('ingredients_en')
             )
             session.add(ingredients)
+            session.commit()
+            
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -307,6 +320,7 @@ def write_to_recipe(dishes_df: pd.DataFrame, engine, session):
                 recipe_en=row.get('recipe_en')
             )
             session.add(recipe)
+            session.commit()
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -324,6 +338,7 @@ def write_to_taste(dishes_df: pd.DataFrame, engine, session):
                 taste_en=row.get('taste_en')
             )
             session.add(taste)
+            session.commit()
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
