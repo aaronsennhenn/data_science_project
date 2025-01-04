@@ -27,6 +27,16 @@ class Dish(Base):
     allergens = Column(String, nullable=True)
     additives = Column(String, nullable=True)
 
+class DishHistory(Base):
+
+    __tablename__ = 'dishes_history'
+    id = Column(Integer, primary_key=True)
+    menuDate = Column(Date, nullable=True)
+    menuLine = Column(String, nullable=True)
+    menu = Column(String, nullable=True)
+    studentPrice = Column(Float, nullable=True)
+    guestPrice = Column(Float, nullable=True)
+
 class FiltersClean(Base):
     __tablename__ = "filters_clean"
     id = Column(Integer, primary_key=True)

@@ -1,14 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import os
-from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
-from db.db_read import get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas
+from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user
+from db.db_read import get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime, timedelta
 import plotly
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 from plotly.subplots import make_subplots
 import json
 from db.utils import compute_cosine_similarity
@@ -517,6 +517,29 @@ def analysis():
         }
         dish_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
 
+
+        ### Price Chart ###
+        df = get_combined_dishes(db_session)
+
+        # Get the initial category or selected category from the form
+        initial_category = df['menuLine'].unique()[0]
+        selected_category = request.form.get('category', initial_category)
+
+        # Filter the DataFrame based on the selected category
+        filtered_df = df[df['menuLine'] == selected_category].sort_values(by='studentPrice')
+
+        # Create the Plotly figure (your customized plot)
+        fig = go.FigureWidget()
+        fig.add_scatter(x=filtered_df['menuDate'], y=filtered_df['studentPrice'], mode='markers')
+        fig.update_layout(
+            title=f'Student Price Over Time for Category {selected_category}',
+            xaxis_title='Date',
+            yaxis_title='Student Price'
+        )
+
+        # Convert the Plotly figure to HTML
+        plot_html = pio.to_html(fig, full_html=False)
+
         # Add pie_charts to the template context
         return render_template('analysis.html',
                              total_mensas=total_mensas,
@@ -536,40 +559,31 @@ def analysis():
                              mensa_chart=mensa_chart,
                              dish_chart=dish_chart,
                              menus_with_lowest_price=menus_with_lowest_price,
-                             username=username)
+                             username=username,
+                             price_plot=plot_html,
+                             categories=df['menuLine'].unique(),
+                             selected_category=selected_category)
     
+# Route to update the plot dynamically
+@app.route('/update_plot', methods=['POST'])
+def update_plot():
+    df = get_combined_dishes(Session())
+    selected_category = request.json.get('category')
+    print(selected_category)
+    filtered_df = df[df['menuLine'] == selected_category].sort_values(by='studentPrice')
+    fig = go.FigureWidget()
+    fig.add_scatter(x=filtered_df['menuDate'], y=filtered_df['studentPrice'], mode='markers')
+    fig.update_layout(
+        title=f'Student Price Over Time for Category {selected_category}',
+        xaxis_title='Date',
+        yaxis_title='Student Price'
+    )
+    plot_html = pio.to_html(fig, full_html=False)
+    return jsonify({'plot': plot_html})
 
 
-@app.route('/dish-clicked', methods=['POST'])
-def dish_clicked():
-    try:
-        mensa_name = request.form.get('mensa_name')  # Extract restaurant name
-        mensa_day = request.form.get('mensa_day')  # Extract weekday
-        if not mensa_name or not mensa_day:
-            return jsonify({'error': 'Missing data'}), 400
-    # Do something with the data (e.g., log, process)
-        print(f"Received data: {mensa_name}, {mensa_day}")
-        #return jsonify({'success': True, 'message': 'Data received'})  # Send back a valid JSON response
-        #return redirect(url_for('mensa_menu', selected_mensa=mensa_name, selected_date=mensa_date))
-        return jsonify({'success': True, 'message': 'Data received'})
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-
-@app.route('/check_image/<filename>')
-def check_image(filename):
-    image_path = os.path.join(images_folder, filename)
-    if os.path.exists(image_path):
-        return '', 200
-    else:
-        return '', 404
 
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)
-        #write_to_course(engine, Session)  #not needed to be rerunned
-        #write_to_directory(engine, Session) #need to be rerunned if more data in dishes is available
-        #write_to_dishes_eng(engine, Session)  #need to be rerunned if more data in dishes is available
     app.run()

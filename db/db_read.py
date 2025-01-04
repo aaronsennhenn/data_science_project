@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng, Taste, Ingredient
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng, Taste, Ingredient, DishHistory
 from typing import List
 from sqlalchemy import func
 import datetime
 import pandas as pd
-from sqlalchemy import or_,func,select,desc
+from sqlalchemy import or_,func,select,desc,select, union, and_, not_
 
 
 def convert_dblist_to_df(db_list):
@@ -575,3 +575,51 @@ def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en
     ).limit(limit).all()
 
     return [(mensa.locationEng if lang == 'en' else mensa.location, round(mensa.avg_rating, 2)) for mensa in favorite_mensas]
+
+
+def get_dishes_history(db_session):
+
+    dishes = db_session.query(DishHistory).all()
+    df = convert_dblist_to_df(dishes)
+    df['menuDate'] = pd.to_datetime(df['menuDate'],format='%Y-%m-%d')
+
+
+    return df
+
+def get_combined_dishes(db_session: Session):
+    """
+    Combine all rows from DishHistory and rows from Dish not in DishHistory.
+    Return the result as a pandas DataFrame.
+    """
+    # Query to select all rows from DishHistory
+    dish_history_query = select(DishHistory.menu, DishHistory.menuDate, DishHistory.menuLine, DishHistory.studentPrice,DishHistory.guestPrice)
+
+    # Query to select rows from Dish not in DishHistory
+    dish_not_in_history_query = select(
+        Dish.menu, Dish.menuDate, Dish.menuLine, Dish.studentPrice,Dish.guestPrice
+    ).where(
+        not_(
+            db_session.query(DishHistory)
+            .filter(
+                and_(
+                    Dish.menu == DishHistory.menu,
+                    Dish.menuDate == DishHistory.menuDate,
+                    Dish.menuLine == DishHistory.menuLine,
+                )
+            )
+            .exists()
+        )
+    )
+
+    # Combine both queries using UNION
+    combined_query = union(dish_history_query, dish_not_in_history_query)
+
+    # Execute the combined query and fetch all results
+    result = db_session.execute(combined_query).fetchall()
+
+    # Convert the result to a pandas DataFrame
+    df = pd.DataFrame(result, columns=["menu", "menuDate", "menuLine", "studentPrice", "guestPrice"])
+    df['menuDate'] = pd.to_datetime(df['menuDate'],format='%Y-%m-%d')
+
+    return df
+
