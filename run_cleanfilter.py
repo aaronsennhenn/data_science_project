@@ -1,11 +1,11 @@
 """
-This script is responsible for cleaning and improving the icons column in the dishes table which includes filters that are used by the frontend. 
-The script is designed to be executed daily at 3:30 AM via a cronjob.
+This script is responsible for updating all tables that rely on the dishes table. The script is designed to be executed daily at 3:30 AM via a cronjob. All the gtp
+promts are imported from the scraper.gpt_prompts module. The script is divided into several modules, each responsible for updating a specific table.
+
 
 Modules:
-- db.db_read load_dishes_table_for_filter_cleaning loads the menu and icon column from the dishes table which are not yet included in the CleanFilters table.
-- db.utils correct_icons function corrects the NA icon string rows based on patterns that we found in the data. E.g. if the menu name includes the string "vegan" than the dish is most likely vegan.
-- scraper.gpt_prompts classifies all the remaining main course dishes that are still NA into the predefined categories using chatgpt api
+- update_filters_clean loads the menu and icon column from the dishes table which are not yet included in the CleanFilters table. Then it cleans the strings in the icon column and updates the CleanFilters table with the cleaned strings.
+- update_Course(), update_embeddings(), update_description(), update_taste(), update_recipe(), update_ingredients(), write_to_dishes_eng() load the menu column that is not contained in the respective table yet and applies the prompts.
 
 
 Execution:
