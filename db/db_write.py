@@ -36,6 +36,7 @@ class DishHistory(Base):
     menu = Column(String, nullable=True)
     studentPrice = Column(Float, nullable=True)
     guestPrice = Column(Float, nullable=True)
+    icons_clean = Column(String, nullable=True)
 
 class FiltersClean(Base):
     __tablename__ = "filters_clean"

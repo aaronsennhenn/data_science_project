@@ -178,23 +178,53 @@
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
                     {% if session.get('language') == 'de' %}Preisentwicklung{% else %}Price Development{% endif %}
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-gray-50 rounded-lg w-full">
-                        <!-- Dropdown for selecting the category -->
-                        <label for="category">Select Category:</label>
-                        <select id="category">
-                            {% for category in categories %}
-                                <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
-                                    {{ category }}
-                                </option>
-                            {% endfor %}
-                        </select>
-
-                        <!-- Plot area -->
+                <div class="grid grid-cols-1 md:grid-cols-10 gap-4">
+                    <!-- Plot Area -->
+                    <div class="p-4 bg-gray-50 rounded-lg col-span-7">
                         <div id="plot">
                             {{ price_plot|safe }}
                         </div>
                     </div>
+                
+                    <!-- Controls Section -->
+                    <div class="p-4 bg-gray-50 rounded-lg col-span-3 flex flex-col space-y-4">
+                        <!-- Dropdown for selecting the category -->
+                        <div>
+                            <label for="category" class="block font-medium text-gray-700">Select Category:</label>
+                            <select id="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                {% for category in categories %}
+                                    <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
+                                        {{ category }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                
+                        <!-- Dropdown for selecting price type -->
+                        <div>
+                            <label for="priceType" class="block font-medium text-gray-700">Price Type:</label>
+                            <select id="priceType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="studentPrice">Student Price</option>
+                                <option value="guestPrice">Guest Price</option>
+                            </select>
+                        </div>
+                
+                        <!-- Checkbox for showing icons -->
+                        <div>
+                            <label for="showIcons" class="inline-flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="showIcons"
+                                    value="true"
+                                    checked
+                                    class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                >
+                                <span class="ml-2 text-gray-700">Show Icons</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
                 </div>
             </div>
 
@@ -296,12 +326,14 @@
     </script>
     <script>
         // Function to update the plot via AJAX
-        function updatePlot(selectedCategory) {
+        function updatePlot(selectedCategory,selectedPrice,selectedIcon) {
             $.ajax({
                 url: '/update_plot',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ category: selectedCategory }),
+                data: JSON.stringify({ category: selectedCategory,
+                                        price: selectedPrice,
+                                        icon: selectedIcon}),
                 success: function(response) {
                     $('#plot').html(response.plot); // Update the plot area with the new plot
                 },
@@ -311,10 +343,19 @@
             });
         }
 
+        // Update the value of the checkbox and send updated data when it changes
+        $('#showIcons').on('change', function () {
+            // Set the checkbox value to "true" or "false" based on its state
+            $(this).val(this.checked ? "true" : "false");
+        });
+
+
         // Update the plot when the dropdown value changes
-        $('#category').on('change', function() {
-            const selectedCategory = $(this).val();
-            updatePlot(selectedCategory);
+        $('#category, #priceType, #showIcons').on('change', function() {
+            const selectedCategory = $('#category').val();
+            const selectedPrice = $('#priceType').val();
+            const selectedIcon = $('#showIcons').val()
+            updatePlot(selectedCategory, selectedPrice, selectedIcon);
         });
     </script>
 </body>

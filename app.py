@@ -15,6 +15,7 @@ from db.utils import compute_cosine_similarity
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
+from charts.plotly import generate_price_chart
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -521,24 +522,13 @@ def analysis():
         ### Price Chart ###
         df = get_combined_dishes(db_session)
 
-        # Get the initial category or selected category from the form
-        initial_category = df['menuLine'].unique()[0]
-        selected_category = request.form.get('category', initial_category)
+        # get 
+        initial_category = "initial"
+        initial_price_type = 'guestPrice'
+        show_icons_initial = True
 
-        # Filter the DataFrame based on the selected category
-        filtered_df = df[df['menuLine'] == selected_category].sort_values(by='studentPrice')
+        plot_html,categories = generate_price_chart(db_session,initial_category,initial_price_type,show_icons_initial)
 
-        # Create the Plotly figure (your customized plot)
-        fig = go.FigureWidget()
-        fig.add_scatter(x=filtered_df['menuDate'], y=filtered_df['studentPrice'], mode='markers')
-        fig.update_layout(
-            title=f'Student Price Over Time for Category {selected_category}',
-            xaxis_title='Date',
-            yaxis_title='Student Price'
-        )
-
-        # Convert the Plotly figure to HTML
-        plot_html = pio.to_html(fig, full_html=False)
 
         # Add pie_charts to the template context
         return render_template('analysis.html',
@@ -561,24 +551,26 @@ def analysis():
                              menus_with_lowest_price=menus_with_lowest_price,
                              username=username,
                              price_plot=plot_html,
-                             categories=df['menuLine'].unique(),
-                             selected_category=selected_category)
+                             categories=categories,
+                             selected_category=initial_category)
     
 # Route to update the plot dynamically
 @app.route('/update_plot', methods=['POST'])
 def update_plot():
-    df = get_combined_dishes(Session())
+
     selected_category = request.json.get('category')
-    print(selected_category)
-    filtered_df = df[df['menuLine'] == selected_category].sort_values(by='studentPrice')
-    fig = go.FigureWidget()
-    fig.add_scatter(x=filtered_df['menuDate'], y=filtered_df['studentPrice'], mode='markers')
-    fig.update_layout(
-        title=f'Student Price Over Time for Category {selected_category}',
-        xaxis_title='Date',
-        yaxis_title='Student Price'
-    )
-    plot_html = pio.to_html(fig, full_html=False)
+    selected_price = request.json.get('price')
+    selected_icon = request.json.get('icon')
+
+    selected_icon = {"true": True, "false": False}.get(selected_icon.lower())
+
+
+    print(selected_category, selected_price, selected_icon)
+
+    with Session() as db_session:
+        plot_html,_ = generate_price_chart(db_session,selected_category,selected_price,selected_icon)
+
+
     return jsonify({'plot': plot_html})
 
 

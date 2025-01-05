@@ -592,11 +592,13 @@ def get_combined_dishes(db_session: Session):
     Return the result as a pandas DataFrame.
     """
     # Query to select all rows from DishHistory
-    dish_history_query = select(DishHistory.menu, DishHistory.menuDate, DishHistory.menuLine, DishHistory.studentPrice,DishHistory.guestPrice)
+    dish_history_query = select(DishHistory.menu, DishHistory.menuDate, DishHistory.menuLine, DishHistory.studentPrice,DishHistory.guestPrice,DishHistory.icons_clean)
 
     # Query to select rows from Dish not in DishHistory
     dish_not_in_history_query = select(
-        Dish.menu, Dish.menuDate, Dish.menuLine, Dish.studentPrice,Dish.guestPrice
+        Dish.menu, Dish.menuDate, Dish.menuLine, Dish.studentPrice,Dish.guestPrice,FiltersClean.icons_clean
+    ).join(
+        FiltersClean, Dish.id == FiltersClean.menu_id
     ).where(
         not_(
             db_session.query(DishHistory)
@@ -618,8 +620,13 @@ def get_combined_dishes(db_session: Session):
     result = db_session.execute(combined_query).fetchall()
 
     # Convert the result to a pandas DataFrame
-    df = pd.DataFrame(result, columns=["menu", "menuDate", "menuLine", "studentPrice", "guestPrice"])
+    df = pd.DataFrame(result, columns=["menu", "menuDate", "menuLine", "studentPrice", "guestPrice","icons_clean"])
     df['menuDate'] = pd.to_datetime(df['menuDate'],format='%Y-%m-%d')
+
+    # in the Dish table, the menuLines "Auswahlgericht" and "Auswahlgericht 2" can be combined
+    df.loc[df['menuLine'] == 'Auswahlgericht vegan 2', 'menuLine'] = 'Auswahlgericht vegan'
+    df.loc[df['menuLine'] == 'Auswahlgericht veget. 2', 'menuLine'] = 'Auswahlgericht veget.'
+    df.loc[df['menuLine'] == 'Auswahlgericht 2', 'menuLine'] = 'Auswahlgericht'
 
     return df
 
