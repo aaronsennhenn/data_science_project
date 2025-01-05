@@ -5,7 +5,7 @@ from sqlalchemy import func
 import datetime
 import pandas as pd
 from sqlalchemy import or_,func,select,desc,select, union, and_, not_
-
+from typing import List, Tuple
 
 def convert_dblist_to_df(db_list):
     dict_list = [vars(obj) for obj in db_list]
@@ -152,17 +152,6 @@ def get_course(session: Session, date, menuline, menu, location) -> str:
 
     
 def load_dishes_table_for_filter_cleaning(Session, update_table):
-    """
-    Loads dishes from the Dish table that are not contained in the FiltersClean table (based on id)
-    and returns them as a DataFrame.
-
-    Args:
-        Session: SQLAlchemy session factory.
-
-    Returns:
-        pd.DataFrame: A DataFrame of dishes not present in FiltersClean.
-    """
-
     if update_table == "FiltersClean":
         table = FiltersClean
     elif update_table == "Embedding":
@@ -332,7 +321,6 @@ def get_lowest_prices_per_menuline_per_mensa(session: Session) -> dict:
     return results
 
 # Get menu and menu line and price of lowest price dish per each mensa (Dish.location)
-# Display all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) 
 def get_menu_with_lowest_price(session: Session) -> dict:
     results = {}
     for mensa in get_available_mensas(session):
@@ -454,82 +442,61 @@ def get_recipes(db_session):
     return recipes
 
 #Get top three dishes of the week - on y-axis the rating average and on x-axis the dish name (menu)
-#table "rating" use menu_id and rating columns and then merge the table "dishes" to find with the menu_id the corresponding dish name saved in column menu
 def get_top_three_dishes(session: Session):
     today = datetime.now().date()
-    start_of_week = today - timedelta(days=today.weekday())
-    end_of_week = start_of_week + timedelta(days=6)
+    week_end = today + timedelta(days=7)
 
     # Query to get top three dishes
     top_dishes = session.query(
         Dish.menu,
-        func.avg(Rating.rating).label('avg_rating')
+        func.avg(Rating.rating).label('avg_rating'),
+        func.count(Rating.id).label('rating_count')
     ).join(Rating, Dish.id == Rating.menu_id
     ).filter(
-        Dish.menuDate.between(start_of_week, end_of_week)
+        Dish.menuDate >= today,
+        Dish.menuDate < week_end
     ).group_by(
         Dish.id
     ).order_by(
         func.avg(Rating.rating).desc()
     ).limit(3).all()
-    #Format result
+
+    # Format result
     result = [
         {
             'dish_name': dish.menu,
-            'avg_rating': round(dish.avg_rating, 2)
+            'avg_rating': round(dish.avg_rating, 2),
+            'rating_count': dish.rating_count
         } for dish in top_dishes
     ]
     return result
 
-# #Testing
-# def get_top_three_dishes(session: Session):
-#     # Query to get top three dishes based on all ratings
-#     top_dishes = session.query(
-#         Dish.menu,
-#         func.avg(Rating.rating).label('avg_rating'),
-#         func.count(Rating.id).label('rating_count')
-#     ).join(Rating, Dish.id == Rating.menu_id
-#     ).group_by(
-#         Dish.id
-#     ).order_by(
-#         func.avg(Rating.rating).desc()
-#     ).limit(3).all()
-
-#     # Format result
-#     result = [
-#         {
-#             'dish_name': dish.menu,
-#             'avg_rating': round(dish.avg_rating, 2),
-#             'rating_count': dish.rating_count
-#         } for dish in top_dishes
-#     ]
-    
-#     return result
-
-
 #Get top three mensas of the week (ranked best first) - on y-axis the rating average and on x-axis the location (mensa)
 def get_top_three_mensas(session: Session):
-    # Get the start and end dates for the current week
     today = datetime.now().date()
-    start_of_week = today - timedelta(days=today.weekday())
-    end_of_week = start_of_week + timedelta(days=6)
+    week_end = today + timedelta(days=7)
+
     # Query to get top three mensas
     top_mensas = session.query(
         Dish.location,
-        func.avg(Rating.rating).label('avg_rating')
+        func.avg(Rating.rating).label('avg_rating'),
+        func.count(Rating.id).label('rating_count')
     ).join(Rating, Dish.id == Rating.menu_id
     ).filter(
-        Dish.menuDate.between(start_of_week, end_of_week)
+        Dish.menuDate >= today,
+        Dish.menuDate < week_end
     ).group_by(
         Dish.location
     ).order_by(
         func.avg(Rating.rating).desc()
     ).limit(3).all()
-    #Format result
+
+    # Format result
     result = [
         {
             'location': mensa.location,
-            'avg_rating': round(mensa.avg_rating, 2)
+            'avg_rating': round(mensa.avg_rating, 2),
+            'rating_count': mensa.rating_count
         } for mensa in top_mensas
     ]
     return result
@@ -546,23 +513,24 @@ def get_first_rating_date_of_user(session: Session, username: str) -> str:
         return first_rating.strftime('%Y-%m-%d')
     return None
 
-# Get favorite dishes (top 3) of user
-def get_favorite_dishes_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3):
+# Get favorite dishes (top 3) of user over entire period
+def get_favorite_dishes_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3) -> List[Tuple[str, float]]:
     favorite_dishes = session.query(
         Dish.id,
         Dish.menu,
         DishEng.menuEng,
-        Rating.rating
+        func.avg(Rating.rating).label('avg_rating')
     ).join(Rating, Dish.id == Rating.menu_id
     ).outerjoin(DishEng, Dish.id == DishEng.menu_id
     ).filter(Rating.user_name == username
-    ).order_by(Rating.rating.desc()
+    ).group_by(Dish.id, Dish.menu, DishEng.menuEng
+    ).order_by(func.avg(Rating.rating).desc()
     ).limit(limit).all()
 
-    return [(dish.menuEng if lang == 'en' else dish.menu, dish.rating) for dish in favorite_dishes]
+    return [(dish.menuEng if lang == 'en' and dish.menuEng else dish.menu, round(dish.avg_rating, 2)) for dish in favorite_dishes]
 
-# Get favorite mensas (top 3) of user
-def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3):
+# Get favorite mensas (top 3) of user over entire period
+def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3) -> List[Tuple[str, float]]:
     favorite_mensas = session.query(
         Dish.location,
         DishEng.locationEng,
@@ -574,8 +542,7 @@ def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en
     ).order_by(func.avg(Rating.rating).desc()
     ).limit(limit).all()
 
-    return [(mensa.locationEng if lang == 'en' else mensa.location, round(mensa.avg_rating, 2)) for mensa in favorite_mensas]
-
+    return [(mensa.locationEng if lang == 'en' and mensa.locationEng else mensa.location, round(mensa.avg_rating, 2)) for mensa in favorite_mensas]
 
 def get_dishes_history(db_session):
 

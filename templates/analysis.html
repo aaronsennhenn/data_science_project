@@ -122,7 +122,6 @@
 
         <section class="mb-12 w-full">
             <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Wöchentliche Analyse{% else %}Weekly Analytics{% endif %}</h2>
-            
             <!-- Menu Details -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
@@ -159,7 +158,7 @@
             <!-- Rating Details -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
-                    {% if session.get('language') == 'de' %}Bewertungsanalyse{% else %}Rating Analysis{% endif %}
+                    {% if session.get('language') == 'de' %}Bewertungseinblicke{% else %}Rating Insights{% endif %}
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="p-4 bg-gray-50 rounded-lg w-full">
@@ -228,13 +227,10 @@
                 </div>
             </div>
 
-
             <!-- Price Analysis -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 w-full">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Preisanalyse{% else %}Price Analysis{% endif %}</h3>
-                <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">
-                    {% if session.get('language') == 'de' %}Geringste Preise{% else %}Lowest Prices{% endif %}
-                </h4>
+                <h4 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em; font-family: cursive;">{% if session.get('language') == 'de' %}Gerichte mit geringstem Preis pro Mensa {% else %}Menu with Lowest Prices per Menu Category{% endif %}</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {% for mensa, data in menus_with_lowest_price.items() %}
                         {% if data %}
@@ -246,7 +242,7 @@
                                             {% if session.get('language') == 'de' %}Menü{% else %}Menu{% endif %}: {{ data.menu }}
                                         </p>
                                         <p class="text-sm font-medium text-gray-600">
-                                            {% if session.get('language') == 'de' %}Menülinie{% else %}Menu Line{% endif %}: {{ data.menu_line }}
+                                            {% if session.get('language') == 'de' %}Menükategorie{% else %}Menu Category{% endif %}: {{ data.menu_line }}
                                         </p>
                                         <div class="mt-2">
                                             <p class="text-sm font-medium text-gray-600">
