@@ -180,7 +180,7 @@ def user_page():
             'xaxis': {'title': 'Mensa', 'tickangle': 45},
             'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
         }
-        mensa_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+        mensa_user_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
 
         # Create top dishes chart
         dish_trace = {
@@ -195,7 +195,7 @@ def user_page():
             'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 45},
             'yaxis': {'title': 'Bewertung' if lang == 'de' else 'Rating'}
         }
-        dish_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+        dish_user_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
 
     finally:
         db_session.close()
@@ -206,8 +206,8 @@ def user_page():
                            first_rating_date=first_rating_date,
                            favorite_dishes=favorite_dishes,
                            favorite_mensas=favorite_mensas,
-                           mensa_chart=mensa_chart,
-                           dish_chart=dish_chart)
+                           mensa_user_chart=mensa_user_chart,
+                           dish_user_chart=dish_user_chart)
 
 
 @app.route('/menu', methods=['GET','POST'])
@@ -532,13 +532,13 @@ def analysis():
         fig = go.FigureWidget()
         fig.add_scatter(x=filtered_df['menuDate'], y=filtered_df['studentPrice'], mode='markers')
         fig.update_layout(
-            title=f'Student Price Over Time for Category {selected_category}',
+            # title=f'Student Price Over Time for Category {selected_category}',
             xaxis_title='Date',
             yaxis_title='Student Price'
         )
 
         # Convert the Plotly figure to HTML
-        plot_html = pio.to_html(fig, full_html=False)
+        plot_html = pio.to_html(fig, full_html=False, config={'responsive': True})
 
         # Add pie_charts to the template context
         return render_template('analysis.html',
