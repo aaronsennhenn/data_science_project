@@ -1,5 +1,5 @@
 """
-This script is responsible for updating all tables that rely on the dishes table. The script is designed to be executed daily at 3:30 AM via a cronjob. All the gtp
+This script is responsible for updating all tables that rely on the dishes table. The script is designed to be executed daily after the run_scraper.py as a cronjob. All the gtp
 promts are imported from the scraper.gpt_prompts module. The script is divided into several modules, each responsible for updating a specific table.
 
 
@@ -104,7 +104,7 @@ def update_description():
         return
 
     with Session() as db_session:
-        description_df = generate_description(df, 'menu')
+        description_df = generate_description(df, 'menu','menuLine')
         write_to_description(description_df,engine,db_session)
 
 def update_taste():

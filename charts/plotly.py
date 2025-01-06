@@ -50,6 +50,7 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     )
 
     # Convert the Plotly figure to HTML
+    #plot_html = pio.to_html(fig, full_html=False,config={'responsive': True})
     plot_html = pio.to_html(fig, full_html=False)
 
     return plot_html,df['menuLine'].unique()

@@ -229,7 +229,7 @@ def classify_dish_taste(df, column):
         # Create prompt for taste classification
         messages = [
             {"role": "system", "content": "Classify the dish into one of the following categories: Fettig, Leicht, or Süß. Respond with only one word."},
-            {"role": "user", "content": f"Classify the dish: '{cleaned_text}'"}
+            {"role": "user", "content": f"Classify the dish: '{menu}'"}
         ]
 
         # Send request
