@@ -22,21 +22,20 @@ document.addEventListener('DOMContentLoaded', function () {
     
     submitRatingButtons.forEach(button => {
         button.addEventListener('click', function () {
-            const menuLine = this.getAttribute('data-menu-line');
             const id = this.getAttribute('data-id');
-            const rating = document.querySelector(`input[name="rating_${menuLine}"]:checked`).value;
+            const rating = document.querySelector(`input[name="rating_${id}"]:checked`).value;
 
-            if (rating) {
-                const feedback = this.nextElementSibling;
-                feedback.classList.remove('hidden');
-                feedback.textContent = 'Rating received!';
+        //    if (rating) {
+        //        const feedback = this.nextElementSibling;
+        //        feedback.classList.remove('hidden');
+        //        feedback.textContent = 'Rating received!';
                 
-                setTimeout(() => {
-                    feedback.classList.add('hidden');
-                }, 3000);
-            } else {
-                alert('Please select a rating before submitting.');
-            }
+         //       setTimeout(() => {
+         //           feedback.classList.add('hidden');
+         //       }, 3000);
+         //   } else {
+         //       alert('Please select a rating before submitting.');
+         //   }
 
             const formData = new FormData();
             formData.append('id', id);
@@ -45,9 +44,11 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch('/menu', {
                 method: 'POST',
                 body: formData,
-            })
+            })                              
         });
     });
+
+ 
 
     // Handle mensa selection
     mensaDropdown.addEventListener('change', function() {
@@ -74,4 +75,17 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
+});
+
+// function for rate more dishes popup
+function togglePopup() {
+    document.getElementById("popup-1").classList.toggle("active");
+}
+document.addEventListener('DOMContentLoaded', function () {
+    // Check if the "popup" query parameter exists
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('popup')) {
+        // Open the popup
+        togglePopup();
+    }
 });

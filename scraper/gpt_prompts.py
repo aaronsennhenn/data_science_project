@@ -5,14 +5,15 @@ import re
 from nltk.corpus import stopwords
 import json
 from secret import OPENAI_KEY
-
+nltk.download('stopwords')
+stop_words = set(stopwords.words('german'))
 
 def initialize_openai_client(api_key):
     os.environ["OPENAI_API_KEY"] = api_key
     client = OpenAI()
     return client
 
-#Setup client
+#Setup client manually
 os.environ["OPENAI_API_KEY"] = OPENAI_KEY
 client = OpenAI()
 
@@ -20,9 +21,6 @@ client = OpenAI()
 #Function to clean text
 def preprocess_text(text):
 
-    nltk.download('stopwords')
-    stop_words = set(stopwords.words('german'))
-    
     text = re.sub(r"\[.*?\]", "", text).strip() # remove special characters
     text = text.lower()  # Convert to lowercase
     text = re.sub(r"[^a-zäöüß\s]", "", text)
@@ -30,7 +28,6 @@ def preprocess_text(text):
     text = " ".join(text.split())
 
     # remove stopwords
-    stop_words = set(stopwords.words('german'))  # Replace 'german' with your language of choice
     words = text.split()
     filtered_words = [word for word in words if word.lower() not in stop_words]
     text = " ".join(filtered_words)
@@ -141,53 +138,62 @@ def embedding_extraction(df,column):
 
 
 #Descriptions
-def generate_description(df, column):
+def generate_description(df, column, menuLine):
     description_en_list = []
     description_de_list = []
     tokens_list = []
 
-    for menu in df[column]:
-        # Handle non-string or empty menu values
-        if not isinstance(menu, str) or not menu.strip():
+    # Define the dish filter
+    dish_filter = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Dessert vorport.', 'Dessert SB', 'Beilagen SB']
+        
+    for dish, line in zip(df[column], df[menuLine]):
+        # Check if menuLine matches dish_filter or menu is invalid
+        if not isinstance(dish, str) or not dish.strip() or line in dish_filter:
             description_en_list.append("No description available.")
             description_de_list.append("Keine Beschreibung verfügbar.")
             tokens_list.append(0)
             continue
 
-        cleaned_text = preprocess_text(menu)
-
-        # Create prompt for English description
-        messages_en = [
-            {"role": "system", "content": "Provide a short description of the dish in English for someone unfamiliar with it."},
-            {"role": "user", "content": f"Describe the dish: '{cleaned_text}'"}
-        ]
-
-        # Create prompt for German description
+        #Create prompt for German description
         messages_de = [
-            {"role": "system", "content": "Gib eine kurze Beschreibung des Gerichts auf Deutsch für jemanden, der es nicht kennt."},
-            {"role": "user", "content": f"Beschreibe das Gericht: '{cleaned_text}'"}
+            {"role": "system", "content": (
+                "Du bist ein Student. Gib eine kurze Beschreibung des Gerichts auf Deutsch."
+                "Verwende einen prägnanten und einfachen Ton."
+                "Beispiel für das Gericht Chili Con Carne: Ein herzhaftes, würziges Gericht aus Rinderhackfleisch, roten Bohnen, Tomaten, Zwiebeln, Knoblauch und Chili. Gewürzt mit Paprika, Kreuzkümmel und Chili für Schärfe und Geschmack."
+            )},
+            {"role": "user", "content": f"Beschreibe das Gericht: '{dish}'"}
         ]
-
-        # Send request for English description
-        completion_en = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages_en,
-            max_tokens=100,
-            temperature=0.2
-        )
 
         # Send request for German description
         completion_de = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages_de,
+            max_tokens=300,
+            temperature=0.01
+        )
+
+        #Extract descriptions and tokens
+        description_de = completion_de.choices[0].message.content.strip()
+        tokens_used = completion_de.usage.total_tokens
+
+        # Translate German description into English via follow-up prompt
+        translation_prompt = [
+            {"role": "system", "content": (
+                "You are an expert translator. Please translate the following German description into clear, natural English. "
+                "Maintain the format and tone, and ensure that the description is easy to understand."
+            )},
+            {"role": "user", "content": f"Translate this description:\n\n{description_de}"}
+        ]
+
+        translation_response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=translation_prompt,
             max_tokens=100,
             temperature=0.2
         )
 
-        # Extract descriptions and tokens
-        description_en = completion_en.choices[0].message.content.strip()
-        description_de = completion_de.choices[0].message.content.strip()
-        tokens_used = completion_en.usage.total_tokens + completion_de.usage.total_tokens
+        description_en = translation_response.choices[0].message.content.strip()
+        tokens_used += translation_response.usage.total_tokens
 
         # Append results
         description_en_list.append(description_en)
@@ -220,12 +226,10 @@ def classify_dish_taste(df, column):
             tokens_list.append(0)
             continue
 
-        cleaned_text = preprocess_text(menu)
-
         # Create prompt for taste classification
         messages = [
             {"role": "system", "content": "Classify the dish into one of the following categories: Fettig, Leicht, or Süß. Respond with only one word."},
-            {"role": "user", "content": f"Classify the dish: '{cleaned_text}'"}
+            {"role": "user", "content": f"Classify the dish: '{menu}'"}
         ]
 
         # Send request
@@ -267,60 +271,65 @@ def classify_dish_taste(df, column):
     return df
 
 
-def generate_recipe(df, column):
+def generate_recipe(df, column, menuLine):
     recipe_en_list = []
     recipe_de_list = []
     tokens_list = []
+
+    # Define the dish filter
+    dish_filter = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Dessert vorport.', 'Dessert SB', 'Beilagen SB']
         
-    for dish in df[column]:
-        
-        # Handle non-string or empty entries in the column
-        if not isinstance(dish, str) or not dish.strip():
+    for dish, line in zip(df[column], df[menuLine]):
+        # Check if menuLine matches dish_filter or dish is invalid
+        if not isinstance(dish, str) or not dish.strip() or line in dish_filter:
             recipe_en_list.append("No recipe available.")
             recipe_de_list.append("Kein Rezept verfügbar.")
             tokens_list.append(0)
             continue
 
-        #Create prompt for generating a short recipe
-        messages_en = [
-            {"role": "system", "content": (
-                "You are a professional chef. Create a short and simple recipe for the following dish. "
-                "The recipe should include ingredients and step-by-step instructions, written in English, and suitable for a home cook."
-            )},
-            {"role": "user", "content": f"Please provide a short recipe for the dish: '{dish}'."}
-        ]
-    
+        # Create prompt for generating a short recipe in German
         messages_de = [
             {"role": "system", "content": (
-                "Sie sind ein Profikoch. Erstellen Sie ein kurzes und einfaches Rezept für das folgende Gericht. "
-                "Das Rezept sollte Zutaten und eine Schritt-für-Schritt-Anleitung enthalten, in deutscher Sprache verfasst und für einen Hausmann geeignet sein."
+               "Sie sind ein Profikoch. Erstellen Sie ein kurzes und einfaches Rezept für das folgende Gericht. "
+               "Das Rezept sollte Zutaten und eine Schritt-für-Schritt-Anleitung enthalten, in deutscher Sprache verfasst und für einen Hausmann geeignet sein. "
+               "Formatieren Sie das Rezept wie folgt: "
+               "Zutaten:\n- [Zutat 1]\n- [Zutat 2]\n\nAnleitung:\n1. [Schritt 1]\n2. [Schritt 2] "
+               "Stellen Sie sicher, dass die Zutaten und Anweisungen vollständig und klar sind, ohne mitten im Satz abzubrechen."
+               "Vermeiden Sie abschließende Bemerkungen wie 'Guten Appetit'. Geben Sie nur das Rezept an."
             )},
             {"role": "user", "content": f"Bitte geben Sie ein kurzes Rezept an für das Gericht: '{dish}'."}
         ]
-        
-    
-    
-        #Send request
-        completion_en = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages_en,
-            max_tokens=200,
-            temperature=0.5
-        )
 
         completion_de = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=messages_de,
-            max_tokens=200,
-            temperature=0.5
+            max_tokens=500,
+            temperature=0.1
         )
 
-   
-        #Extract recipe and tokens used
-        recipe_en = completion_en.choices[0].message.content.strip()
+        # Extract the German recipe and token usage
         recipe_de = completion_de.choices[0].message.content.strip()
-        tokens_used = completion_en.usage.total_tokens + completion_de.usage.total_tokens
-        
+        tokens_used = completion_de.usage.total_tokens
+
+        # Translate German recipe into English via follow-up prompt
+        translation_prompt = [
+            {"role": "system", "content": (
+                "You are an expert translator. Please translate the following German recipe into clear, natural English. "
+                "Maintain the format and tone, and ensure that the instructions are easy to follow."
+            )},
+            {"role": "user", "content": f"Translate this recipe:\n\n{recipe_de}"}
+        ]
+
+        translation_response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=translation_prompt,
+            max_tokens=500,
+            temperature=0.1
+        )
+
+        recipe_en = translation_response.choices[0].message.content.strip()
+        tokens_used += translation_response.usage.total_tokens
+
         # Append to lists
         recipe_en_list.append(recipe_en)
         recipe_de_list.append(recipe_de)
@@ -366,9 +375,6 @@ def classify_missing_filters(dish_name):
     result = completion.choices[0].message.content.strip().split("\n")
     result_string = result[0].strip() if len(result) > 0 else ""
 
-    # transform classification string into consistent format:
-    #replacement_dict = {"fish": "F", "poultry": "G", "veal": "K", "lamb": "L", "beef": "R", "pork": "S", "game": "W","vegetarian":"V"}
-    # return replacement_dict.get(result_string)
     return result_string  
 
 ## Run all prompts

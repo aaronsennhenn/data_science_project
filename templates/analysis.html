@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/analysis.css') }}" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
@@ -120,7 +122,6 @@
 
         <section class="mb-12 w-full">
             <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Wöchentliche Analyse{% else %}Weekly Analytics{% endif %}</h2>
-            
             <!-- Menu Details -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
@@ -157,7 +158,7 @@
             <!-- Rating Details -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
-                    {% if session.get('language') == 'de' %}Bewertungsanalyse{% else %}Rating Analysis{% endif %}
+                    {% if session.get('language') == 'de' %}Bewertungseinblicke{% else %}Rating Insights{% endif %}
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="p-4 bg-gray-50 rounded-lg w-full">
@@ -171,13 +172,65 @@
                 </div>
             </div>
 
+            <!-- Price development over time -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
+                    {% if session.get('language') == 'de' %}Preisentwicklung{% else %}Price Development{% endif %}
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-10 gap-4">
+                    <!-- Plot Area -->
+                    <div class="p-4 bg-gray-50 rounded-lg col-span-7">
+                        <div id="plot">
+                            {{ price_plot|safe }}
+                        </div>
+                    </div>
+                
+                    <!-- Controls Section -->
+                    <div class="p-4 bg-gray-50 rounded-lg col-span-3 flex flex-col space-y-4">
+                        <!-- Dropdown for selecting the category -->
+                        <div>
+                            <label for="category" class="block font-medium text-gray-700">Select Category:</label>
+                            <select id="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                {% for category in categories %}
+                                    <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
+                                        {{ category }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                
+                        <!-- Dropdown for selecting price type -->
+                        <div>
+                            <label for="priceType" class="block font-medium text-gray-700">Price Type:</label>
+                            <select id="priceType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="studentPrice">Student Price</option>
+                                <option value="guestPrice">Guest Price</option>
+                            </select>
+                        </div>
+                
+                        <!-- Checkbox for showing icons -->
+                        <div>
+                            <label for="showIcons" class="inline-flex items-center">
+                                <input
+                                    type="checkbox"
+                                    id="showIcons"
+                                    value="true"
+                                    checked
+                                    class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                >
+                                <span class="ml-2 text-gray-700">Show Icons</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                </div>
+            </div>
 
             <!-- Price Analysis -->
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 w-full">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Preisanalyse{% else %}Price Analysis{% endif %}</h3>
-                <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">
-                    {% if session.get('language') == 'de' %}Geringste Preise{% else %}Lowest Prices{% endif %}
-                </h4>
+                <h4 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em; font-family: cursive;">{% if session.get('language') == 'de' %}Gerichte mit geringstem Preis pro Mensa {% else %}Menu with Lowest Prices per Menu Category{% endif %}</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {% for mensa, data in menus_with_lowest_price.items() %}
                         {% if data %}
@@ -189,7 +242,7 @@
                                             {% if session.get('language') == 'de' %}Menü{% else %}Menu{% endif %}: {{ data.menu }}
                                         </p>
                                         <p class="text-sm font-medium text-gray-600">
-                                            {% if session.get('language') == 'de' %}Menülinie{% else %}Menu Line{% endif %}: {{ data.menu_line }}
+                                            {% if session.get('language') == 'de' %}Menükategorie{% else %}Menu Category{% endif %}: {{ data.menu_line }}
                                         </p>
                                         <div class="mt-2">
                                             <p class="text-sm font-medium text-gray-600">
@@ -221,76 +274,14 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-                 <!-- Average Prices Column
-                <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Durchschnittliche Preise{% else %}Average Prices{% endif %}</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {% for mensa in names_available_mensas %}
-                    <div class="p-4 bg-gray-50 rounded-lg">
-                        <div class="flex flex-col">
-                            <div class="w-full mb-4">
-                                <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
-                                {% for menuLine, price in mensa_average_prices[mensa].items()|sort %}
-                                <div class="mt-2">
-                                <p class="text-sm font-medium text-gray-600">
-                                {% if session.get('language') == 'de' %}
-                                    {{ menuLine }}
-                                {% else %}
-                                    {{ menuLineEng if menuLineEng else menuLine }}
-                                {% endif %}
-                                </p>
-                                <p class="font-medium">€{{ price }}</p>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %} 
-                -->
             </div>                
 
-            <!-- Lowest Prices Column 
-                <h4 class="text-sm font-medium text-gray-500 mb-2 text-center" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Geringste Preise{% else %}Lowest Prices{% endif %} </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {% for mensa in names_available_mensas %}
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <div class="flex flex-col">
-                                <div class="w-full mb-4">
-                                    <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
-                                    {% for menuLine, price in mensa_lowest_prices[mensa].items() %}
-                                    <div class="mt-2">
-                                        <p class="text-sm font-medium text-gray-600">
-                                            {% if session.get('language') == 'de' %}
-                                                {% if menuLine == 'Student Price' %}Studentenpreis
-                                                {% elif menuLine == 'Guest Price' %}Gästepreis
-                                                {% else %}{{ menuLine }}{% endif %}
-                                            {% else %}
-                                                {{ menuLine }}
-                                            {% endif %}
-                                        </p>
-                                        <p class="font-medium">€{{ price }}</p>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                -->
+            
                 </div>
             </div>
         </div>
     </section>
-    <!--
-    <section class="mb-12 w-full max-w-full px-4">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Gesamtanalyse{% else %} Total Analytics{% endif %}</h2>
-
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-            <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Preisentwicklung{% else %} Price Development{% endif %}</h3>
-            <div id="price-development-plots" class="w-full h-[600px]"></div>
-        </div>
-    </section>
-    -->
-    </main>
+</main>
     
     <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 py-8">
@@ -305,11 +296,12 @@
         var graphs = {{ plot_json | safe }};
         Plotly.newPlot('price-development-plots', graphs.data, graphs.layout);
     </script>
-     <script>
-        {% for mensa in names_available_mensas %}
-            var pieData = {{ pie_charts[mensa] | safe }};
-            Plotly.newPlot('pie-chart-{{ loop.index }}', pieData.data, pieData.layout);
-        {% endfor %}
+
+    <script>
+    {% for mensa in names_available_mensas %}
+        var pieData = {{ pie_charts[mensa] | safe }};
+        Plotly.newPlot('pie-chart-{{ loop.index }}', pieData.data, pieData.layout);
+    {% endfor %}
     </script>  
     <script>
     Plotly.newPlot('top-mensas-chart', {{ mensa_chart | safe }}.data, {{ mensa_chart | safe }}.layout);
@@ -326,6 +318,40 @@
 
         closeMenu.addEventListener('click', () => {
             sidebar.classList.add('translate-x-full');
+        });
+    </script>
+    <script>
+        // Function to update the plot via AJAX
+        function updatePlot(selectedCategory,selectedPrice,selectedIcon) {
+            $.ajax({
+                url: '/update_plot',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ category: selectedCategory,
+                                        price: selectedPrice,
+                                        icon: selectedIcon}),
+                success: function(response) {
+                    $('#plot').html(response.plot); // Update the plot area with the new plot
+                },
+                error: function(error) {
+                    console.error('Error updating plot:', error);
+                }
+            });
+        }
+
+        // Update the value of the checkbox and send updated data when it changes
+        $('#showIcons').on('change', function () {
+            // Set the checkbox value to "true" or "false" based on its state
+            $(this).val(this.checked ? "true" : "false");
+        });
+
+
+        // Update the plot when the dropdown value changes
+        $('#category, #priceType, #showIcons').on('change', function() {
+            const selectedCategory = $('#category').val();
+            const selectedPrice = $('#priceType').val();
+            const selectedIcon = $('#showIcons').val()
+            updatePlot(selectedCategory, selectedPrice, selectedIcon);
         });
     </script>
 </body>

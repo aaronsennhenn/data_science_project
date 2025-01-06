@@ -27,6 +27,17 @@ class Dish(Base):
     allergens = Column(String, nullable=True)
     additives = Column(String, nullable=True)
 
+class DishHistory(Base):
+
+    __tablename__ = 'dishes_history'
+    id = Column(Integer, primary_key=True)
+    menuDate = Column(Date, nullable=True)
+    menuLine = Column(String, nullable=True)
+    menu = Column(String, nullable=True)
+    studentPrice = Column(Float, nullable=True)
+    guestPrice = Column(Float, nullable=True)
+    icons_clean = Column(String, nullable=True)
+
 class FiltersClean(Base):
     __tablename__ = "filters_clean"
     id = Column(Integer, primary_key=True)
@@ -119,10 +130,7 @@ class Course(Base):
     __tablename__ = 'course'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # Add this line
-    menuDate = Column(Date, nullable=True)
-    menuLine = Column(String, nullable=True)
-    menu = Column(String, nullable=True)
-    location = Column(String, nullable=True)
+    menu_id = Column(Integer, nullable=True)
     course = Column(String, nullable=True)
     course_eng = Column(String, nullable=True)
 
@@ -180,7 +188,6 @@ def write_to_db(filtered_df: pd.DataFrame, engine, Session):
                 print(f"Error message: {str(e)}")
                 continue
 
-        write_to_course(engine, Session)
         
         db_session.commit()
 
@@ -210,13 +217,24 @@ def write_to_dishes_eng(engine, Session):
         db_session.commit()
     
 
-# This table contains the user ratings, the menu_id of the rated meal, a timestamp, and the user_id if he is logged in
+
+
 def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):
-    Rating.metadata.create_all(engine) 
+    Rating.metadata.create_all(engine)
 
     with Session() as db_session:
-        rating = Rating(menu_id=menu_id, rating=rating, user_name=user_name)
-        db_session.add(rating)
+        # Check if the user already gave a rating for the menu_id
+        existing_rating = db_session.query(Rating).filter_by(menu_id=menu_id, user_name=user_name).first()
+
+        if existing_rating and user_name:
+            # Update the existing rating
+            existing_rating.rating = rating
+        else:
+            # Add a new rating if none exists
+            new_rating = Rating(menu_id=menu_id, rating=rating, user_name=user_name)
+            db_session.add(new_rating)
+
+        # Commit the changes
         db_session.commit()
 
 def write_to_filters_clean(icons_df: pd.DataFrame, engine, session):
@@ -258,6 +276,8 @@ def write_to_ingredient(dishes_df: pd.DataFrame, engine, session):
                 ingredients_en=row.get('ingredients_en')
             )
             session.add(ingredients)
+            session.commit()
+            
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -275,6 +295,7 @@ def write_to_description(dishes_df: pd.DataFrame, engine, session):
                 description_en=row.get('description_en')
             )
             session.add(description)
+            session.commit()
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -291,6 +312,8 @@ def write_to_embedding(dishes_df: pd.DataFrame, engine, session):
                 embedding=row.get('gpt_embedding'),
             )
             session.add(embedding)
+            session.commit()
+            
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -308,6 +331,7 @@ def write_to_recipe(dishes_df: pd.DataFrame, engine, session):
                 recipe_en=row.get('recipe_en')
             )
             session.add(recipe)
+            session.commit()
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -325,6 +349,7 @@ def write_to_taste(dishes_df: pd.DataFrame, engine, session):
                 taste_en=row.get('taste_en')
             )
             session.add(taste)
+            session.commit()
         except ValueError as e:
             print(f"Error converting values for row: {row.to_dict()}")
             print(f"Error message: {str(e)}")
@@ -424,54 +449,45 @@ def write_to_directory(engine, Session):
         db_session.commit()
 
 
-def write_to_course(engine, Session):
+def write_to_course(engine, db_session):
     Course.metadata.create_all(engine)
     
-    with Session() as db_session:
-        dishes = db_session.query(Dish).all()
+    dishes = db_session.query(Dish).all()
+    
+    for dish in dishes:
+        existing = db_session.query(Course).filter(Course.menu_id == dish.id).first()
         
-        for dish in dishes:
-            existing = db_session.query(Course).filter(
-                Course.menuDate == dish.menuDate,
-                Course.menuLine == dish.menuLine,
-                Course.menu == dish.menu,
-                Course.location == dish.location
-            ).first()
+        if not existing:
+            main_dishes = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan', 'Tagesmenü vegetarisch','Angebot d. Tages veget.','mensaVital vegan',
+                            'Auswahlgericht', 'Auswahlgericht vegan 2', 'Auswahlgericht 2',
+                            'Auswahlgericht veget.', 'Auswahlgericht vegan', 'mensaVital vegetarisch']
             
-            if not existing:
-                main_dishes = ['Angebot des Tages', 'Tagesmenü', 'Tagesmenü vegan', 
-                             'Auswahlgericht', 'Auswahlgericht vegan 2', 'Auswahlgericht 2',
-                             'Auswahlgericht veget.', 'Auswahlgericht vegan', 'mensaVital vegetarisch']
-                
-                side_dishes = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Beilagen SB']
-                
-                desserts = ['Dessert SB', 'Dessert vorport.']
-                
-                course = None
-                course_eng = None
-                
-                if dish.menuLine in main_dishes:
-                    course = "Hauptspeise"
-                    course_eng = "Main Dish"
-                elif dish.menuLine in side_dishes:
-                    course = "Beilage"
-                    course_eng = "Side Dish"
-                elif dish.menuLine in desserts:
-                    course = "Nachspeise"
-                    course_eng = "Dessert"
-                
-                if course and course_eng:
-                    new_course = Course(
-                        menuDate=dish.menuDate,
-                        menuLine=dish.menuLine,
-                        menu=dish.menu,
-                        location=dish.location,
-                        course=course,
-                        course_eng=course_eng
-                    )
-                    db_session.add(new_course)
-        
-        db_session.commit()
+            side_dishes = ['Salat-/ Gemüsebuffet 100g', 'Beilagen vorport.', 'Beilagen SB']
+            
+            desserts = ['Dessert SB', 'Dessert vorport.']
+            
+            course = None
+            course_eng = None
+            
+            if dish.menuLine in main_dishes:
+                course = "Hauptspeise"
+                course_eng = "Main Dish"
+            elif dish.menuLine in side_dishes:
+                course = "Beilage"
+                course_eng = "Side Dish"
+            elif dish.menuLine in desserts:
+                course = "Nachspeise"
+                course_eng = "Dessert"
+            
+            if course and course_eng:
+                new_course = Course(
+                    menu_id=dish.id,
+                    course=course,
+                    course_eng=course_eng
+                )
+                db_session.add(new_course)
+    
+    db_session.commit()
 
 
 def update_user_vector(username, engine, Session):

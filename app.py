@@ -1,20 +1,21 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import os
-from werkzeug.security import generate_password_hash, check_password_hash
 from secret import *
-from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user, write_to_course, write_to_dishes_eng, write_to_directory
-from db.db_read import get_user_vector, get_dishes_by_date_location_filtered, get_course_eng, get_course, get_next_five_days_data, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user
+from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user
+from db.db_read import get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas
 from scraper.data_transform import collect_unique_meats
-from datetime import datetime
+from datetime import datetime, timedelta
 import plotly
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.io as pio
 from plotly.subplots import make_subplots
 import json
 from db.utils import compute_cosine_similarity
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
+from charts.plotly import generate_price_chart
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -79,7 +80,7 @@ def login():
             
             if user and user.check_password(password):
                 session['username'] = username
-                return redirect(url_for("user_page"))
+                return redirect(url_for("menu"))
             else:
                 error_message = "Your username or password is wrong!"
                 return render_template('login.html', error=error_message)
@@ -100,7 +101,7 @@ def register():
         write_to_user(username, password, engine, Session)
         
         session['username'] = username
-        return redirect(url_for('user_page'))
+        return redirect(url_for('menu'))
 
 
 # login for google
@@ -180,7 +181,7 @@ def user_page():
             'xaxis': {'title': 'Mensa', 'tickangle': 45},
             'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
         }
-        mensa_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+        mensa_user_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
 
         # Create top dishes chart
         dish_trace = {
@@ -195,7 +196,7 @@ def user_page():
             'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 45},
             'yaxis': {'title': 'Bewertung' if lang == 'de' else 'Rating'}
         }
-        dish_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+        dish_user_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
 
     finally:
         db_session.close()
@@ -206,8 +207,8 @@ def user_page():
                            first_rating_date=first_rating_date,
                            favorite_dishes=favorite_dishes,
                            favorite_mensas=favorite_mensas,
-                           mensa_chart=mensa_chart,
-                           dish_chart=dish_chart)
+                           mensa_user_chart=mensa_user_chart,
+                           dish_user_chart=dish_user_chart)
 
 
 @app.route('/menu', methods=['GET','POST'])
@@ -216,31 +217,26 @@ def menu():
     session['language'] = lang
     session.permanent = True
     with Session() as db_session:
+        
         # Get additives and allergens 
         additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng  = get_written_forms(db_session)
-        
-        # Get descriptions and recipes
-        descriptions = get_descriptions(db_session)
-        recipes = get_recipes(db_session)
-
-        # query available data for the next five days
-        data = get_next_five_days_data(db_session)
-
-        # store dates and mensas in a list
-        available_dates = sorted([datetime.strptime(key.split(", ")[1], '%Y-%m-%d').strftime('%Y-%m-%d') 
-                                for key in data.keys()])
-        available_mensas = list(set([mensa for mensas in data.values() for mensa in mensas]))
-
+ 
         # set default values
-        mensa_name = request.args.get('selected_mensa', 'all')  # Changed default to 'all'
-        date = available_dates[0]
+        mensa_name = 'all'  # Changed default to 'all' to show dishes of all mensas
+        today = datetime.now().date()
+        available_dates = [(today + timedelta(days=x)).strftime('%Y-%m-%d') for x in range(5)]
+        date = today.strftime('%Y-%m-%d')
+        available_mensas = get_unique_mensas(db_session)
         selected_diet_meat = 'omnivore'
         selected_price = "studentPrice"
-        no_results = False 
+        no_results = False
+        recommendation_switch = None
 
-        # if user logged in, get user_id
+        # if user is logged in, get user_id
         user_name = session.get('username')
         user_vector = get_user_vector(user_name, db_session)
+
+
 
         # When user filters, get filtered values
         if request.method == 'POST':
@@ -248,8 +244,11 @@ def menu():
             date_temp = request.form.get('selected_date')
             selected_diet_meat = request.form.getlist('selected_diet_meat')
             selected_price = request.form.get('selected_price')
+            recommendation_switch = request.form.get('recommendation_switch')
+
             # get rating from user and selected dish with mensa
             rating, menu_id = request.form.get('rating'), request.form.get('id')
+            print(rating, menu_id)
 
             # write rating and id to database. If user is not logged in, still safe the rating but with NA username
             if rating:
@@ -261,9 +260,14 @@ def menu():
                     update_user_vector(user_name, engine, Session)
                     user_vector = get_user_vector(user_name, db_session)
 
-            # only udate the date variable, if a date is selected
+            # only update the date variable, if a date is selected
             if date_temp:
                 date = date_temp
+
+        if user_name:
+            random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(),lang,user_name,db_session) # initialize random dish
+        else:
+            random_dish = (None,None)
 
         # filter dishes column and merge additional information. Also apply filter of the user directly in the sql query
         dishes = get_dishes_by_date_location_filtered(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name, selected_diet_meat, session.get('language'))
@@ -290,31 +294,48 @@ def menu():
                         'recipe_en':dish[8],
                         'course_eng':dish[9],
                         'embedding':dish[10],
-                        'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0
+                        'average_rating':dish[11],
+                        'rating_count':dish[12],
+                        'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
+                        'is_top_recommendation_in_course': False  # Initialize to False
                         })
+        
+        # Sort dishes by recommendation score if recommendation switch is on
+        if recommendation_switch:
+            menu_data = sorted(menu_data, key=lambda x: x['recommendation_score'], reverse=True)
+        
 
-        # Group dishes into a list of dicts
+        # Group dishes into a list of dicts with course type as key. e.g. main dish, dessert, site dish
         grouped_menu_data = {}
         for dish in menu_data:
-            course_key = dish['course'] if lang == 'de' else dish['course_eng']
+            course_key = dish.get('course') if lang == 'de' else dish.get('course_eng')
+            if not course_key:  # Skip if course_key is None or empty
+                continue
             if course_key not in grouped_menu_data:
                 grouped_menu_data[course_key] = []
             grouped_menu_data[course_key].append(dish)
 
+        # find dish with highest recommendation score for course type and set flag
+        target_course_keys = 'Hauptspeise' if lang == 'de' else 'Main Dish'
+        for course_key, dishes in grouped_menu_data.items():
+            if course_key in target_course_keys:
+                # Find the dish with the highest recommendation score
+                top_dish = max(dishes, key=lambda x: x['recommendation_score'])
+                
+                # Set the flag only for the top dish in the target courses
+                for dish in dishes:
+                    dish['is_top_recommendation_in_course'] = dish == top_dish
+
         # Check for no results after filtering
         if not grouped_menu_data:
             no_results = True
-
-        # encode selected weekday to display
-        selected_weekday = datetime.strptime(date, '%Y-%m-%d').strftime('%A')
-            
+    
     return render_template('menu.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,
                          dishes=grouped_menu_data,
                          selected_mensa=mensa_name,
                          selected_date=date,
-                         selected_weekday=selected_weekday,
                          selected_price=selected_price,
                          selected_diet_meat=selected_diet_meat,
                          additives_dict=additives_dict,
@@ -323,11 +344,11 @@ def menu():
                          allergens_dict_eng=allergens_dict_eng,
                          meats_dict=meats_dict,
                          meats_dict_eng=meats_dict_eng,
-                         descriptions=descriptions,
-                         recipes=recipes,
                          username=user_name,
                          lang=lang,
-                         no_results=no_results)
+                         no_results=no_results,
+                         recommendation_switch=recommendation_switch,
+                         random_dish=random_dish)
 
 
 @app.route('/analysis')
@@ -497,6 +518,17 @@ def analysis():
         }
         dish_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
 
+
+        ### Price Chart ###
+
+        # get 
+        initial_category = "initial"
+        initial_price_type = 'guestPrice'
+        show_icons_initial = True
+
+        plot_html,categories = generate_price_chart(db_session,initial_category,initial_price_type,show_icons_initial)
+
+
         # Add pie_charts to the template context
         return render_template('analysis.html',
                              total_mensas=total_mensas,
@@ -516,61 +548,33 @@ def analysis():
                              mensa_chart=mensa_chart,
                              dish_chart=dish_chart,
                              menus_with_lowest_price=menus_with_lowest_price,
-                             username=username)
+                             username=username,
+                             price_plot=plot_html,
+                             categories=categories,
+                             selected_category=initial_category)
     
+# Route to update the plot dynamically
+@app.route('/update_plot', methods=['POST'])
+def update_plot():
+
+    selected_category = request.json.get('category')
+    selected_price = request.json.get('price')
+    selected_icon = request.json.get('icon')
+
+    selected_icon = {"true": True, "false": False}.get(selected_icon.lower())
 
 
-@app.route('/dish-clicked', methods=['POST'])
-def dish_clicked():
-    try:
-        mensa_name = request.form.get('mensa_name')  # Extract restaurant name
-        mensa_day = request.form.get('mensa_day')  # Extract weekday
-        if not mensa_name or not mensa_day:
-            return jsonify({'error': 'Missing data'}), 400
-    # Do something with the data (e.g., log, process)
-        print(f"Received data: {mensa_name}, {mensa_day}")
-        #return jsonify({'success': True, 'message': 'Data received'})  # Send back a valid JSON response
-        #return redirect(url_for('mensa_menu', selected_mensa=mensa_name, selected_date=mensa_date))
-        return jsonify({'success': True, 'message': 'Data received'})
+    print(selected_category, selected_price, selected_icon)
 
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/mensa/<mensa_name>')
-def mensa_menu(mensa_name):
-    date = request.args.get('date')
-    
     with Session() as db_session:
-        dishes = get_dishes_by_date_location(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name)
-        
-        menu_data = []
-        for dish in dishes:
-            menu_data.append({
-                'menu': dish.menu,
-                'studentPrice': dish.studentPrice,
-                'guestPrice': dish.guestPrice,
-                'allergens': dish.allergens,
-                'additives': dish.additives
-            })
-            
-        return render_template('mensa_result.html',
-                             mensa_name=mensa_name,
-                             mensa_day=date,
-                             dishes=menu_data)
+        plot_html,_ = generate_price_chart(db_session,selected_category,selected_price,selected_icon)
 
-@app.route('/check_image/<filename>')
-def check_image(filename):
-    image_path = os.path.join(images_folder, filename)
-    if os.path.exists(image_path):
-        return '', 200
-    else:
-        return '', 404
+
+    return jsonify({'plot': plot_html})
+
+
 
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)
-        #write_to_course(engine, Session)  #not needed to be rerunned
-        #write_to_directory(engine, Session) #need to be rerunned if more data in dishes is available
-        #write_to_dishes_eng(engine, Session)  #need to be rerunned if more data in dishes is available
     app.run()

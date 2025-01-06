@@ -1,11 +1,11 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng, Taste, Ingredient, DishHistory
 from typing import List
 from sqlalchemy import func
 import datetime
 import pandas as pd
-from sqlalchemy import or_
-
+from sqlalchemy import or_,func,select,desc,select, union, and_, not_
+from typing import List, Tuple
 
 def convert_dblist_to_df(db_list):
     dict_list = [vars(obj) for obj in db_list]
@@ -44,7 +44,7 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
         .outerjoin(Recipe, Dish.id == Recipe.menu_id)
         .outerjoin(Description, Dish.id == Description.menu_id)
         .outerjoin(DishEng, Dish.id == DishEng.menu_id)
-        .outerjoin(Course, Dish.id == Course.id)
+        .outerjoin(Course, Dish.id == Course.menu_id)
         .add_columns(
             # German columns
             Recipe.recipe_de,
@@ -64,7 +64,62 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
     # join the embedding column to the filtered dataframe
     query = query.outerjoin(Embedding, Dish.id == Embedding.menu_id).add_columns(Embedding.embedding)
 
+    # Compute average rating for menu_ids in the query
+    avg_rating_subquery = (
+        db_session.query(
+            Rating.menu_id.label("menu_id"),
+            func.round(func.avg(Rating.rating),2).label("average_rating"),
+            func.count(Rating.rating).label("rating_count")  # Count of ratings
+
+        )
+        .group_by(Rating.menu_id)
+        .subquery()
+    )
+
+    # Join the average rating to the main query
+    query = query.outerjoin(avg_rating_subquery, Dish.id == avg_rating_subquery.c.menu_id).add_columns(
+        avg_rating_subquery.c.average_rating.label("average_rating"),
+        avg_rating_subquery.c.rating_count.label("rating_count")
+
+    )
+
     return query.all()
+
+def get_random_dishes(selected_date, lang, user_name, db_session: Session):
+    
+
+    # Query one random main dish that has not been rated by the user yet and is not on the selected date
+    if lang == "de":
+        query = (
+            select(Dish.id, Dish.menu)
+            .outerjoin(Rating, (Dish.id == Rating.menu_id) & (Rating.user_name == user_name))
+            .outerjoin(Course, Course.menu_id == Dish.id)
+            .where(Rating.menu_id == None,
+                Dish.menuDate != selected_date,
+                Course.course == "Hauptspeise",
+                Dish.menu != None
+            )
+            .order_by(func.random())
+            .limit(1)  # Limit to 1 random dish
+        )
+    else:
+        query = (
+            select(DishEng.menu_id, DishEng.menuEng)
+            .outerjoin(Rating, (DishEng.menu_id == Rating.menu_id) & (Rating.user_name == user_name))
+            .outerjoin(Course, Course.menu_id == DishEng.menu_id)
+            .where(Rating.menu_id == None,
+                DishEng.menuDate != selected_date,
+                Course.course_eng == "Main Dish",
+                DishEng.menuEng != None
+            )
+            .order_by(func.random())
+            .limit(1)  # Limit to 1 random dish
+        )
+
+    # Execute the query
+    result = db_session.execute(query).fetchone()
+    return result
+
 
 def get_image_path(dish_id: int, session: Session) -> str:
     dish = session.query(Dish).filter_by(id=dish_id).first()
@@ -96,26 +151,30 @@ def get_course(session: Session, date, menuline, menu, location) -> str:
     return course[0] if course else None
 
     
-def load_dishes_table_for_filter_cleaning(Session):
-    """
-    Loads dishes from the Dish table that are not contained in the FiltersClean table (based on id)
-    and returns them as a DataFrame.
+def load_dishes_table_for_filter_cleaning(Session, update_table):
+    if update_table == "FiltersClean":
+        table = FiltersClean
+    elif update_table == "Embedding":
+        table = Embedding
+    elif update_table == "Description":
+        table = Description
+    elif update_table == "Taste":
+        table = Taste
+    elif update_table == "Recipe":
+        table = Recipe
+    elif update_table == "Ingredient":
+        table = Ingredient
 
-    Args:
-        Session: SQLAlchemy session factory.
 
-    Returns:
-        pd.DataFrame: A DataFrame of dishes not present in FiltersClean.
-    """
     with Session() as session:
-        # Query for dishes not in FiltersClean
+        # Query for dishes not in update_table
         dishes = session.query(
             Dish.id,
             Dish.menuLine,
             Dish.menu,
             Dish.icons
         ).filter(
-            ~session.query(FiltersClean).filter(FiltersClean.menu_id == Dish.id).exists()
+            ~session.query(table).filter(table.menu_id == Dish.id).exists()
         ).all()
 
         # Convert results to a list of dictionaries
@@ -140,7 +199,7 @@ def get_next_five_days_data(session: Session) -> dict:
     date_range = [today + timedelta(days=x) for x in range(5)]
 
     # MANUALLY FIX DATES OVER CHRISTMAS PERIOD BECAUSE MENSA IS CLOSED. MUST BE REMOVED AFTER CHRISTMAS
-    date_range = [datetime(2024, 12, 17), datetime(2024, 12, 18), datetime(2024, 12, 19), datetime(2024, 12, 20)]
+    #date_range = [datetime(2024, 12, 17), datetime(2024, 12, 18), datetime(2024, 12, 19), datetime(2024, 12, 20)]
     
     results = {}
     for date in date_range:
@@ -149,6 +208,9 @@ def get_next_five_days_data(session: Session) -> dict:
         results[date.strftime('%A, %Y-%m-%d')] = locations
     
     return results
+
+def get_unique_mensas(session: Session) -> List[str]:
+    return [mensa.location for mensa in session.query(Dish.location).distinct()]
 
 # Get total number of mensas (Dish.location)
 def get_total_mensas(session: Session) -> int:
@@ -259,7 +321,6 @@ def get_lowest_prices_per_menuline_per_mensa(session: Session) -> dict:
     return results
 
 # Get menu and menu line and price of lowest price dish per each mensa (Dish.location)
-# Display all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) 
 def get_menu_with_lowest_price(session: Session) -> dict:
     results = {}
     for mensa in get_available_mensas(session):
@@ -381,82 +442,61 @@ def get_recipes(db_session):
     return recipes
 
 #Get top three dishes of the week - on y-axis the rating average and on x-axis the dish name (menu)
-#table "rating" use menu_id and rating columns and then merge the table "dishes" to find with the menu_id the corresponding dish name saved in column menu
 def get_top_three_dishes(session: Session):
     today = datetime.now().date()
-    start_of_week = today - timedelta(days=today.weekday())
-    end_of_week = start_of_week + timedelta(days=6)
+    week_end = today + timedelta(days=7)
 
     # Query to get top three dishes
     top_dishes = session.query(
         Dish.menu,
-        func.avg(Rating.rating).label('avg_rating')
+        func.avg(Rating.rating).label('avg_rating'),
+        func.count(Rating.id).label('rating_count')
     ).join(Rating, Dish.id == Rating.menu_id
     ).filter(
-        Dish.menuDate.between(start_of_week, end_of_week)
+        Dish.menuDate >= today,
+        Dish.menuDate < week_end
     ).group_by(
         Dish.id
     ).order_by(
         func.avg(Rating.rating).desc()
     ).limit(3).all()
-    #Format result
+
+    # Format result
     result = [
         {
             'dish_name': dish.menu,
-            'avg_rating': round(dish.avg_rating, 2)
+            'avg_rating': round(dish.avg_rating, 2),
+            'rating_count': dish.rating_count
         } for dish in top_dishes
     ]
     return result
 
-# #Testing
-# def get_top_three_dishes(session: Session):
-#     # Query to get top three dishes based on all ratings
-#     top_dishes = session.query(
-#         Dish.menu,
-#         func.avg(Rating.rating).label('avg_rating'),
-#         func.count(Rating.id).label('rating_count')
-#     ).join(Rating, Dish.id == Rating.menu_id
-#     ).group_by(
-#         Dish.id
-#     ).order_by(
-#         func.avg(Rating.rating).desc()
-#     ).limit(3).all()
-
-#     # Format result
-#     result = [
-#         {
-#             'dish_name': dish.menu,
-#             'avg_rating': round(dish.avg_rating, 2),
-#             'rating_count': dish.rating_count
-#         } for dish in top_dishes
-#     ]
-    
-#     return result
-
-
 #Get top three mensas of the week (ranked best first) - on y-axis the rating average and on x-axis the location (mensa)
 def get_top_three_mensas(session: Session):
-    # Get the start and end dates for the current week
     today = datetime.now().date()
-    start_of_week = today - timedelta(days=today.weekday())
-    end_of_week = start_of_week + timedelta(days=6)
+    week_end = today + timedelta(days=7)
+
     # Query to get top three mensas
     top_mensas = session.query(
         Dish.location,
-        func.avg(Rating.rating).label('avg_rating')
+        func.avg(Rating.rating).label('avg_rating'),
+        func.count(Rating.id).label('rating_count')
     ).join(Rating, Dish.id == Rating.menu_id
     ).filter(
-        Dish.menuDate.between(start_of_week, end_of_week)
+        Dish.menuDate >= today,
+        Dish.menuDate < week_end
     ).group_by(
         Dish.location
     ).order_by(
         func.avg(Rating.rating).desc()
     ).limit(3).all()
-    #Format result
+
+    # Format result
     result = [
         {
             'location': mensa.location,
-            'avg_rating': round(mensa.avg_rating, 2)
+            'avg_rating': round(mensa.avg_rating, 2),
+            'rating_count': mensa.rating_count
         } for mensa in top_mensas
     ]
     return result
@@ -473,23 +513,24 @@ def get_first_rating_date_of_user(session: Session, username: str) -> str:
         return first_rating.strftime('%Y-%m-%d')
     return None
 
-# Get favorite dishes (top 3) of user
-def get_favorite_dishes_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3):
+# Get favorite dishes (top 3) of user over entire period
+def get_favorite_dishes_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3) -> List[Tuple[str, float]]:
     favorite_dishes = session.query(
         Dish.id,
         Dish.menu,
         DishEng.menuEng,
-        Rating.rating
+        func.avg(Rating.rating).label('avg_rating')
     ).join(Rating, Dish.id == Rating.menu_id
     ).outerjoin(DishEng, Dish.id == DishEng.menu_id
     ).filter(Rating.user_name == username
-    ).order_by(Rating.rating.desc()
+    ).group_by(Dish.id, Dish.menu, DishEng.menuEng
+    ).order_by(func.avg(Rating.rating).desc()
     ).limit(limit).all()
 
-    return [(dish.menuEng if lang == 'en' else dish.menu, dish.rating) for dish in favorite_dishes]
+    return [(dish.menuEng if lang == 'en' and dish.menuEng else dish.menu, round(dish.avg_rating, 2)) for dish in favorite_dishes]
 
-# Get favorite mensas (top 3) of user
-def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3):
+# Get favorite mensas (top 3) of user over entire period
+def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3) -> List[Tuple[str, float]]:
     favorite_mensas = session.query(
         Dish.location,
         DishEng.locationEng,
@@ -501,4 +542,58 @@ def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en
     ).order_by(func.avg(Rating.rating).desc()
     ).limit(limit).all()
 
-    return [(mensa.locationEng if lang == 'en' else mensa.location, round(mensa.avg_rating, 2)) for mensa in favorite_mensas]
+    return [(mensa.locationEng if lang == 'en' and mensa.locationEng else mensa.location, round(mensa.avg_rating, 2)) for mensa in favorite_mensas]
+
+def get_dishes_history(db_session):
+
+    dishes = db_session.query(DishHistory).all()
+    df = convert_dblist_to_df(dishes)
+    df['menuDate'] = pd.to_datetime(df['menuDate'],format='%Y-%m-%d')
+
+
+    return df
+
+def get_combined_dishes(db_session: Session):
+    """
+    Combine all rows from DishHistory and rows from Dish not in DishHistory.
+    Return the result as a pandas DataFrame.
+    """
+    # Query to select all rows from DishHistory
+    dish_history_query = select(DishHistory.menu, DishHistory.menuDate, DishHistory.menuLine, DishHistory.studentPrice,DishHistory.guestPrice,DishHistory.icons_clean)
+
+    # Query to select rows from Dish not in DishHistory
+    dish_not_in_history_query = select(
+        Dish.menu, Dish.menuDate, Dish.menuLine, Dish.studentPrice,Dish.guestPrice,FiltersClean.icons_clean
+    ).join(
+        FiltersClean, Dish.id == FiltersClean.menu_id
+    ).where(
+        not_(
+            db_session.query(DishHistory)
+            .filter(
+                and_(
+                    Dish.menu == DishHistory.menu,
+                    Dish.menuDate == DishHistory.menuDate,
+                    Dish.menuLine == DishHistory.menuLine,
+                )
+            )
+            .exists()
+        )
+    )
+
+    # Combine both queries using UNION
+    combined_query = union(dish_history_query, dish_not_in_history_query)
+
+    # Execute the combined query and fetch all results
+    result = db_session.execute(combined_query).fetchall()
+
+    # Convert the result to a pandas DataFrame
+    df = pd.DataFrame(result, columns=["menu", "menuDate", "menuLine", "studentPrice", "guestPrice","icons_clean"])
+    df['menuDate'] = pd.to_datetime(df['menuDate'],format='%Y-%m-%d')
+
+    # in the Dish table, the menuLines "Auswahlgericht" and "Auswahlgericht 2" can be combined
+    df.loc[df['menuLine'] == 'Auswahlgericht vegan 2', 'menuLine'] = 'Auswahlgericht vegan'
+    df.loc[df['menuLine'] == 'Auswahlgericht veget. 2', 'menuLine'] = 'Auswahlgericht veget.'
+    df.loc[df['menuLine'] == 'Auswahlgericht 2', 'menuLine'] = 'Auswahlgericht'
+
+    return df
+

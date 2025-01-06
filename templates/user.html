@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/analysis.css') }}" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
@@ -110,21 +111,21 @@
             </div>        
         </div>
     </section>
-
+    <section class="mb-12 w-full">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
         <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre Favoriten{% else %}Your Favorites{% endif %}</h2>
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="p-4 bg-gray-50 rounded-lg w-full">
-                    <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Ihre Top Mensen{% else %}Your Top Mensas{% endif %}</h4>
-                    <div id="top-mensas-chart" style="width: 100%; height: 300px;"></div>
-                </div>
-                <div class="p-4 bg-gray-50 rounded-lg w-full">
-                    <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Ihre Top Menüs{% else %}Your Top Dishes{% endif %}</h4>
-                    <div id="top-dishes-chart" style="width: 100%; height: 300px;"></div>
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 bg-gray-50 rounded-lg w-full">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Deine Lieblingsmensen{% else %}Your Favorite Mensas{% endif %}</h4>
+                <div id="top-mensa-user-chart" style="width: 100%; height: 300px;"></div>
             </div>
-        </div>
-    </section>    
+            <div class="p-4 bg-gray-50 rounded-lg w-full">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Deine Liebglingsmenüs{% else %}Your Favorite Dishes{% endif %}</h4>
+                <div id="top-dishes-user-chart" style="width: 100%; height: 300px;"></div>
+            </div>
+        </div>  
+    </div>       
+</section>   
 </main>
 
     <!-- Footer -->
@@ -135,8 +136,8 @@
     </footer>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
-        Plotly.newPlot('top-mensas-chart', {{ mensa_chart | safe }}.data, {{ mensa_chart | safe }}.layout);
-        Plotly.newPlot('top-dishes-chart', {{ dish_chart | safe }}.data, {{ dish_chart | safe }}.layout);
+        Plotly.newPlot('top-mensa-user-chart', {{ mensa_user_chart | safe }}.data, {{ mensa_user_chart | safe }}.layout);
+        Plotly.newPlot('top-dishes-user-chart', {{ dish_user_chart | safe }}.data, {{ dish_user_chart | safe }}.layout);
     </script>
     <script>
             const menuToggle = document.getElementById('menu-toggle');
