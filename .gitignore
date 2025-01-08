@@ -213,6 +213,13 @@ __pycache__/*.pyc
 
 # Ignore old data (Mayer)
 data/*.csv
+data/
+data.zip
 
 # Ignore all test files
 tests/
+clustering.py
+clustering.ipynb
+
+# Ignore models 
+word2vec_model.pth
