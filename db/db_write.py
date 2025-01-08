@@ -45,6 +45,14 @@ class FiltersClean(Base):
     icons_clean = Column(String, nullable=True)
 
 
+class PriceClean(Base):
+    __tablename__ = "prices_clean"
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, nullable=False)
+    studentPrice_imputed = Column(String,nullable=True)
+    guestPrice_imputed = Column(String,nullable=True)
+
+
 class DishEng(Base):
     __tablename__ = 'dishes_eng'
     id = Column(Integer, primary_key=True)
@@ -557,3 +565,56 @@ def update_user_vector(username, engine, Session):
 
         # Commit the changes
         db_session.commit()
+
+
+
+        
+def write_imputed_price_to_filtersclean(df, db_session, price_column, engine):
+    # this function writes the imputed prices to the PriceClean table
+    PriceClean.metadata.create_all(engine)
+
+    # Filter rows where "missingPrices" is 1
+    rows_to_process = df[df["missingPrices"] == 1]
+    if rows_to_process.empty:
+        print("No rows with missing prices to process.")
+        return
+
+    try:
+        for _, row in rows_to_process.iterrows():
+            # Query FiltersClean joined with Dish
+            query = (
+                db_session.query(FiltersClean, Dish)
+                .join(Dish, Dish.id == FiltersClean.menu_id)
+                .filter(
+                    Dish.menuDate == row.get("menuDate"),
+                    Dish.menu == row.get("menu")
+                )
+            ).first()
+
+            if query:
+                filters_clean, dish = query
+
+                # Check if a PriceClean entry already exists for this dish.id
+                price_clean = db_session.query(PriceClean).filter_by(menu_id=dish.id).first()
+
+                if not price_clean:
+                    # Create a new PriceClean entry if none exists
+                    price_clean = PriceClean(
+                        menu_id=dish.id,
+                        studentPrice_imputed=row.get("price_predicted") if price_column == "studentPrice" else None,
+                        guestPrice_imputed=row.get("price_predicted") if price_column == "guestPrice" else None
+                    )
+                    db_session.add(price_clean)
+                else:
+                    # Update the existing PriceClean entry
+                    if price_column == "studentPrice":
+                        price_clean.studentPrice_imputed = row.get("price_predicted")
+                    elif price_column == "guestPrice":
+                        price_clean.guestPrice_imputed = row.get("price_predicted")
+
+        # Commit changes after processing all rows
+        db_session.commit()
+        print("Finished processing all rows.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        db_session.rollback()
