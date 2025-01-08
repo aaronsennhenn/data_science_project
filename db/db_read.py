@@ -46,7 +46,6 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
         .outerjoin(Description, Dish.id == Description.menu_id)
         .outerjoin(DishEng, Dish.id == DishEng.menu_id)
         .outerjoin(Course, Dish.id == Course.menu_id)
-        .outerjoin(PriceClean, Dish.id == PriceClean.menu_id)
         .add_columns(
             # German columns
             Recipe.recipe_de,
@@ -60,9 +59,6 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
             Recipe.recipe_en if selected_lang == "en" else None,
             Course.course_eng if selected_lang == "en" else None,
 
-            # imputed price
-            PriceClean.studentPrice_imputed,
-            PriceClean.guestPrice_imputed
         )
     )
 
