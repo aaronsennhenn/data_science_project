@@ -6,7 +6,7 @@ promts are imported from the scraper.gpt_prompts module. The script is divided i
 Modules:
 - update_filters_clean loads the menu and icon column from the dishes table which are not yet included in the CleanFilters table. Then it cleans the strings in the icon column and updates the CleanFilters table with the cleaned strings.
 - update_Course(), update_embeddings(), update_description(), update_taste(), update_recipe(), update_ingredients(), write_to_dishes_eng() load the menu column that is not contained in the respective table yet and applies the prompts.
-
+- update_cleajnprices() loads the dishes table and imputes the missing prices for the studentPrice and guestPrice columns. The imputed prices are then written back to the CleanFilters table.
 
 Execution:
 This script is intended to be run as a cronjob every day at 3:30 AM.
@@ -18,9 +18,9 @@ from secret import USER, PASSWORD, HOST, PORT
 import pandas as pd
 import numpy as np
 from scraper.gpt_prompts import classify_missing_filters,embedding_extraction,generate_description,classify_dish_taste,generate_recipe,ingredient_extraction
-from db.db_read import load_dishes_table_for_filter_cleaning
-from db.utils import correct_icons
-from db.db_write import write_to_filters_clean,write_to_course,write_to_embedding, write_to_description, write_to_taste, write_to_recipe, write_to_ingredient,write_to_dishes_eng
+from db.db_read import load_dishes_table_for_filter_cleaning, get_combined_dishes
+from db.utils import correct_icons,impute_missing_prices
+from db.db_write import write_to_filters_clean,write_to_course,write_to_embedding, write_to_description, write_to_taste, write_to_recipe, write_to_ingredient,write_to_dishes_eng,write_imputed_price_to_filtersclean
 
 
 
@@ -30,6 +30,7 @@ replacement_dict = {
             "K": "veal",
             "L": "lamb",
             "R": "beef",
+            
             "S": "pork",
             "W": "game",
             "V": "vegetarian"
@@ -138,6 +139,16 @@ def update_ingredients():
         write_to_ingredient(ingredients_df, engine,db_session)
 
 
+def update_cleanprices():
+
+    dish = get_combined_dishes(Session())
+    impute_studentPrice = impute_missing_prices(dish,"studentPrice")
+    impute_guestPrice = impute_missing_prices(impute_studentPrice,"guestPrice")
+    with Session() as db_session:
+        write_imputed_price_to_filtersclean(impute_studentPrice,db_session,"studentPrice",engine)
+        write_imputed_price_to_filtersclean(impute_guestPrice,db_session,"guestPrice",engine)
+
+
 if __name__ == "__main__":
     update_FiltersClean()
     update_Course()
@@ -147,3 +158,4 @@ if __name__ == "__main__":
     update_recipe()
     update_ingredients()
     write_to_dishes_eng(engine,Session)
+    update_cleanprices()
