@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from secret import *
 from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user
-from db.db_read import get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas
+from db.db_read import get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas, compute_tasteprofile_similiarity_by_uservector
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime, timedelta
 import plotly
@@ -15,7 +15,7 @@ from db.utils import compute_cosine_similarity
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
-from charts.plotly import generate_price_chart
+from charts.plotly import generate_price_chart, create_taste_radarchart
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -167,6 +167,7 @@ def user_page():
         first_rating_date = get_first_rating_date_of_user(db_session, user_name)
         favorite_dishes = get_favorite_dishes_of_user(db_session, user_name, lang)
         favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)
+        tasteprofile_df = compute_tasteprofile_similiarity_by_uservector(db_session, user_name)
 
         # Create top mensas chart
         mensa_trace = {
@@ -197,6 +198,10 @@ def user_page():
             'yaxis': {'title': 'Bewertung' if lang == 'de' else 'Rating'}
         }
         dish_user_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+        
+        
+        #Create tasteprofile radarchart
+        tastechart_html = create_taste_radarchart(tasteprofile_df, 'taste_label', 'similarity')
 
     finally:
         db_session.close()
@@ -208,7 +213,8 @@ def user_page():
                            favorite_dishes=favorite_dishes,
                            favorite_mensas=favorite_mensas,
                            mensa_user_chart=mensa_user_chart,
-                           dish_user_chart=dish_user_chart)
+                           dish_user_chart=dish_user_chart,
+                           tastechart_html = tastechart_html)
 
 
 @app.route('/menu', methods=['GET','POST'])

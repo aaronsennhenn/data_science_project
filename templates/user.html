@@ -91,6 +91,7 @@
         <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Ihre persönliche Mensa-Statistik{% else %}Your personal mensa statistics{% endif %}</p>
     </div>
 
+	
     <!-- Key Metrics Section -->
     <section class="mb-12 w-full">
         <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre zentralen Kennzahlen{% else %}Your Key Metrics{% endif %}</h2>
@@ -125,7 +126,19 @@
             </div>
         </div>  
     </div>       
-</section>   
+</section>
+
+
+<!-- Radar Chart Section for Taste Profile -->
+    <section class="mb-12 w-full">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre Geschmack{% else %}Your Taste{% endif %}</h2>
+            <div id="taste-profile-chart" style="width: 100%; height: 400px;">
+                {{ tastechart_html | safe }}
+            </div>
+        </div>
+    </section>
+   
 </main>
 
     <!-- Footer -->

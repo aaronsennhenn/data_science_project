@@ -54,3 +54,39 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     plot_html = pio.to_html(fig, full_html=False)
 
     return plot_html,df['menuLine'].unique()
+
+
+
+
+def create_taste_radarchart(df, taste_label, similarity):
+
+    r = df[similarity].tolist()  
+    theta = df[taste_label].tolist()  
+
+    # Create Radar Chart
+    fig = go.Figure()
+
+    # Add player's data to the chart
+    fig.add_trace(go.Scatterpolar(
+        r=r,  # Player stats values
+        theta=theta,  # Player stats labels
+        fill='toself',  # Fill the area under the line
+        marker=dict(color='blue'),
+        name = 'This is your Taste Profile'
+    ))
+
+    # Update layout for better appearance
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=False,
+                range=[0, 1]
+            )
+        ),
+        showlegend=True
+    )
+
+    # Convert figure to html format
+    fig_html = pio.to_html(fig, full_html=False)
+    
+    return fig_html

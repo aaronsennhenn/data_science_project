@@ -6,6 +6,7 @@ import datetime
 import pandas as pd
 from sqlalchemy import or_,func,select,desc,select, union, and_, not_
 from typing import List, Tuple
+from db.utils import compute_cosine_similarity
 
 def convert_dblist_to_df(db_list):
     dict_list = [vars(obj) for obj in db_list]
@@ -597,3 +598,17 @@ def get_combined_dishes(db_session: Session):
 
     return df
 
+
+
+def compute_tasteprofile_similiarity_by_uservector(session: Session, username: str):
+    user_vector_query = session.query(User.user_vector).filter(User.username == username).first()
+    user_vector_str = user_vector_query[0]
+    df = pd.read_csv(r'static\csv\tasteprofile_static.csv') #load static embeddings for tastelabels
+    similarity_scores =[]
+    
+    for dish_embedding_str in df['gpt_embedding']:
+        score = compute_cosine_similarity(user_vector_str, dish_embedding_str)
+        similarity_scores.append(score)       
+    df['similarity'] = similarity_scores
+        
+    return df
