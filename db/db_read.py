@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng, Taste, Ingredient, DishHistory,PriceClean
+from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng, Taste, Ingredient, DishHistory,PriceClean,EmbeddingCluster
 from typing import List
 from sqlalchemy import func
 import datetime
@@ -7,6 +7,10 @@ import pandas as pd
 from sqlalchemy import or_,func,select,desc,select, union, and_, not_
 from typing import List, Tuple
 from db.utils import compute_cosine_similarity
+import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 def convert_dblist_to_df(db_list):
     dict_list = [vars(obj) for obj in db_list]
@@ -613,3 +617,38 @@ def compute_tasteprofile_similiarity_by_uservector(session: Session, username: s
     df['similarity'] = similarity_scores
         
     return df
+
+
+def get_embedding_cluster(db_session):
+    query = db_session.query(EmbeddingCluster).all()
+    df = convert_dblist_to_df(query)
+    df['centroid'] = df['centroid'].apply(
+            lambda x: np.array(eval(x)) if isinstance(x, str) else np.array(x)
+        )
+    return df
+
+
+def get_cluster_similarity(db_session,user_name):
+    
+    # get user vector
+    query = get_user_by_username(db_session,user_name)
+    user_vector = np.array(eval(query.user_vector))
+
+    # get centroid df
+    centroid_df = get_embedding_cluster(db_session)
+
+    # get centroids
+    centroids = np.vstack(centroid_df['centroid'])
+
+    # Compute cosine similarity
+    similarity_scores = cosine_similarity([user_vector], centroids)[0]
+    centroid_df['cosine_similarity'] = similarity_scores
+    centroid_df.sort_values('cosine_similarity', ascending=False)
+
+    # scale cosine similarity
+    scaler = MinMaxScaler()
+    centroid_df["min_max_scaler"] = scaler.fit_transform(centroid_df.cosine_similarity.values.reshape(-1,1))
+    centroid_df["scaled"] = centroid_df["cosine_similarity"].apply(lambda x: (x - 0.5) / 0.5)
+
+
+    return centroid_df

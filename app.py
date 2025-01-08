@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from secret import *
 from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user
-from db.db_read import get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas, compute_tasteprofile_similiarity_by_uservector
+from db.db_read import get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas, compute_tasteprofile_similiarity_by_uservector
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime, timedelta
 import plotly
@@ -200,8 +200,12 @@ def user_page():
         dish_user_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
         
         
+                # get cosine similarity of user vector
+        cluster_df = get_cluster_similarity(db_session, user_name)
+
         #Create tasteprofile radarchart
-        tastechart_html = create_taste_radarchart(tasteprofile_df, 'taste_label', 'similarity')
+        country_chart = create_taste_radarchart(cluster_df.iloc[:-3], 'cluster_name', 'scaled')
+        regional_chart = create_taste_radarchart(cluster_df.iloc[-3:], 'cluster_name', 'scaled')
 
     finally:
         db_session.close()
@@ -214,7 +218,8 @@ def user_page():
                            favorite_mensas=favorite_mensas,
                            mensa_user_chart=mensa_user_chart,
                            dish_user_chart=dish_user_chart,
-                           tastechart_html = tastechart_html)
+                           country_chart = country_chart,
+                           regional_chart=regional_chart)
 
 
 @app.route('/menu', methods=['GET','POST'])

@@ -38,6 +38,12 @@ class DishHistory(Base):
     guestPrice = Column(Float, nullable=True)
     icons_clean = Column(String, nullable=True)
 
+class EmbeddingCluster(Base):
+    __tablename__ = 'embedding_clusters'
+    id = Column(Integer, primary_key=True)
+    cluster_name = Column(String, nullable=False)
+    centroid = Column(String, nullable=True)
+
 class FiltersClean(Base):
     __tablename__ = "filters_clean"
     id = Column(Integer, primary_key=True)
