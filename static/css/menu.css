@@ -155,6 +155,18 @@ p {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin-bottom: 20px;
+  height: 900px; /* Set a fixed height */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Distribute space between elements */
+}
+
+.card-content {
+  flex-grow: 1; /* Allow content to grow and take available space */
+}
+
+.card-footer {
+  margin-top: auto; /* Push footer to the bottom */
 }
 
 .card-title.menu-line {
@@ -338,46 +350,6 @@ input:checked + .slider:before {
   }
 }
 
-
-
-.popup .content {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  background: white;
-  width: 450px;
-  height: 270px;
-  z-index:2;
-  text-align: left;
-  padding:20px;
-  box-sizing: border-box;
-}
-
-.popup .close-btn {
-  cursor: pointer;
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width:30px;
-  background:#222;
-  color:#fff;
-  font-size:25px;
-  font-weight:600;
-  line-height:30px;
-  text-align: center;
-  border-radius: 50%;
-}
-
-.popup.active .overlay {
-  display: block;
-}
-
-.popup.active .content {
-  transition:all 300ms ease-in-out;
-  transform:translate(-50%, -50%) scale(1);
-}
-
 /* Rate Dishes Button */
 .rate-dishes-btn {
   display: block; /* Ensures it behaves like a block element */
@@ -409,4 +381,92 @@ input:checked + .slider:before {
 
 .rate-more-dishes-button:hover {
   background-color: #3F42C8;
+}
+.popup {
+  position: absolute; /* Position the popup absolutely within its container */
+  display: none; /* Hide the popup by default */
+  z-index: 2; /* Ensure it appears above other content */
+}
+
+.popup .overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: none; /* Hide the overlay by default */
+}
+
+.popup .content {
+  position: relative; /* Position the content relative to the popup */
+  background: white;
+  width: 450px;
+  max-height: 80vh; /* Set a maximum height to ensure it doesn't overflow the viewport */
+  overflow-y: auto; /* Enable vertical scrolling if content exceeds max-height */
+  text-align: left;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.popup .close-btn {
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  background: #222;
+  color: #fff;
+  font-size: 25px;
+  font-weight: 600;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 50%;
+}
+
+.popup.active {
+  display: block; /* Show the popup when active */
+}
+
+.popup.active .overlay {
+  display: block; /* Show the overlay when active */
+}
+
+.popup.active .content {
+  transition: all 300ms ease-in-out;
+}
+
+/* Description Button */
+.description-btn {
+  display: block;
+  padding: 12px 24px;
+  background-color: #1B1EAF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 200px;
+}
+
+.description-btn:hover {
+  background-color: #161894;
+}
+
+/* Recipe Button */
+.recipe-btn {
+  display: block;
+  padding: 12px 24px;
+  background-color:  #1B1EAF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 200px;
+}
+
+.recipe-btn:hover {
+  background-color: #161894;
 }

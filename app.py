@@ -39,6 +39,10 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope':'openid profile email'})
 
+# Function to format x-axis labels with line breaks
+def format_labels(labels):
+    return [label.replace(', ', '<br>') for label in labels]
+
 @app.route('/set_language/<lang>')
 def set_language(lang):
     session['language'] = lang
@@ -171,7 +175,7 @@ def user_page():
 
         # Create top mensas chart
         mensa_trace = {
-            'x': [mensa[0] for mensa in favorite_mensas],
+            'x': format_labels([mensa[0] for mensa in favorite_mensas]),
             'y': [mensa[1] for mensa in favorite_mensas],
             'type': 'bar',
             'marker': {
@@ -179,14 +183,14 @@ def user_page():
             }
         }
         mensa_layout = {
-            'xaxis': {'title': 'Mensa', 'tickangle': 45},
+            'xaxis': {'title': 'Mensa', 'tickangle': 0},
             'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
         }
         mensa_user_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
 
         # Create top dishes chart
         dish_trace = {
-            'x': [dish[0] for dish in favorite_dishes],
+            'x': format_labels([mensa[0] for mensa in favorite_dishes]),
             'y': [dish[1] for dish in favorite_dishes],
             'type': 'bar',
             'marker': {
@@ -194,7 +198,7 @@ def user_page():
             }
         }
         dish_layout = {
-            'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 45},
+            'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 0},
             'yaxis': {'title': 'Bewertung' if lang == 'de' else 'Rating'}
         }
         dish_user_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
@@ -450,7 +454,7 @@ def analysis():
         linecolor='rgba(0,0,0,0.2)',
         title_text="Date",
         tickformat="%Y-%m-%d",  # Show full date for each tick
-        tickangle=45,  # Angle the dates for better readability
+        tickangle=0,  # Angle the dates for better readability
         tickmode="auto"
         )
 
@@ -496,10 +500,10 @@ def analysis():
             )
             
             pie_charts[mensa] = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
+        
         # Create top mensas chart
         mensa_trace = {
-            'x': [item['location'] for item in top_three_mensas],
+            'x': format_labels([item['location'] for item in top_three_mensas]),
             'y': [item['avg_rating'] for item in top_three_mensas],
             'type': 'bar',
             'marker': {
@@ -515,7 +519,7 @@ def analysis():
 
         # Create top dishes chart
         dish_trace = {
-            'x': [item['dish_name'] for item in top_three_dishes],
+            'x': format_labels([item['dish_name'] for item in top_three_dishes]),
             'y': [item['avg_rating'] for item in top_three_dishes],
             'type': 'bar',
             'marker': {
@@ -524,7 +528,7 @@ def analysis():
         }
         dish_layout = {
             #'title': 'Top 3' if lang == 'de' else 'Top 3',
-            'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 45},
+            'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 0},
             'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
         }
         dish_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)

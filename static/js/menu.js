@@ -81,6 +81,13 @@ document.addEventListener('DOMContentLoaded', function () {
 function togglePopup() {
     document.getElementById("popup-1").classList.toggle("active");
 }
+function toggleDescriptionPopup(dishId) {
+    document.getElementById("description-popup-" + dishId).classList.toggle("active");
+}
+
+function toggleRecipePopup(dishId) {
+    document.getElementById("recipe-popup-" + dishId).classList.toggle("active");
+}
 document.addEventListener('DOMContentLoaded', function () {
     // Check if the "popup" query parameter exists
     const urlParams = new URLSearchParams(window.location.search);

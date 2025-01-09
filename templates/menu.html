@@ -99,9 +99,9 @@
         </h1>
         <h2 class="text-xl font-semibold text-gray-800 mb-6">
             {% if session.get('language') == 'de' %}
-                Wählen Sie Ihr Menü nach Ihren Vorlieben
+                Wählen Sie Ihr Menü nach Ihren Vorlieben!
             {% else %}
-                Choose your menu based on your preferences
+                Choose your menu based on your preferences!
             {% endif %}
         </h2>
         <form action="{{ url_for('menu') }}" method="POST" class="flex flex-wrap gap-4" id="filter-form">
@@ -184,7 +184,7 @@
             <div class="flex-1">
                 <p class="text-left">
                 {% if session.get('language') == 'de' %}
-                    personalisierte Empfehlung:
+                    Personalisierte Empfehlung:
                 {% else %}
                     Personalized recommendation:
                 {% endif %}
@@ -199,14 +199,1056 @@
             <div class="w-full">
                 <button type="submit" class="bg-violet-500 text-white px-4 py-2 rounded-md shadow hover:bg-violet-600 transition">
                 {% if session.get('language') == 'de' %}
-                    Senden
+                    Anfrage senden
                 {% else %}
-                    Submit
+                    Submit request
                 {% endif %}
                 </button>
             </div>
         </form>
     </div>
+
+<!-- Results section -->
+<div class="container mt-8 w-full">
+    {% if no_results %}
+    <div class="text-2xl font-bold text-center">
+        {% if session.get('language') == 'de' %}
+            Es wurden keine Daten für die ausgewählten Optionen gefunden!
+        {% else %}
+            No data was found for the selected options!
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="grid grid-cols-3 gap-6">
+        <!-- Main dish -->
+        <div>
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+                {% if session.get('language') == 'de' %}Hauptspeise{% else %}Main Dish{% endif %}
+            </h2>
+            {% if dishes.get('Hauptspeise') or dishes.get('Main Dish') %}
+            {% for dish in dishes.get('Hauptspeise', []) or dishes.get('Main Dish', []) %}
+            <div class="card w-full">
+                <div class="grid items-start w-full p-6">
+                    <div class="col-span-1 space-y-4">
+                        <!-- Dish recommendation -->
+                        <div class="flex gap-2 mb-2">
+                            <div>
+                                {% if dish.is_top_recommendation_in_course and recommendation_switch %}
+                                <p class="text-xl text-green-600 text-left">
+                                    {% if session.get('language') == 'de' %}
+                                    Wir empfehlen Ihnen dieses Hauptgericht basierend auf Ihren persönlichen Vorlieben!
+                                    {% else %}
+                                    We recommend this dish to you based on your personal preferences!
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if selected_mensa == 'all' %}
+                        <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
+                        {% endif %}
+                        <h3 class="card-title menu-line text-2xl font-bold">
+                            {% if session.get('language') == 'de' %}
+                            {{ dish.menuLine }}
+                            {% else %}
+                            {{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}
+                            {% endif %}
+                        </h3>
+                        <h5 class="card-title menu-name text-xl">
+                            {% if session.get('language') == 'de' %}
+                            {{ dish.menu }}
+                            {% else %}
+                            {{ dish.menuEng if dish.menuEng else dish.menu }}
+                            {% endif %}
+                        </h5>
+                        <div class="text-lg font-medium text-gray-700">
+                            {% if selected_price == 'studentPrice' or not selected_price %}
+                            <div>
+                                {% if session.get('language') == 'de' %}
+                                Studentenpreis:
+                                {% else %}
+                                Student Price:
+                                {% endif %}
+                                {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
+                            </div>
+                            {% endif %}
+                            {% if selected_price == 'guestPrice' %}
+                            <div>
+                                {% if session.get('language') == 'de' %}
+                                Gästepreis:
+                                {% else %}
+                                Guest Price:
+                                {% endif %}
+                                {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex gap-2 mb-2">
+                            {% if 'fish' in dish.icons %}
+                            <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}">
+                                <img src="{{ url_for('static', filename='images/icon_fish.png') }}" alt="Fish" class="h-6">
+                            </span>
+                            {% endif %}
+                            {% if 'poultry' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Geflügel{% else %}Poultry{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_poultry.png') }}" alt="Poultry" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'veal' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Kalb{% else %}Veal{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_veal.png') }}" alt="Veal" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'lamb' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Lamm{% else %}Lamb{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_lamb.png') }}" alt="Lamb" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'beef' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Rind{% else %}Beef{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_beef.png') }}" alt="Beef" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'pork' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Schwein{% else %}Pork{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_pork.png') }}" alt="Pork" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'game' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Wild{% else %}Game{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_game.png') }}" alt="Game" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'top' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Empfehlung{% else %}Top{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_recommendation.png') }}" alt="Top" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'vegetarian' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vegetarisch{% else %}Vegetarian{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_vegetarian.png') }}" alt="Vegetarian" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'vegan' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vegan{% else %}Vegan{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_vegan.png') }}" alt="Vegan" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'mensaVital' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vital{% else %}Vital{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_mensavital.png') }}" alt="Vital" class="h-6">
+                                </span>
+                            {% endif %}
+                        </div> 
+                        <div class="flex flex-col">
+                            <!-- Allergens -->
+                            <p class="text-sm text-gray-500 text-left leading-tight">
+                                {% if session.get('language') == 'de' %}Allergene{% else %}Allergens{% endif %}:
+                                {% if dish.allergens %}
+                                {% set found_allergens = [] %}
+                                {% for allergen in dish.allergens.split(',') %}
+                                {% set allergen_code = allergen.strip() %}
+                                {% if allergen_code in allergens_dict %}
+                                {% if session.get('language') == 'de' %}
+                                {% set _ = found_allergens.append(allergens_dict[allergen_code]) %}
+                                {% else %}
+                                {% set _ = found_allergens.append(allergens_dict_eng[allergen_code]) %}
+                                {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                                {% if found_allergens %}
+                                {{ found_allergens|join(', ') }}
+                                {% else %}
+                                /
+                                {% endif %}
+                                {% else %}
+                                /
+                                {% endif %}
+                            </p>
+                            <!-- Additives -->
+                            <p class="text-sm text-gray-500 text-left leading-tight">
+                                {% if session.get('language') == 'de' %}Zusatzstoffe{% else %}Additives{% endif %}:
+                                {% if dish.additives %}
+                                {% set found_additives = [] %}
+                                {% for additive in dish.additives.split(',') %}
+                                {% set additive_code = additive.strip() %}
+                                {% if additive_code in additives_dict %}
+                                {% if session.get('language') == 'de' %}
+                                {% set _ = found_additives.append(additives_dict[additive_code]) %}
+                                {% else %}
+                                {% set _ = found_additives.append(additives_dict_eng[additive_code]) %}
+                                {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                                {% if found_additives %}
+                                {{ found_additives|join(', ') }}
+                                {% else %}
+                                /
+                                {% endif %}
+                                {% else %}
+                                /
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="flex gap-2 mb-2">
+                            <button class="description-btn" onclick="toggleDescriptionPopup({{ dish.id }})">{% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}</button>
+                            <div class="popup" id="description-popup-{{ dish.id }}">
+                                <div class="overlay"></div>
+                                <div class="content">
+                                    <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
+                                    {% if session.get('language') == 'de' %}
+                                    {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
+                                    {% else %}
+                                    {{ dish.description_en if dish.description_en else 'No description available' }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mb-2">
+                            <button class="recipe-btn" onclick="toggleRecipePopup({{ dish.id }})">{% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}</button>
+                            <div class="popup" id="recipe-popup-{{ dish.id }}">
+                                <div class="overlay"></div>
+                                <div class="content">
+                                    <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
+                                    {% if session.get('language') == 'de' and dish.recipe_de %}
+                                    {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
+                                    {% if recipe_parts|length > 1 %}
+                                    <div class="space-y-6">
+                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                        {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
+                                        {% if ingredients_instructions|length > 1 %}
+                                        <div class="mt-4">
+                                            <h5 class="font-medium mb-2">Zutaten:</h5>
+                                            <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                {% for line in ingredients_instructions[0].split('\n') %}
+                                                {% if line.strip().startswith('-') %}
+                                                <li>{{ line.strip('- ') }}</li>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="mt-4">
+                                            <h5 class="font-medium mb-2">Anleitung:</h5>
+                                            <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                {% for line in ingredients_instructions[1].split('\n') %}
+                                                {% if line.strip() and line.strip()[0].isdigit() %}
+                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </ol>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <p class="text-gray-600">Kein Rezept verfügbar</p>
+                                    {% endif %}
+                                    {% elif dish.recipe_en %}
+                                    {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
+                                    {% if recipe_parts|length > 1 %}
+                                    <div class="space-y-6">
+                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                        {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
+                                        {% if ingredients_instructions|length > 1 %}
+                                        <div class="mt-4">
+                                            <h5 class="font-medium mb-2">Ingredients:</h5>
+                                            <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                {% for line in ingredients_instructions[0].split('\n') %}
+                                                {% if line.strip().startswith('-') %}
+                                                <li>{{ line.strip('- ') }}</li>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="mt-4">
+                                            <h5 class="font-medium mb-2">Instructions:</h5>
+                                            <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                {% for line in ingredients_instructions[1].split('\n') %}
+                                                {% if line.strip() and line.strip()[0].isdigit() %}
+                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </ol>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <p class="text-gray-800">No recipe available</p>
+                                    {% endif %}
+                                    {% else %}
+                                    <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <!-- Ratings -->
+                            <div class="rating mt-4 text-4xl flex justify-end">
+                                <input type="radio" id="star5_{{ dish.id }}" name="rating_{{ dish.id }}" value="5" />
+                                <label for="star5_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star4_{{ dish.id }}" name="rating_{{ dish.id }}" value="4" />
+                                <label for="star4_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star3_{{ dish.id }}" name="rating_{{ dish.id }}" value="3" />
+                                <label for="star3_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star2_{{ dish.id }}" name="rating_{{ dish.id }}" value="2" />
+                                <label for="star2_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
+                                <label for="star1_{{ dish.id }}">&#9733;</label>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <button class="submit-rating mt-2" data-id="{{ dish.id }}">
+                                {% if session.get('language') == 'de' %}
+                                Bewertung senden
+                                {% else %}
+                                Submit Rating
+                                {% endif %}
+                            </button>
+                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                                {% if session.get('language') == 'de' %}
+                                Bewertung erhalten!
+                                {% else %}
+                                Rating received!
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="flex">
+                            <div class="mt-4 p-2 bg-gray-200 text-gray-700 rounded">
+                                <!-- Average Rating and Count -->
+                                <span>
+                                    {% if dish.average_rating is not none %}
+                                    {{ dish.average_rating }}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
+                                    (
+                                    {% if dish.rating_count is not none %}
+                                    {{ dish.rating_count }}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                    )
+                                </span>
+                                <!-- Recommendation Score -->
+                                {% if recommendation_switch and course in ['Hauptspeise', 'Main Dish'] %}
+                                <br>
+                                <span>
+                                    {% if session.get('language') == 'de' %}
+                                    Personalisierter Menu Score: {{ dish.recommendation_score }}
+                                    {% else %}
+                                    Personalized menu score: {{ dish.recommendation_score }}
+                                    {% endif %}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-center text-gray-600">
+                {% if session.get('language') == 'de' %}
+                Keine Hauptspeise verfügbar für diese Auswahl
+                {% else %}
+                No main dish available for this selection
+                {% endif %}
+            </p>
+            {% endif %}
+        </div>
+        <!-- Side Dish -->
+        <div>
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+                {% if session.get('language') == 'de' %}Beilage{% else %}Side Dish{% endif %}
+            </h2>
+            {% if dishes.get('Beilage') or dishes.get('Side Dish') %}
+            {% for dish in dishes.get('Beilage', []) or dishes.get('Side Dish', []) %}
+            <!-- Dish card code here -->
+            <div class="card w-full">
+                <div class="grid items-start w-full p-6">
+                    <div class="col-span-1 space-y-4">
+                        <!-- Dish recommendation -->
+                        <div class="flex gap-2 mb-2">
+                            <div>
+                                {% if dish.is_top_recommendation_in_course and recommendation_switch %}
+                                <p class="text-xl text-green-600 text-left">
+                                    {% if session.get('language') == 'de' %}
+                                    Wir empfehlen Ihnen dieses Hauptgericht basierend auf Ihren persönlichen Vorlieben!
+                                    {% else %}
+                                    We recommend this dish to you based on your personal preferences!
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if selected_mensa == 'all' %}
+                        <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
+                        {% endif %}
+                        <h3 class="card-title menu-line text-2xl font-bold">
+                            {% if session.get('language') == 'de' %}
+                            {{ dish.menuLine }}
+                            {% else %}
+                            {{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}
+                            {% endif %}
+                        </h3>
+                        <h5 class="card-title menu-name text-xl">
+                            {% if session.get('language') == 'de' %}
+                            {{ dish.menu }}
+                            {% else %}
+                            {{ dish.menuEng if dish.menuEng else dish.menu }}
+                            {% endif %}
+                        </h5>
+                        <div class="text-lg font-medium text-gray-700">
+                            {% if selected_price == 'studentPrice' or not selected_price %}
+                            <div>
+                                {% if session.get('language') == 'de' %}
+                                Studentenpreis:
+                                {% else %}
+                                Student Price:
+                                {% endif %}
+                                {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
+                            </div>
+                            {% endif %}
+                            {% if selected_price == 'guestPrice' %}
+                            <div>
+                                {% if session.get('language') == 'de' %}
+                                Gästepreis:
+                                {% else %}
+                                Guest Price:
+                                {% endif %}
+                                {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex gap-2 mb-2">
+                            {% if 'fish' in dish.icons %}
+                            <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}">
+                                <img src="{{ url_for('static', filename='images/icon_fish.png') }}" alt="Fish" class="h-6">
+                            </span>
+                            {% endif %}
+                            {% if 'poultry' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Geflügel{% else %}Poultry{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_poultry.png') }}" alt="Poultry" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'veal' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Kalb{% else %}Veal{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_veal.png') }}" alt="Veal" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'lamb' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Lamm{% else %}Lamb{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_lamb.png') }}" alt="Lamb" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'beef' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Rind{% else %}Beef{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_beef.png') }}" alt="Beef" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'pork' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Schwein{% else %}Pork{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_pork.png') }}" alt="Pork" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'game' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Wild{% else %}Game{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_game.png') }}" alt="Game" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'top' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Empfehlung{% else %}Top{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_recommendation.png') }}" alt="Top" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'vegetarian' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vegetarisch{% else %}Vegetarian{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_vegetarian.png') }}" alt="Vegetarian" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'vegan' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vegan{% else %}Vegan{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_vegan.png') }}" alt="Vegan" class="h-6">
+                                </span>
+                            {% endif %}
+                            {% if 'mensaVital' in dish.icons %}
+                                <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vital{% else %}Vital{% endif %}">
+                                    <img src="{{ url_for('static', filename='images/icon_mensavital.png') }}" alt="Vital" class="h-6">
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-col">
+                            <!-- Allergens -->
+                            <p class="text-sm text-gray-500 text-left leading-tight">
+                                {% if session.get('language') == 'de' %}Allergene{% else %}Allergens{% endif %}:
+                                {% if dish.allergens %}
+                                {% set found_allergens = [] %}
+                                {% for allergen in dish.allergens.split(',') %}
+                                {% set allergen_code = allergen.strip() %}
+                                {% if allergen_code in allergens_dict %}
+                                {% if session.get('language') == 'de' %}
+                                {% set _ = found_allergens.append(allergens_dict[allergen_code]) %}
+                                {% else %}
+                                {% set _ = found_allergens.append(allergens_dict_eng[allergen_code]) %}
+                                {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                                {% if found_allergens %}
+                                {{ found_allergens|join(', ') }}
+                                {% else %}
+                                /
+                                {% endif %}
+                                {% else %}
+                                /
+                                {% endif %}
+                            </p>
+                            <!-- Additives -->
+                            <p class="text-sm text-gray-500 text-left leading-tight">
+                                {% if session.get('language') == 'de' %}Zusatzstoffe{% else %}Additives{% endif %}:
+                                {% if dish.additives %}
+                                {% set found_additives = [] %}
+                                {% for additive in dish.additives.split(',') %}
+                                {% set additive_code = additive.strip() %}
+                                {% if additive_code in additives_dict %}
+                                {% if session.get('language') == 'de' %}
+                                {% set _ = found_additives.append(additives_dict[additive_code]) %}
+                                {% else %}
+                                {% set _ = found_additives.append(additives_dict_eng[additive_code]) %}
+                                {% endif %}
+                                {% endif %}
+                                {% endfor %}
+                                {% if found_additives %}
+                                {{ found_additives|join(', ') }}
+                                {% else %}
+                                /
+                                {% endif %}
+                                {% else %}
+                                /
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="flex gap-2 mb-2">
+                            <button class="description-btn" onclick="toggleDescriptionPopup({{ dish.id }})">{% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}</button>
+                            <div class="popup" id="description-popup-{{ dish.id }}">
+                                <div class="overlay"></div>
+                                <div class="content">
+                                    <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
+                                    {% if session.get('language') == 'de' %}
+                                    {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
+                                    {% else %}
+                                    {{ dish.description_en if dish.description_en else 'No description available' }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mb-2">
+                            <button class="recipe-btn" onclick="toggleRecipePopup({{ dish.id }})">{% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}</button>
+                            <div class="popup" id="recipe-popup-{{ dish.id }}">
+                                <div class="overlay"></div>
+                                <div class="content">
+                                    <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
+                                    {% if session.get('language') == 'de' and dish.recipe_de %}
+                                    {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
+                                    {% if recipe_parts|length > 1 %}
+                                    <div class="space-y-6">
+                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                        {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
+                                        {% if ingredients_instructions|length > 1 %}
+                                        <div class="mt-4">
+                                            <h5 class="font-medium mb-2">Zutaten:</h5>
+                                            <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                {% for line in ingredients_instructions[0].split('\n') %}
+                                                {% if line.strip().startswith('-') %}
+                                                <li>{{ line.strip('- ') }}</li>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="mt-4">
+                                            <h5 class="font-medium mb-2">Anleitung:</h5>
+                                            <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                {% for line in ingredients_instructions[1].split('\n') %}
+                                                {% if line.strip() and line.strip()[0].isdigit() %}
+                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </ol>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <p class="text-gray-600">Kein Rezept verfügbar</p>
+                                    {% endif %}
+                                    {% elif dish.recipe_en %}
+                                    {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
+                                    {% if recipe_parts|length > 1 %}
+                                    <div class="space-y-6">
+                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                        {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
+                                        {% if ingredients_instructions|length > 1 %}
+                                        <div class="mt-4">
+                                            <h5 class="font-medium mb-2">Ingredients:</h5>
+                                            <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                {% for line in ingredients_instructions[0].split('\n') %}
+                                                {% if line.strip().startswith('-') %}
+                                                <li>{{ line.strip('- ') }}</li>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="mt-4">
+                                            <h5 class="font-medium mb-2">Instructions:</h5>
+                                            <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                {% for line in ingredients_instructions[1].split('\n') %}
+                                                {% if line.strip() and line.strip()[0].isdigit() %}
+                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </ol>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% else %}
+                                    <p class="text-gray-800">No recipe available</p>
+                                    {% endif %}
+                                    {% else %}
+                                    <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <!-- Ratings -->
+                            <div class="rating mt-4 text-4xl flex justify-end">
+                                <input type="radio" id="star5_{{ dish.id }}" name="rating_{{ dish.id }}" value="5" />
+                                <label for="star5_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star4_{{ dish.id }}" name="rating_{{ dish.id }}" value="4" />
+                                <label for="star4_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star3_{{ dish.id }}" name="rating_{{ dish.id }}" value="3" />
+                                <label for="star3_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star2_{{ dish.id }}" name="rating_{{ dish.id }}" value="2" />
+                                <label for="star2_{{ dish.id }}">&#9733;</label>
+                                <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
+                                <label for="star1_{{ dish.id }}">&#9733;</label>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <button class="submit-rating mt-2" data-id="{{ dish.id }}">
+                                {% if session.get('language') == 'de' %}
+                                Bewertung senden
+                                {% else %}
+                                Submit Rating
+                                {% endif %}
+                            </button>
+                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                                {% if session.get('language') == 'de' %}
+                                Bewertung erhalten!
+                                {% else %}
+                                Rating received!
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="flex">
+                            <div class="mt-4 p-2 bg-gray-200 text-gray-700 rounded">
+                                <!-- Average Rating and Count -->
+                                <span>
+                                    {% if dish.average_rating is not none %}
+                                    {{ dish.average_rating }}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
+                                    (
+                                    {% if dish.rating_count is not none %}
+                                    {{ dish.rating_count }}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                    )
+                                </span>
+                                <!-- Recommendation Score -->
+                                {% if recommendation_switch and course in ['Hauptspeise', 'Main Dish'] %}
+                                <br>
+                                <span>
+                                    {% if session.get('language') == 'de' %}
+                                    Personalisierter Menu Score: {{ dish.recommendation_score }}
+                                    {% else %}
+                                    Personalized menu score: {{ dish.recommendation_score }}
+                                    {% endif %}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-center text-gray-600">
+                {% if session.get('language') == 'de' %}
+                Keine Beilage verfügbar für diese Auswahl
+                {% else %}
+                No side dish available for this selection
+                {% endif %}
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- Dessert -->
+        <div>
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+                {% if session.get('language') == 'de' %}Dessert{% else %}Dessert{% endif %}
+            </h2>
+            {% if dishes.get('Dessert') %}
+                {% for dish in dishes.get('Dessert', []) %}
+                    <!-- Dish card code here -->
+                    <div class="card w-full">
+                        <div class="grid items-start w-full p-6">
+                            <div class="col-span-1 space-y-4">
+                                 <!-- Dish recommendation -->
+                                <div class="flex gap-2 mb-2">
+                                    <div>
+                                        {% if dish.is_top_recommendation_in_course and recommendation_switch %}
+                                            <p class="text-xl text-green-600 text-left">
+                                                {% if session.get('language') == 'de' %}
+                                                    Wir empfehlen Ihnen dieses Hauptgericht basierend auf Ihren persönlichen Vorlieben!
+                                                {% else %}
+                                                    We recommend this dish to you based on your personal preferences!
+                                                {% endif %}
+                                            </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if selected_mensa == 'all' %}
+                                <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
+                                {% endif %}  
+                                <!-- If lang == de then we use in dishes table menuLine, and menu
+                                If lang == en then we use in dishes_eng table menuLineEng and menuEng -->  
+                                <h3 class="card-title menu-line text-2xl font-bold">
+                                    {% if session.get('language') == 'de' %}
+                                        {{ dish.menuLine }}
+                                    {% else %}
+                                        {{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}
+                                    {% endif %}
+                                </h3>
+                                <h5 class="card-title menu-name text-xl">
+                                    {% if session.get('language') == 'de' %}
+                                        {{ dish.menu }}
+                                    {% else %}
+                                        {{ dish.menuEng if dish.menuEng else dish.menu }}
+                                    {% endif %}
+                                </h5>                                
+                                <!-- show either student or guest price -->                    
+                                <div class="text-lg font-medium text-gray-700">
+                                    {% if selected_price == 'studentPrice' or not selected_price %}
+                                        <div>
+                                            {% if session.get('language') == 'de' %}
+                                                Studentenpreis: 
+                                            {% else %}
+                                                Student Price: 
+                                            {% endif %}
+                                            {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
+                                        </div>
+                                        {% endif %}
+                                        {% if selected_price == 'guestPrice' %}
+                                        <div>
+                                            {% if session.get('language') == 'de' %}
+                                                Gästepreis: 
+                                            {% else %}
+                                                Guest Price: 
+                                            {% endif %}
+                                            {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
+                                        </div>
+                                        {% endif %}
+                                </div> 
+                                                                             
+                                <!-- Icons on selected meats-->
+                                <div class="flex gap-2 mb-2">
+                                    {% if 'fish' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_fish.png') }}" alt="Fish" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'poultry' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Geflügel{% else %}Poultry{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_poultry.png') }}" alt="Poultry" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'veal' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Kalb{% else %}Veal{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_veal.png') }}" alt="Veal" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'lamb' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Lamm{% else %}Lamb{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_lamb.png') }}" alt="Lamb" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'beef' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Rind{% else %}Beef{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_beef.png') }}" alt="Beef" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'pork' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Schwein{% else %}Pork{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_pork.png') }}" alt="Pork" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'game' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Wild{% else %}Game{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_game.png') }}" alt="Game" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'top' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Empfehlung{% else %}Top{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_recommendation.png') }}" alt="Top" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'vegetarian' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vegetarisch{% else %}Vegetarian{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_vegetarian.png') }}" alt="Vegetarian" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'vegan' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vegan{% else %}Vegan{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_vegan.png') }}" alt="Vegan" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    {% if 'mensaVital' in dish.icons %}
+                                        <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vital{% else %}Vital{% endif %}">
+                                            <img src="{{ url_for('static', filename='images/icon_mensavital.png') }}" alt="Vital" class="h-6">
+                                        </span>
+                                    {% endif %}
+                                    </div> 
+                                    <div class="flex flex-col">
+                                    <!-- Allergens -->
+                                    <p class="text-sm text-gray-500 text-left leading-tight">
+                                            {% if session.get('language') == 'de' %}Allergene{% else %}Allergens{% endif %}:
+                                            {% if dish.allergens %}
+                                                {% set found_allergens = [] %}
+                                                {% for allergen in dish.allergens.split(',') %}
+                                                    {% set allergen_code = allergen.strip() %}
+                                                    {% if allergen_code in allergens_dict %}
+                                                        {% if session.get('language') == 'de' %}
+                                                            {% set _ = found_allergens.append(allergens_dict[allergen_code]) %}
+                                                        {% else %}
+                                                            {% set _ = found_allergens.append(allergens_dict_eng[allergen_code]) %}
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if found_allergens %}
+                                                    {{ found_allergens|join(', ') }}
+                                                {% else %}
+                                                    /
+                                                {% endif %}
+                                            {% else %}
+                                                /
+                                            {% endif %}
+                                    </p>
+                                    <!-- Additives -->
+                                    <p class="text-sm text-gray-500 text-left leading-tight">
+                                            {% if session.get('language') == 'de' %}Zusatzstoffe{% else %}Additives{% endif %}:
+                                            {% if dish.additives %}
+                                                {% set found_additives = [] %}
+                                                {% for additive in dish.additives.split(',') %}
+                                                    {% set additive_code = additive.strip() %}
+                                                    {% if additive_code in additives_dict %}
+                                                        {% if session.get('language') == 'de' %}
+                                                            {% set _ = found_additives.append(additives_dict[additive_code]) %}
+                                                        {% else %}
+                                                            {% set _ = found_additives.append(additives_dict_eng[additive_code]) %}
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if found_additives %}
+                                                    {{ found_additives|join(', ') }}
+                                                {% else %}
+                                                    /
+                                                {% endif %}
+                                            {% else %}
+                                                /
+                                            {% endif %}
+                                    </p>
+                                </div>      
+                                
+                                <div class="flex gap-2 mb-2">
+                                    <button class="description-btn" onclick="toggleDescriptionPopup({{ dish.id }})">{% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}</button>
+                                    <div class="popup" id="description-popup-{{ dish.id }}">
+                                        <div class="overlay"></div>
+                                        <div class="content">
+                                            <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
+                                            {% if session.get('language') == 'de' %}
+                                            {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
+                                            {% else %}
+                                            {{ dish.description_en if dish.description_en else 'No description available' }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <div class="flex gap-2 mb-2">
+                                    <button class="recipe-btn" onclick="toggleRecipePopup({{ dish.id }})">{% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}</button>
+                                    <div class="popup" id="recipe-popup-{{ dish.id }}">
+                                        <div class="overlay"></div>
+                                        <div class="content">
+                                            <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
+                                            {% if session.get('language') == 'de' and dish.recipe_de %}
+                                                {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
+                                                {% if recipe_parts|length > 1 %}
+                                                    <div class="space-y-6">
+                                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                                        {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
+                                                        {% if ingredients_instructions|length > 1 %}
+                                                            <div class="mt-4">
+                                                                <h5 class="font-medium mb-2">Zutaten:</h5>
+                                                                <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                                    {% for line in ingredients_instructions[0].split('\n') %}
+                                                                        {% if line.strip().startswith('-') %}
+                                                                            <li>{{ line.strip('- ') }}</li>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            </div>
+                                                            <div class="mt-4">
+                                                                <h5 class="font-medium mb-2">Anleitung:</h5>
+                                                                <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                                    {% for line in ingredients_instructions[1].split('\n') %}
+                                                                        {% if line.strip() and line.strip()[0].isdigit() %}
+                                                                            <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </ol>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% else %}
+                                                    <p class="text-gray-600">Kein Rezept verfügbar</p>
+                                                {% endif %}
+                                            {% elif dish.recipe_en %}
+                                                {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
+                                                {% if recipe_parts|length > 1 %}
+                                                    <div class="space-y-6">
+                                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                                        {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
+                                                        {% if ingredients_instructions|length > 1 %}
+                                                            <div class="mt-4">
+                                                                <h5 class="font-medium mb-2">Ingredients:</h5>
+                                                                <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                                    {% for line in ingredients_instructions[0].split('\n') %}
+                                                                        {% if line.strip().startswith('-') %}
+                                                                            <li>{{ line.strip('- ') }}</li>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </ul>
+                                                            </div>
+                                                            <div class="mt-4">
+                                                                <h5 class="font-medium mb-2">Instructions:</h5>
+                                                                <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                                    {% for line in ingredients_instructions[1].split('\n') %}
+                                                                        {% if line.strip() and line.strip()[0].isdigit() %}
+                                                                            <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </ol>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                {% else %}
+                                                    <p class="text-gray-800">No recipe available</p>
+                                                {% endif %}
+                                            {% else %}
+                                                <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+    
+                                <div class="flex">
+                                    <!-- Ratings -->
+                                    <div class="rating mt-4 text-4xl flex justify-end">
+                                        <input type="radio" id="star5_{{ dish.id }}" name="rating_{{ dish.id }}" value="5" />
+                                        <label for="star5_{{ dish.id }}">&#9733;</label>
+                                        <input type="radio" id="star4_{{ dish.id }}" name="rating_{{ dish.id }}" value="4" />
+                                        <label for="star4_{{ dish.id }}">&#9733;</label>
+                                        <input type="radio" id="star3_{{ dish.id }}" name="rating_{{ dish.id }}" value="3" />
+                                        <label for="star3_{{ dish.id }}">&#9733;</label>
+                                        <input type="radio" id="star2_{{ dish.id }}" name="rating_{{ dish.id }}" value="2" />
+                                        <label for="star2_{{ dish.id }}">&#9733;</label>
+                                        <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
+                                        <label for="star1_{{ dish.id }}">&#9733;</label>
+                                    </div>
+                                </div> 
+    
+                                <div class="flex">
+                                    <button class="submit-rating mt-2" data-id="{{ dish.id }}">
+                                    {% if session.get('language') == 'de' %}
+                                        Bewertung senden
+                                    {% else %}
+                                        Submit Rating
+                                    {% endif %}
+                                    </button>
+                                    <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                                        {% if session.get('language') == 'de' %}
+                                            Bewertung erhalten!
+                                        {% else %}
+                                            Rating received!
+                                        {% endif %}
+                                    </p>
+                                </div>
+    
+                                <div class="flex">
+                                    <div class="mt-4 p-2 bg-gray-200 text-gray-700 rounded">
+                                        <!-- Average Rating and Count -->
+                                        <span>
+                                            {% if dish.average_rating is not none %}
+                                                {{ dish.average_rating }}
+                                            {% else %}
+                                                0
+                                            {% endif %} 
+                                            {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %} 
+    
+                                            (
+                                            {% if dish.rating_count is not none %}
+                                                {{ dish.rating_count }}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                            {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                            )
+                                        </span>
+                                        <!-- Recommendation Score -->
+                                        {% if recommendation_switch and course in ['Hauptspeise', 'Main Dish'] %}
+                                            <br> 
+                                            <span>
+                                                {% if session.get('language') == 'de' %}
+                                                    Personalisierter Menu Score: {{ dish.recommendation_score }}
+                                                {% else %}
+                                                    Personalized menu score: {{ dish.recommendation_score }}
+                                                {% endif %}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                        </div>       
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-center text-gray-600">
+                    {% if session.get('language') == 'de' %}
+                        Kein Dessert verfügbar für diese Auswahl
+                    {% else %}
+                        No dessert available for this selection
+                    {% endif %}
+                </p>
+            {% endif %}
+        </div>
+        </div>
+    {% endif %}
+</div>               
+
 <!-- Rate more dishes button -->
 {% if username %}
 <div class="popup" id="popup-1">
@@ -256,375 +1298,8 @@
         </p>
     </div>
 </div>
-<button class="rate-dishes-btn" onclick="togglePopup()">Rate More Dishes</button>
+<button class="rate-dishes-btn" onclick="togglePopup()">{% if session.get('language') == 'de' %}Bewerte weitere Gerichte{% else %}Rate more dishes{% endif %}</button>
 {% endif %}
-    <!-- Results section -->
-    <div class="container mt-8 w-full">
-        {% if no_results %}
-        <div class="text-2xl font-bold text-center">
-        {% if session.get('language') == 'de' %}
-            Es wurden keine Daten für die ausgewählten Optionen gefunden!
-        {% else %}
-            No data was found for the selected options!
-        {% endif %}
-        </div>
-        {% else %}
-        <div class="grid grid-cols-1 gap-6">
-            {% for course, course_dishes in dishes.items() %}
-                <!-- Course headline -->
-                <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
-                    {{ course }}
-                </h2>
-                {% for dish in course_dishes %}
-                <div class="card w-full">
-                    <!-- <div class="card-body flex justify-between p-6">
-                        <div class="flex-grow space-y-4">  --> 
-                    <div class="grid grid-cols-4 gap-4 items-start w-full p-6">
-                        <div class="col-span-1 space-y-4">
-                            {% if selected_mensa == 'all' %}
-                            <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
-                            {% endif %}  
-                            <!-- If lang == de then we use in dishes table menuLine, and menu
-                            If lang == en then we use in dishes_eng table menuLineEng and menuEng -->  
-                            <h3 class="card-title menu-line text-2xl font-bold">
-                                {% if session.get('language') == 'de' %}
-                                    {{ dish.menuLine }}
-                                {% else %}
-                                    {{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}
-                                {% endif %}
-                            </h3>
-                            <h5 class="card-title menu-name text-xl">
-                                {% if session.get('language') == 'de' %}
-                                    {{ dish.menu }}
-                                {% else %}
-                                    {{ dish.menuEng if dish.menuEng else dish.menu }}
-                                {% endif %}
-                            </h5>                                
-                            <!-- show either student or guest price -->                    
-                            <div class="text-lg font-medium text-gray-700">
-                                {% if selected_price == 'studentPrice' or not selected_price %}
-                                    <div>
-                                        {% if session.get('language') == 'de' %}
-                                            Studentenpreis: 
-                                        {% else %}
-                                            Student Price: 
-                                        {% endif %}
-                                        {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
-                                    </div>
-                                    {% endif %}
-                                    {% if selected_price == 'guestPrice' %}
-                                    <div>
-                                        {% if session.get('language') == 'de' %}
-                                            Gästepreis: 
-                                        {% else %}
-                                            Guest Price: 
-                                        {% endif %}
-                                        {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
-                                    </div>
-                                    {% endif %}
-                            </div> 
-                                                                         
-                            <!-- Icons on selected meats-->
-                            <div class="flex gap-2 mb-2">
-                                {% if 'fish' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_fish.png') }}" alt="Fish" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'poultry' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Geflügel{% else %}Poultry{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_poultry.png') }}" alt="Poultry" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'veal' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Kalb{% else %}Veal{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_veal.png') }}" alt="Veal" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'lamb' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Lamm{% else %}Lamb{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_lamb.png') }}" alt="Lamb" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'beef' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Rind{% else %}Beef{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_beef.png') }}" alt="Beef" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'pork' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Schwein{% else %}Pork{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_pork.png') }}" alt="Pork" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'game' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Wild{% else %}Game{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_game.png') }}" alt="Game" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'top' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Empfehlung{% else %}Top{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_recommendation.png') }}" alt="Top" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'vegetarian' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vegetarisch{% else %}Vegetarian{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_vegetarian.png') }}" alt="Vegetarian" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'vegan' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vegan{% else %}Vegan{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_vegan.png') }}" alt="Vegan" class="h-6">
-                                    </span>
-                                {% endif %}
-                                {% if 'mensaVital' in dish.icons %}
-                                    <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Vital{% else %}Vital{% endif %}">
-                                        <img src="{{ url_for('static', filename='images/icon_mensavital.png') }}" alt="Vital" class="h-6">
-                                    </span>
-                                {% endif %}
-                            </div>      
-                        </div>
-
-
-                    <!--<div class="flex justify-between items-start space-x-4 max-w-4xl mx-auto"> -->
-                        <div class="col-span-2 flex space-x-4">
-                            <!-- Description -->
-                            <div class="w-1/2">
-                                <h4 class="text-lg font-semibold mb-2">
-                                    {% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}
-                                </h4>
-                                <div class="description-content h-32 overflow-hidden">
-                                <div class="text-gray-800 font-medium mb-2 text-left text-base">
-                                    {% if session.get('language') == 'de' %}
-                                        {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
-                                    {% else %}
-                                        {{ dish.description_en if dish.description_en else 'No description available' }}
-                                    {% endif %}
-                                </div>  
-                            </div>
-                            <button class="expand-button mt-2 text-sm text-gray-500 hover:text-gray-700" data-expand-text="{% if session.get('language') == 'de' %}Mehr anzeigen{% else %}Show more{% endif %}" data-collapse-text="{% if session.get('language') == 'de' %}Weniger anzeigen{% else %}Show less{% endif %}">
-                                {% if session.get('language') == 'de' %}Mehr anzeigen{% else %}Show more{% endif %}
-                            </button>  
-                        </div>
-                        
-                        <!-- Recipe -->
-                        <div class="w-1/2">
-                            <h4 class="text-lg font-semibold mb-2">
-                                    {% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}
-                            </h4>
-                            <div class="recipe-content h-32 overflow-hidden">
-                                {% if session.get('language') == 'de' and dish.recipe_de %}
-                                    {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
-                                    {% if recipe_parts|length > 1 %}
-                                        <div class="space-y-6">
-                                            <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
-                                            {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
-                                            {% if ingredients_instructions|length > 1 %}
-                                                <div class="mt-4">
-                                                    <h5 class="font-medium mb-2">Zutaten:</h5>
-                                                    <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
-                                                        {% for line in ingredients_instructions[0].split('\n') %}
-                                                            {% if line.strip().startswith('-') %}
-                                                                <li>{{ line.strip('- ') }}</li>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </ul>
-                                                </div>
-                                                <div class="mt-4">
-                                                    <h5 class="font-medium mb-2">Anleitung:</h5>
-                                                    <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
-                                                        {% for line in ingredients_instructions[1].split('\n') %}
-                                                            {% if line.strip() and line.strip()[0].isdigit() %}
-                                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </ol>
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    {% else %}
-                                        <p class="text-gray-600">Kein Rezept verfügbar</p>
-                                    {% endif %}
-                                {% elif dish.recipe_en %}
-                                    {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
-                                    {% if recipe_parts|length > 1 %}
-                                        <div class="space-y-6">
-                                            <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
-                                            {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
-                                            {% if ingredients_instructions|length > 1 %}
-                                                <div class="mt-4">
-                                                    <h5 class="font-medium mb-2">Ingredients:</h5>
-                                                    <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
-                                                        {% for line in ingredients_instructions[0].split('\n') %}
-                                                            {% if line.strip().startswith('-') %}
-                                                                <li>{{ line.strip('- ') }}</li>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </ul>
-                                                </div>
-                                                <div class="mt-4">
-                                                    <h5 class="font-medium mb-2">Instructions:</h5>
-                                                    <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
-                                                        {% for line in ingredients_instructions[1].split('\n') %}
-                                                            {% if line.strip() and line.strip()[0].isdigit() %}
-                                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                    </ol>
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    {% else %}
-                                        <p class="text-gray-800">No recipe available</p>
-                                    {% endif %}
-                                {% else %}
-                                    <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
-                                {% endif %}
-                            </div>
-                            <button class="expand-button mt-2 text-sm text-gray-500 hover:text-gray-700" data-expand-text="{% if session.get('language') == 'de' %}Mehr anzeigen{% else %}Show more{% endif %}" data-collapse-text="{% if session.get('language') == 'de' %}Weniger anzeigen{% else %}Show less{% endif %}">
-                                {% if session.get('language') == 'de' %}Mehr anzeigen{% else %}Show more{% endif %}
-                            </button> 
-                        </div>
-                        </div>              
-                        <div class="col-span-1 flex flex-col items-end">
-                            <!-- Images -->
-                            <div class="mb-4 max-w-xs justify-end">
-                                <!-- <img src="{{ url_for('static', filename='images/menu_1.png') }}" alt="Coffee Shop" class="w-full h-auto rounded-lg shadow-md object-cover"> -->
-                            </div> 
-                            <!-- display if dish is recommendet -->
-                            <div>
-                                {% if dish.is_top_recommendation_in_course and recommendation_switch %}
-                                    <p class="text-sm text-green-600">
-                                        {% if session.get('language') == 'de' %}
-                                            Wir empfehlen Ihnen dieses Hauptgericht basierend auf Ihren persönlichen Vorlieben!
-                                        {% else %}
-                                            We recommend this dish to you based on your personal preferences!
-                                        {% endif %}
-                                    </p>
-                                {% endif %}
-                            </div>
-
-                            <!-- Ratings -->
-                            <div class="rating mt-4 text-4xl flex justify-end">
-                                <input type="radio" id="star5_{{ dish.id }}" name="rating_{{ dish.id }}" value="5" />
-                                <label for="star5_{{ dish.id }}">&#9733;</label>
-                                <input type="radio" id="star4_{{ dish.id }}" name="rating_{{ dish.id }}" value="4" />
-                                <label for="star4_{{ dish.id }}">&#9733;</label>
-                                <input type="radio" id="star3_{{ dish.id }}" name="rating_{{ dish.id }}" value="3" />
-                                <label for="star3_{{ dish.id }}">&#9733;</label>
-                                <input type="radio" id="star2_{{ dish.id }}" name="rating_{{ dish.id }}" value="2" />
-                                <label for="star2_{{ dish.id }}">&#9733;</label>
-                                <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
-                                <label for="star1_{{ dish.id }}">&#9733;</label>
-                            </div>
-                            <button class="submit-rating mt-2" data-id="{{ dish.id }}">
-                                {% if session.get('language') == 'de' %}
-                                    Bewertung senden
-                                {% else %}
-                                    Submit Rating
-                                {% endif %}
-                            </button>
-                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
-                                {% if session.get('language') == 'de' %}
-                                    Bewertung erhalten!
-                                {% else %}
-                                    Rating received!
-                                {% endif %}
-                            </p>
-                            <div class="mt-4 p-2 bg-gray-200 text-gray-700 rounded">
-                                <!-- Average Rating and Count -->
-                                <span>
-                                    {% if dish.average_rating is not none %}
-                                        {{ dish.average_rating }}
-                                    {% else %}
-                                        0
-                                    {% endif %} 
-                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %} 
-
-                                    (
-                                    {% if dish.rating_count is not none %}
-                                        {{ dish.rating_count }}
-                                    {% else %}
-                                        0
-                                    {% endif %}
-                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
-                                    )
-                                </span>
-
-
-                                
-                                <!-- Recommendation Score -->
-                                {% if recommendation_switch and course in ['Hauptspeise', 'Main Dish'] %}
-                                    <br> 
-                                    <span>
-                                        {% if session.get('language') == 'de' %}
-                                            Personalisierter Menu Score: {{ dish.recommendation_score }}
-                                        {% else %}
-                                            Personalized menu score: {{ dish.recommendation_score }}
-                                        {% endif %}
-                                    </span>
-                                {% endif %}
-                            </div>
-                            
-
-                        </div>                                                
-                    </div>           
-                        <!-- Allergens -->
-                        <p class="text-sm text-gray-500">
-                                {% if session.get('language') == 'de' %}Allergene{% else %}Allergens{% endif %}:
-                                {% if dish.allergens %}
-                                    {% set found_allergens = [] %}
-                                    {% for allergen in dish.allergens.split(',') %}
-                                        {% set allergen_code = allergen.strip() %}
-                                        {% if allergen_code in allergens_dict %}
-                                            {% if session.get('language') == 'de' %}
-                                                {% set _ = found_allergens.append(allergens_dict[allergen_code]) %}
-                                            {% else %}
-                                                {% set _ = found_allergens.append(allergens_dict_eng[allergen_code]) %}
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% if found_allergens %}
-                                        {{ found_allergens|join(', ') }}
-                                    {% else %}
-                                        /
-                                    {% endif %}
-                                {% else %}
-                                    /
-                                {% endif %}
-                        </p>
-
-                        <!-- Additives -->
-                        <p class="text-sm text-gray-500">
-                                {% if session.get('language') == 'de' %}Zusatzstoffe{% else %}Additives{% endif %}:
-                                {% if dish.additives %}
-                                    {% set found_additives = [] %}
-                                    {% for additive in dish.additives.split(',') %}
-                                        {% set additive_code = additive.strip() %}
-                                        {% if additive_code in additives_dict %}
-                                            {% if session.get('language') == 'de' %}
-                                                {% set _ = found_additives.append(additives_dict[additive_code]) %}
-                                            {% else %}
-                                                {% set _ = found_additives.append(additives_dict_eng[additive_code]) %}
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    {% if found_additives %}
-                                        {{ found_additives|join(', ') }}
-                                    {% else %}
-                                        /
-                                    {% endif %}
-                                {% else %}
-                                    /
-                                {% endif %}
-                            </p>
-                        </div> 
-                </div>
-            </div>
-            {% endfor %}
-            {% endfor %}
-        </div>
-    {% endif %}
-    </div>   
 </main>
 <script>
     const menuToggle = document.getElementById('menu-toggle');
