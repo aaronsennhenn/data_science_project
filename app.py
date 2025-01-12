@@ -225,6 +225,20 @@ def user_page():
                            country_chart = country_chart,
                            regional_chart=regional_chart)
 
+@app.route('/rating')
+def rating():
+    lang = session.get('language', 'en')
+    session['language'] = lang
+    session.permanent = True
+    username = session.get('username')
+    
+    with Session() as db_session:
+        today = datetime.now().date()
+        date = today.strftime('%Y-%m-%d')
+        user_name = session.get('username')
+        
+        random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(), lang, user_name, db_session)  # Assuming you have a function to get a random dish
+        return render_template('rating.html', username=username, random_dish=random_dish)  # Pass username to the template
 
 @app.route('/menu', methods=['GET','POST'])
 def menu():
@@ -471,7 +485,7 @@ def analysis():
         plot_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
         # Create pie charts for each mensa
-        VIOLET_COLORS = ['#4F46E5', '#6366F1', '#818CF8', '#A5B4FC', '#233142', '#455d7a', '#e3e3e3']
+        VIOLET_COLORS = ['#4F46E5', '#6366F1', '#818CF8', '#A5B4FC', '#233142', '#455d7a', '#e3e3e3', '#f0f0f0']
 
         pie_charts = {}
         for mensa, distribution in menu_line_distribution.items():

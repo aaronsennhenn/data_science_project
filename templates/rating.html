@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mensa App - Your Digital Dining Guide</title>
+    <title>Mensa Analytics Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/index.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/rating.css') }}" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="{{ url_for('static', filename='js/rating.js') }}" defer></script>
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
-    <!-- Background Image with Overlay -->
-    <div class="bg-image fixed inset-0 z-0"></div>
     <!-- Header -->
     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
         <nav>
@@ -21,11 +21,11 @@
                 <!-- Language Buttons - Centered -->
                 <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
                     <a href="{{ url_for('set_language', lang='en') }}" 
-                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                         EN
                     </a>
                     <a href="{{ url_for('set_language', lang='de') }}"
-                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                         DE
                     </a>
                 </div>
@@ -39,7 +39,7 @@
             </div>
         </nav>
     </header>
-
+    
     <!-- Sidebar Navigation -->
     <div id="sidebar" class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-20">
         <div class="p-5">
@@ -86,84 +86,90 @@
         </div>
     </div>
 
- <!-- Main Content -->
-<div class="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
-    <div class="content-wrapper max-w-4xl w-full p-8 bg-white rounded-xl shadow-sm border border-gray-100">
-        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
-            {% if session.get('language') == 'de' %}
-                Ihr digitaler Mensa-Guide
-            {% else %}
-                Your Digital Mensa Guide
-            {% endif %}
-        </h1>
-        <p class="text-xl text-gray-600 mb-12 text-center leading-relaxed">
-            {% if session.get('language') == 'de' %}
-                Entdecken Sie die vielfältigen kulinarischen Angebote in den Cafeterien und Mensen Tübingens.
-                Erkunden Sie die Mensa-Szene Tübingens und gewinnen Sie Einblicke in Menümuster, Preise und aktuelle Trends.
-            {% else %}
-                Discover the diverse culinary offerings across Tübingen's cafeterias and mensas.
-                Explore Tübingen's mensa scene, uncovering menu patterns, pricing insights, and emerging trends.
-            {% endif %}
-        </p>        
-        
-        <!-- Locations Section -->
-        <div class="mt-12 relative">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-6 text-center">
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center px-4 py-4">
+        <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}</h1>
+            <p class="text-gray-600 text-center">
                 {% if session.get('language') == 'de' %}
-                    Standorte
+                    Erfahre alles über Bewertungen oder bewerte selbst Gerichte und Mensen in Tübingen!
                 {% else %}
-                    Locations
+                    Learn all about ratings or rate the dishes and cafeterias in Tübingen yourself!
                 {% endif %}
-            </h2>
-                <!-- Container for the image -->
-                <div class="relative max-w-4xl mx-auto">
-                    <!-- The map image -->
-                    <img src="{{ url_for('static', filename='images/map.jpg') }}" 
-                         alt="Map with Dining Facilities" 
-                         class="w-full h-auto rounded-lg shadow-sm">
-                    
-                    <!-- Markers on the map -->
-                    {% for mensa_name, coordinates in mensa_coordinates.items() %}
-                        <a href="{{ url_for('menu', selected_mensa=mensa_name) }}"
-                           class="absolute"
-                           style="top: {{ coordinates.top }}%; left: {{ coordinates.left }}%;">
-                            <!-- Marker Image -->
-                            <img src="{{ url_for('static', filename='images/marker.jpg') }}" 
-                                 alt="Marker for {{ mensa_name }}" 
-                                 class="w-8 h-8 marker">
-                            <!-- Mensa Name -->
-                            <span 
-                                class="absolute text-sm bg-white text-gray-800 px-2 py-1 rounded shadow-lg mensa-label"
-                                style="top: {{ coordinates.text_offset }}px; left: 120%; white-space: nowrap;">
-                                {{ mensa_name }}
-                            </span>
-                        </a>
-                    {% endfor %}
-                </div>
-            </div>
+            </p>
+        </div>
 
+    <!-- Rate more dishes button -->
+    {% if username %}
+    <div class="popup" id="popup-1">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="close-btn" onclick="togglePopup()">&times;</div>
+            {% if session.get('language') == 'de' %}
+                <h1>Bewerte Gerichte um eine bessere Empfehlung zu erhalten</h1>
+            {% else %}
+                <h1>Rate dishes to improve the recommendation</h1>
+            {% endif %}
+            <p id="random-dish-name">{{ random_dish[1] }}</p>
+            
+            <!-- Ratings -->
+            <div class="rating mt-4 text-4xl flex justify-end">
+                <input type="radio" id="star5_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="5" />
+                <label for="star5_{{ random_dish[0] }}">&#9733;</label>
+                <input type="radio" id="star4_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="4" />
+                <label for="star4_{{ random_dish[0] }}">&#9733;</label>
+                <input type="radio" id="star3_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="3" />
+                <label for="star3_{{ random_dish[0] }}">&#9733;</label>
+                <input type="radio" id="star2_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="2" />
+                <label for="star2_{{ random_dish[0] }}">&#9733;</label>
+                <input type="radio" id="star1_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="1" />
+                <label for="star1_{{ random_dish[0] }}">&#9733;</label>
+            </div>
+            <button class="submit-rating mt-2" data-id="{{ random_dish[0] }}">
+                {% if session.get('language') == 'de' %}
+                    Bewertung senden
+                {% else %}
+                    Submit Rating
+                {% endif %}
+            </button>
+            <button class="submit-rating mt-2" onclick="location.href='/menu?popup=1';">
+                {% if session.get('language') == 'de' %}
+                    Nächstes Gericht
+                {% else %}
+                    Next Dish
+                {% endif %}
+            </button>
+            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                {% if session.get('language') == 'de' %}
+                    Bewertung erhalten!
+                {% else %}
+                    Rating received!
+                {% endif %}
+            </p>
         </div>
     </div>
+    <button class="rate-dishes-btn" onclick="togglePopup()">{% if session.get('language') == 'de' %}Bewerte weitere Gerichte{% else %}Rate more dishes{% endif %}</button>
+    {% endif %}
 
+</main>
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 py-8">
+    <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+        &copy; 2024 MENSA APP. All rights reserved.
+    </div>
+</footer>
+<script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const closeMenu = document.getElementById('close-menu');
+    const sidebar = document.getElementById('sidebar');
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-8 relative z-10">
-        <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
-            &copy; 2024 MENSA APP. All rights reserved.
-        </div>
-    </footer>
-    <script>
-        const menuToggle = document.getElementById('menu-toggle');
-        const closeMenu = document.getElementById('close-menu');
-        const sidebar = document.getElementById('sidebar');
-    
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('translate-x-full');
-        });
-    
-        closeMenu.addEventListener('click', () => {
-            sidebar.classList.add('translate-x-full');
-        });
-    </script>
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('translate-x-full');
+    });
+
+    closeMenu.addEventListener('click', () => {
+        sidebar.classList.add('translate-x-full');
+    });
+</script>
 </body>
 </html>

@@ -24,19 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', function () {
             const id = this.getAttribute('data-id');
             const rating = document.querySelector(`input[name="rating_${id}"]:checked`).value;
-
-        //    if (rating) {
-        //        const feedback = this.nextElementSibling;
-        //        feedback.classList.remove('hidden');
-        //        feedback.textContent = 'Rating received!';
-                
-         //       setTimeout(() => {
-         //           feedback.classList.add('hidden');
-         //       }, 3000);
-         //   } else {
-         //       alert('Please select a rating before submitting.');
-         //   }
-
             const formData = new FormData();
             formData.append('id', id);
             formData.append('rating', rating);
@@ -47,8 +34,6 @@ document.addEventListener('DOMContentLoaded', function () {
             })                              
         });
     });
-
- 
 
     // Handle mensa selection
     mensaDropdown.addEventListener('change', function() {

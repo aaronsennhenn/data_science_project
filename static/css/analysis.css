@@ -5,6 +5,9 @@ body {
 .font-script {
     font-family: 'Dancing Script', cursive;
 }
+.custom-height {
+    min-height: 300px; /* Adjust the height as needed */
+}
 nav {
     width: 100%;
     padding: 0 2rem;
