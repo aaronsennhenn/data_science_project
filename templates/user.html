@@ -133,24 +133,31 @@
 
 
 <!-- Radar Chart Section for Taste Profile -->
-        <section class="mb-12 w-full">
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-                <h2 class="text-xl font-semibold text-gray-800 mb-6">
-                    {% if session.get('language') == 'de' %}Ihre Geschmack{% else %}Your Taste{% endif %}
-                </h2>
-                <div class="flex justify-center items-center gap-6">
-                    <!-- First Chart -->
-                    <div id="taste-profile-chart" style="flex: 1; max-width: 50%; height: 400px;">
-                        {{ country_chart | safe }}
-                    </div>
-
-                    <!-- Second Chart -->
-                    <div id="second-chart" style="flex: 1; max-width: 50%; height: 400px;">
-                        {{ regional_chart | safe }}
-                    </div>
-                </div>
+<section class="mb-12 w-full">
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+            {% if session.get('language') == 'de' %}Ihr Geschmacksprofil{% else %}Your Taste-Profile{% endif %}
+        </h2>
+        <div class="flex justify-center items-center gap-6">
+            <!-- First Chart -->
+            <div id="taste-profile-chart" style="flex: 1; max-width: 50%; height: 650px; border: 2px solid #ccc; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2"">
+                    {% if session.get('language') == 'de' %}Ihr Internationaler Geschmack{% else %}Your International Taste{% endif %}
+                </h3>
+                {{ country_chart | safe }}
             </div>
-        </section>
+
+            <!-- Second Chart -->
+            <div id="second-chart" style="flex: 1; max-width: 50%; height: 650px; border: 2px solid #ccc; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2"">
+                    {% if session.get('language') == 'de' %}Ihr Regioaler Geschmack{% else %}Your Regional Taste{% endif %}
+                </h3>
+                {{ regional_chart | safe }}
+            </div>
+        </div>
+    </div>
+</section>
+
    
 </main>
 

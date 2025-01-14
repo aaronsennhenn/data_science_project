@@ -63,27 +63,31 @@ def create_taste_radarchart(df, taste_label, similarity):
     r = df[similarity].tolist()  
     theta = df[taste_label].tolist()  
 
-    # Create Radar Chart
+    #Create Radar Chart
     fig = go.Figure()
 
-    # Add player's data to the chart
+    #Add player's data to the chart
     fig.add_trace(go.Scatterpolar(
-        r=r,  # Player stats values
-        theta=theta,  # Player stats labels
-        fill='toself',  # Fill the area under the line
+        r=r, 
+        theta=theta, 
+        fill='toself',  
         marker=dict(color='blue'),
-        name = 'This is your Taste Profile'
+        name = None,
+        hoverinfo = 'none'
     ))
 
-    # Update layout for better appearance
+    #Update layout for better appearance
     fig.update_layout(
+        autosize=True,
         polar=dict(
             radialaxis=dict(
                 visible=False,
                 range=[0, 1]
             )
         ),
-        showlegend=True
+        showlegend=False,
+        height = 560,
+        width = 560
     )
 
     # Convert figure to html format
