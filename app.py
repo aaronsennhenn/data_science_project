@@ -345,13 +345,12 @@ def menu():
             grouped_menu_data[course_key].append(dish)
 
         # find dish with highest recommendation score for course type and set flag
-        target_course_keys = 'Hauptspeise' if lang == 'de' else 'Main Dish'
         for course_key, dishes in grouped_menu_data.items():
-            if course_key in target_course_keys:
+            if dishes:  # Ensure there are dishes for the course
                 # Find the dish with the highest recommendation score
                 top_dish = max(dishes, key=lambda x: x['recommendation_score'])
                 
-                # Set the flag only for the top dish in the target courses
+                # Set the flag only for the top dish in the current course
                 for dish in dishes:
                     dish['is_top_recommendation_in_course'] = dish == top_dish
 
