@@ -184,21 +184,78 @@
                     <label for="price_guest">{% if session.get('language') == 'de' %}Gast{% else %}Guest{% endif %}</label>
                 </div>
             </div>
+            <!-- Sort by switches-->
             <div class="flex-1">
                 <p class="text-left">
-                {% if session.get('language') == 'de' %}
-                    Personalisierte Empfehlung:
-                {% else %}
-                    Personalized recommendation:
-                {% endif %}
+                    {% if session.get('language') == 'de' %}
+                        Sortiere nach:
+                    {% else %}
+                        Sort by:
+                    {% endif %}
                 </p>
-                <div class="radio-group">
+                <!-- Switches -->
+                <!-- Personalized Recommendation Switch -->
+                <div class="switch-item">
                     <label class="switch">
                         <input type="checkbox" name="recommendation_switch" value="on">
                         <span class="slider round"></span>
                     </label>
+                    <span class="text-left">
+                        {% if session.get('language') == 'de' %}
+                            Personalisierte Empfehlung
+                        {% else %}
+                            Personalized Recommendation
+                        {% endif %}
+                    </span>
+                </div>
+        
+                <!-- Price Filter Switch -->
+                <div class="switch-item">
+                    <label class="switch">
+                        <input type="checkbox" name="price_switch" value="on">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="text-left">
+                        {% if session.get('language') == 'de' %}
+                            Preis
+                        {% else %}
+                            Price
+                        {% endif %}
+                    </span>
+                </div>
+        
+                <!-- Rating Filter Switch -->
+                <div class="switch-item">
+                    <label class="switch">
+                        <input type="checkbox" name="rating_switch" value="on">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="text-left">
+                        {% if session.get('language') == 'de' %}
+                            Durchschn. Bewertung
+                        {% else %}
+                            Avg. Rating
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Number of Ratings Filter Switch -->
+                <div class="switch-item">
+                    <label class="switch">
+                        <input type="checkbox" name="rating_count_switch" value="on">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="text-left">
+                        {% if session.get('language') == 'de' %}
+                            Anzahl Bewertung
+                        {% else %}
+                            Number of Ratings
+                        {% endif %}
+                    </span>
                 </div>
             </div>
+            
+            
             <div class="w-full">
                 <button type="submit" class="bg-violet-500 text-white px-4 py-2 rounded-md shadow hover:bg-violet-600 transition">
                 {% if session.get('language') == 'de' %}
@@ -325,19 +382,11 @@
                             <!-- Average Rating and Count -->
                             <div class="p-2 bg-gray-200 text-gray-700 rounded">
                                 <span>
-                                    {% if dish.average_rating is not none %}
-                                    {{ dish.average_rating }}
-                                    {% else %}
-                                    0
-                                    {% endif %}
-                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
-                                    (
-                                    {% if dish.rating_count is not none %}
-                                    {{ dish.rating_count }}
-                                    {% else %}
-                                    0
-                                    {% endif %}
-                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                    {{ dish.average_rating }} 
+                                    {{ 'Sterne' if session.get('language') == 'de' else 'Stars' }}
+                                    ( 
+                                    {{ dish.rating_count }} 
+                                    {{ 'Bewertungen' if session.get('language') == 'de' else 'Ratings' }}
                                     )
                                 </span>
                                 <!-- Recommendation Score -->
@@ -682,19 +731,11 @@
                             <!-- Average Rating and Count -->
                             <div class="p-2 bg-gray-200 text-gray-700 rounded">
                                 <span>
-                                    {% if dish.average_rating is not none %}
-                                    {{ dish.average_rating }}
-                                    {% else %}
-                                    0
-                                    {% endif %}
-                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
-                                    (
-                                    {% if dish.rating_count is not none %}
-                                    {{ dish.rating_count }}
-                                    {% else %}
-                                    0
-                                    {% endif %}
-                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                    {{ dish.average_rating }} 
+                                    {{ 'Sterne' if session.get('language') == 'de' else 'Stars' }}
+                                    ( 
+                                    {{ dish.rating_count }} 
+                                    {{ 'Bewertungen' if session.get('language') == 'de' else 'Ratings' }}
                                     )
                                 </span>
                                 <!-- Recommendation Score -->
@@ -932,19 +973,11 @@
                                     <!-- Average Rating and Count -->
                                     <div class="p-2 bg-gray-200 text-gray-700 rounded">
                                         <span>
-                                            {% if dish.average_rating is not none %}
-                                            {{ dish.average_rating }}
-                                            {% else %}
-                                            0
-                                            {% endif %}
-                                            {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
-                                            (
-                                            {% if dish.rating_count is not none %}
-                                            {{ dish.rating_count }}
-                                            {% else %}
-                                            0
-                                            {% endif %}
-                                            {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                            {{ dish.average_rating }} 
+                                            {{ 'Sterne' if session.get('language') == 'de' else 'Stars' }}
+                                            ( 
+                                            {{ dish.rating_count }} 
+                                            {{ 'Bewertungen' if session.get('language') == 'de' else 'Ratings' }}
                                             )
                                         </span>
                                         <!-- Recommendation Score -->
@@ -1107,7 +1140,7 @@
                                     </p>
                                 </div>      
     
-                                <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center justify-between gap-2">
                                     <!-- Ratings -->
                                     <div class="rating text-4xl flex">
                                         <input type="radio" id="star5_{{ dish.id }}" name="rating_{{ dish.id }}" value="5" />

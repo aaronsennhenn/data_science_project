@@ -260,6 +260,9 @@ def menu():
         selected_price = "studentPrice"
         no_results = False
         recommendation_switch = None
+        price_switch = None
+        rating_count_switch = None
+        rating_switch = None
 
         # if user is logged in, get user_id
         user_name = session.get('username')
@@ -272,8 +275,11 @@ def menu():
             mensa_name = request.form.get('selected_mensa')
             date_temp = request.form.get('selected_date')
             selected_diet_meat = request.form.getlist('selected_diet_meat')
-            selected_price = request.form.get('selected_price')
+            selected_price_temp = request.form.get('selected_price')
             recommendation_switch = request.form.get('recommendation_switch')
+            price_switch = request.form.get('price_switch')
+            rating_switch = request.form.get('rating_switch')
+            rating_count_switch = request.form.get('rating_count_switch')
 
             # get rating from user and selected dish with mensa
             rating, menu_id = request.form.get('rating'), request.form.get('id')
@@ -292,6 +298,8 @@ def menu():
             # only update the date variable, if a date is selected
             if date_temp:
                 date = date_temp
+            if selected_price_temp:
+                selected_price = selected_price_temp
 
         if user_name:
             random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(),lang,user_name,db_session) # initialize random dish
@@ -323,17 +331,22 @@ def menu():
                         'recipe_en':dish[8],
                         'course_eng':dish[9],
                         'embedding':dish[10],
-                        'average_rating':dish[11],
-                        'rating_count':dish[12],
+                        'average_rating':dish[11] or 0, # zero if dish is not rated yet
+                        'rating_count':dish[12] or 0, # zero if is not rated yet 
                         'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
                         'is_top_recommendation_in_course': False  # Initialize to False
                         })
         
-        # Sort dishes by recommendation score if recommendation switch is on
+        # Implement sorting based on switches
         if recommendation_switch:
-            menu_data = sorted(menu_data, key=lambda x: x['recommendation_score'], reverse=True)
+            menu_data = sorted(menu_data, key=lambda x: x.get('recommendation_score', 0), reverse=True)
+        elif price_switch:
+            menu_data = sorted(menu_data, key=lambda x: x.get('studentPrice', 0))
+        elif rating_switch:
+            menu_data = sorted(menu_data, key=lambda x: x.get('average_rating', 0), reverse=True)
+        elif rating_count_switch:
+            menu_data = sorted(menu_data, key=lambda x: x.get('rating_count', 0), reverse=True)
         
-
         # Group dishes into a list of dicts with course type as key. e.g. main dish, dessert, site dish
         grouped_menu_data = {}
         for dish in menu_data:
@@ -344,7 +357,7 @@ def menu():
                 grouped_menu_data[course_key] = []
             grouped_menu_data[course_key].append(dish)
 
-        # find dish with highest recommendation score for course type and set flag
+        # find dish with highest recommendation score for each course type and set flag
         for course_key, dishes in grouped_menu_data.items():
             if dishes:  # Ensure there are dishes for the course
                 # Find the dish with the highest recommendation score
@@ -376,6 +389,9 @@ def menu():
                          lang=lang,
                          no_results=no_results,
                          recommendation_switch=recommendation_switch,
+                         price_switch=price_switch,
+                         rating_switch=rating_switch,
+                         rating_count_switch=rating_count_switch,
                          random_dish=random_dish)
 
 
