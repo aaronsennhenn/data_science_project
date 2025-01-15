@@ -91,7 +91,7 @@
 
 
 <!-- Main -->
-<main class="flex-grow flex flex-col items-center px-4 py-4">
+<main class="flex-grow flex flex-col px-4 py-4">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
         <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
             {% if session.get('language') == 'de' %}
@@ -211,6 +211,71 @@
         </form>
     </div>
 
+<!-- Rate more dishes button -->
+{% if username %}
+<div class="flex justify-start items-center gap-4">
+    <!-- Rate More Dishes Button -->
+    <button class="rate-dishes-btn" onclick="togglePopup()">
+        {% if session.get('language') == 'de' %}
+            Mehr Gerichte bewerten
+        {% else %}
+            Rate More Dishes
+        {% endif %}
+    </button>
+
+    <!-- Popup -->
+    <div class="popup" id="popup-1">
+        <div class="overlay"></div>
+        <div class="content">
+            <div class="close-btn" onclick="togglePopup()">&times;</div>
+            {% if session.get('language') == 'de' %}
+                <h1>Bewerte Gerichte um eine bessere Empfehlung zu erhalten</h1>
+            {% else %}
+                <h1>Rate dishes to improve the recommendation</h1>
+            {% endif %}
+            <p id="random-dish-name">{{ random_dish[1] }}</p>
+
+            <!-- Ratings -->
+            <div class="rating mt-4 text-4xl flex justify-end">
+                <input type="radio" id="star5_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="5" />
+                <label for="star5_{{ random_dish[0] }}">&#9733;</label>
+                <input type="radio" id="star4_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="4" />
+                <label for="star4_{{ random_dish[0] }}">&#9733;</label>
+                <input type="radio" id="star3_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="3" />
+                <label for="star3_{{ random_dish[0] }}">&#9733;</label>
+                <input type="radio" id="star2_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="2" />
+                <label for="star2_{{ random_dish[0] }}">&#9733;</label>
+                <input type="radio" id="star1_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="1" />
+                <label for="star1_{{ random_dish[0] }}">&#9733;</label>
+            </div>
+            <button class="submit-rating mt-2" data-id="{{ random_dish[0] }}">
+                {% if session.get('language') == 'de' %}
+                    Bewertung senden
+                {% else %}
+                    Submit Rating
+                {% endif %}
+            </button>
+            <button class="submit-rating mt-2" onclick="location.href='/menu?popup=1';">
+                {% if session.get('language') == 'de' %}
+                    Nächstes Gericht
+                {% else %}
+                    Next Dish
+                {% endif %}
+            </button>
+            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                {% if session.get('language') == 'de' %}
+                    Bewertung erhalten!
+                {% else %}
+                    Rating received!
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+
 <!-- Results section -->
 <div class="container mt-8 w-full">
     {% if no_results %}
@@ -226,7 +291,7 @@
         <!-- Main dish -->
         <div>
             <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
-                {% if session.get('language') == 'de' %}Hauptspeise{% else %}Main Dish{% endif %}
+                {% if session.get('language') == 'de' %}Hauptspeisen{% else %}Main Dishes{% endif %}
             </h2>
             {% if dishes.get('Hauptspeise') or dishes.get('Main Dish') %}
             {% for dish in dishes.get('Hauptspeise', []) or dishes.get('Main Dish', []) %}
@@ -247,9 +312,48 @@
                                 {% endif %}
                             </div>
                         </div>
-                        {% if selected_mensa == 'all' %}
-                        <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
-                        {% endif %}
+                        <!-- Display location and average rating and score in on row -->
+                        <div class="flex justify-between items-center gap-4">
+                            {% if selected_mensa == 'all' %}
+                            <h3 class="text-sm text-gray-600">
+                                {{ dish.location }}
+                            </h3>
+                            {% else %}
+                            <div class="flex-grow"></div>
+                            {% endif %}
+                        
+                            <!-- Average Rating and Count -->
+                            <div class="p-2 bg-gray-200 text-gray-700 rounded">
+                                <span>
+                                    {% if dish.average_rating is not none %}
+                                    {{ dish.average_rating }}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
+                                    (
+                                    {% if dish.rating_count is not none %}
+                                    {{ dish.rating_count }}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                    )
+                                </span>
+                                <!-- Recommendation Score -->
+                                {% if recommendation_switch %}
+                                <br>
+                                <span>
+                                    {% if session.get('language') == 'de' %}
+                                    Personalisierter Menu Score: {{ dish.recommendation_score }}
+                                    {% else %}
+                                    Personalized menu score: {{ dish.recommendation_score }}
+                                    {% endif %}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
                         <h3 class="card-title menu-line text-2xl font-bold">
                             {% if session.get('language') == 'de' %}
                             {{ dish.menuLine }}
@@ -265,7 +369,7 @@
                             {% endif %}
                         </h5>
                         <div class="text-lg font-medium text-gray-700">
-                            {% if selected_price == 'studentPrice' or not selected_price %}
+                            {% if selected_price == 'studentPrice'%}
                             <div>
                                 {% if session.get('language') == 'de' %}
                                 Studentenpreis:
@@ -393,99 +497,11 @@
                                 {% endif %}
                             </p>
                         </div>
-                        <div class="flex gap-2 mb-2">
-                            <button class="description-btn" onclick="toggleDescriptionPopup({{ dish.id }})">{% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}</button>
-                            <div class="popup" id="description-popup-{{ dish.id }}">
-                                <div class="overlay"></div>
-                                <div class="content">
-                                    <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
-                                    {% if session.get('language') == 'de' %}
-                                    {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
-                                    {% else %}
-                                    {{ dish.description_en if dish.description_en else 'No description available' }}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex gap-2 mb-2">
-                            <button class="recipe-btn" onclick="toggleRecipePopup({{ dish.id }})">{% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}</button>
-                            <div class="popup" id="recipe-popup-{{ dish.id }}">
-                                <div class="overlay"></div>
-                                <div class="content">
-                                    <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
-                                    {% if session.get('language') == 'de' and dish.recipe_de %}
-                                    {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
-                                    {% if recipe_parts|length > 1 %}
-                                    <div class="space-y-6">
-                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
-                                        {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
-                                        {% if ingredients_instructions|length > 1 %}
-                                        <div class="mt-4">
-                                            <h5 class="font-medium mb-2">Zutaten:</h5>
-                                            <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
-                                                {% for line in ingredients_instructions[0].split('\n') %}
-                                                {% if line.strip().startswith('-') %}
-                                                <li>{{ line.strip('- ') }}</li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                        <div class="mt-4">
-                                            <h5 class="font-medium mb-2">Anleitung:</h5>
-                                            <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
-                                                {% for line in ingredients_instructions[1].split('\n') %}
-                                                {% if line.strip() and line.strip()[0].isdigit() %}
-                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ol>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    {% else %}
-                                    <p class="text-gray-600">Kein Rezept verfügbar</p>
-                                    {% endif %}
-                                    {% elif dish.recipe_en %}
-                                    {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
-                                    {% if recipe_parts|length > 1 %}
-                                    <div class="space-y-6">
-                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
-                                        {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
-                                        {% if ingredients_instructions|length > 1 %}
-                                        <div class="mt-4">
-                                            <h5 class="font-medium mb-2">Ingredients:</h5>
-                                            <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
-                                                {% for line in ingredients_instructions[0].split('\n') %}
-                                                {% if line.strip().startswith('-') %}
-                                                <li>{{ line.strip('- ') }}</li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                        <div class="mt-4">
-                                            <h5 class="font-medium mb-2">Instructions:</h5>
-                                            <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
-                                                {% for line in ingredients_instructions[1].split('\n') %}
-                                                {% if line.strip() and line.strip()[0].isdigit() %}
-                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ol>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    {% else %}
-                                    <p class="text-gray-800">No recipe available</p>
-                                    {% endif %}
-                                    {% else %}
-                                    <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex">
+                       
+                        
+                        <div class="flex items-center justify-between gap-4">
                             <!-- Ratings -->
-                            <div class="rating mt-4 text-4xl flex justify-end">
+                            <div class="rating text-4xl flex">
                                 <input type="radio" id="star5_{{ dish.id }}" name="rating_{{ dish.id }}" value="5" />
                                 <label for="star5_{{ dish.id }}">&#9733;</label>
                                 <input type="radio" id="star4_{{ dish.id }}" name="rating_{{ dish.id }}" value="4" />
@@ -497,55 +513,123 @@
                                 <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
                                 <label for="star1_{{ dish.id }}">&#9733;</label>
                             </div>
-                        </div>
-                        <div class="flex">
-                            <button class="submit-rating mt-2" data-id="{{ dish.id }}">
+                        
+                            <!-- Submit Rating Button -->
+                            <button class="submit-rating" data-id="{{ dish.id }}">
                                 {% if session.get('language') == 'de' %}
                                 Bewertung senden
                                 {% else %}
                                 Submit Rating
                                 {% endif %}
                             </button>
-                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
-                                {% if session.get('language') == 'de' %}
-                                Bewertung erhalten!
-                                {% else %}
-                                Rating received!
-                                {% endif %}
-                            </p>
+
                         </div>
-                        <div class="flex">
-                            <div class="mt-4 p-2 bg-gray-200 text-gray-700 rounded">
-                                <!-- Average Rating and Count -->
-                                <span>
-                                    {% if dish.average_rating is not none %}
-                                    {{ dish.average_rating }}
-                                    {% else %}
-                                    0
-                                    {% endif %}
-                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
-                                    (
-                                    {% if dish.rating_count is not none %}
-                                    {{ dish.rating_count }}
-                                    {% else %}
-                                    0
-                                    {% endif %}
-                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
-                                    )
-                                </span>
-                                <!-- Recommendation Score -->
-                                {% if recommendation_switch and course in ['Hauptspeise', 'Main Dish'] %}
-                                <br>
-                                <span>
+                        
+                        <!-- Feedback -->
+                        <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                            {% if session.get('language') == 'de' %}
+                            Bewertung erhalten!
+                            {% else %}
+                            Rating received!
+                            {% endif %}
+                        </p>
+
+                        <div class="flex gap-4 mb-2">
+                            <!-- Description Button -->
+                            <button class="description-btn" onclick="toggleDescriptionPopup({{ dish.id }})">
+                                {% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}
+                            </button>
+                            <div class="popup" id="description-popup-{{ dish.id }}">
+                                <div class="overlay"></div>
+                                <div class="content">
+                                    <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
                                     {% if session.get('language') == 'de' %}
-                                    Personalisierter Menu Score: {{ dish.recommendation_score }}
+                                        {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
                                     {% else %}
-                                    Personalized menu score: {{ dish.recommendation_score }}
+                                        {{ dish.description_en if dish.description_en else 'No description available' }}
                                     {% endif %}
-                                </span>
-                                {% endif %}
+                                </div>
+                            </div>
+                        
+                            <!-- Recipe Button -->
+                            <button class="recipe-btn" onclick="toggleRecipePopup({{ dish.id }})">
+                                {% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}
+                            </button>
+                            <div class="popup" id="recipe-popup-{{ dish.id }}">
+                                <div class="overlay"></div>
+                                <div class="content">
+                                    <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
+                                    {% if session.get('language') == 'de' and dish.recipe_de %}
+                                        {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
+                                        {% if recipe_parts|length > 1 %}
+                                            <div class="space-y-6">
+                                                <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                                {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
+                                                {% if ingredients_instructions|length > 1 %}
+                                                    <div class="mt-4">
+                                                        <h5 class="font-medium mb-2">Zutaten:</h5>
+                                                        <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                            {% for line in ingredients_instructions[0].split('\n') %}
+                                                                {% if line.strip().startswith('-') %}
+                                                                    <li>{{ line.strip('- ') }}</li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    <div class="mt-4">
+                                                        <h5 class="font-medium mb-2">Anleitung:</h5>
+                                                        <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                            {% for line in ingredients_instructions[1].split('\n') %}
+                                                                {% if line.strip() and line.strip()[0].isdigit() %}
+                                                                    <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </ol>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <p class="text-gray-600">Kein Rezept verfügbar</p>
+                                        {% endif %}
+                                    {% elif dish.recipe_en %}
+                                        {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
+                                        {% if recipe_parts|length > 1 %}
+                                            <div class="space-y-6">
+                                                <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                                {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
+                                                {% if ingredients_instructions|length > 1 %}
+                                                    <div class="mt-4">
+                                                        <h5 class="font-medium mb-2">Ingredients:</h5>
+                                                        <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                            {% for line in ingredients_instructions[0].split('\n') %}
+                                                                {% if line.strip().startswith('-') %}
+                                                                    <li>{{ line.strip('- ') }}</li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    <div class="mt-4">
+                                                        <h5 class="font-medium mb-2">Instructions:</h5>
+                                                        <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                            {% for line in ingredients_instructions[1].split('\n') %}
+                                                                {% if line.strip() and line.strip()[0].isdigit() %}
+                                                                    <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </ol>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <p class="text-gray-800">No recipe available</p>
+                                        {% endif %}
+                                    {% else %}
+                                        <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>
@@ -563,7 +647,7 @@
         <!-- Side Dish -->
         <div>
             <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
-                {% if session.get('language') == 'de' %}Beilage{% else %}Side Dish{% endif %}
+                {% if session.get('language') == 'de' %}Beilagen{% else %}Side Dishes{% endif %}
             </h2>
             {% if dishes.get('Beilage') or dishes.get('Side Dish') %}
             {% for dish in dishes.get('Beilage', []) or dishes.get('Side Dish', []) %}
@@ -577,17 +661,55 @@
                                 {% if dish.is_top_recommendation_in_course and recommendation_switch %}
                                 <p class="text-xl text-green-600 text-left">
                                     {% if session.get('language') == 'de' %}
-                                    Wir empfehlen Ihnen dieses Hauptgericht basierend auf Ihren persönlichen Vorlieben!
+                                    Wir empfehlen Ihnen diese Beilage basierend auf Ihren persönlichen Vorlieben!
                                     {% else %}
-                                    We recommend this dish to you based on your personal preferences!
+                                    We recommend this side dish to you based on your personal preferences!
                                     {% endif %}
                                 </p>
                                 {% endif %}
                             </div>
                         </div>
-                        {% if selected_mensa == 'all' %}
-                        <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
-                        {% endif %}
+                         <!-- Display location and average rating and score in on row -->
+                         <div class="flex justify-between items-center gap-4">
+                            {% if selected_mensa == 'all' %}
+                            <h3 class="text-sm text-gray-600">
+                                {{ dish.location }}
+                            </h3>
+                            {% else %}
+                            <div class="flex-grow"></div>
+                            {% endif %}
+                        
+                            <!-- Average Rating and Count -->
+                            <div class="p-2 bg-gray-200 text-gray-700 rounded">
+                                <span>
+                                    {% if dish.average_rating is not none %}
+                                    {{ dish.average_rating }}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
+                                    (
+                                    {% if dish.rating_count is not none %}
+                                    {{ dish.rating_count }}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                    )
+                                </span>
+                                <!-- Recommendation Score -->
+                                {% if recommendation_switch %}
+                                <br>
+                                <span>
+                                    {% if session.get('language') == 'de' %}
+                                    Personalisierter Menu Score: {{ dish.recommendation_score }}
+                                    {% else %}
+                                    Personalized menu score: {{ dish.recommendation_score }}
+                                    {% endif %}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
                         <h3 class="card-title menu-line text-2xl font-bold">
                             {% if session.get('language') == 'de' %}
                             {{ dish.menuLine }}
@@ -731,99 +853,10 @@
                                 {% endif %}
                             </p>
                         </div>
-                        <div class="flex gap-2 mb-2">
-                            <button class="description-btn" onclick="toggleDescriptionPopup({{ dish.id }})">{% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}</button>
-                            <div class="popup" id="description-popup-{{ dish.id }}">
-                                <div class="overlay"></div>
-                                <div class="content">
-                                    <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
-                                    {% if session.get('language') == 'de' %}
-                                    {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
-                                    {% else %}
-                                    {{ dish.description_en if dish.description_en else 'No description available' }}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex gap-2 mb-2">
-                            <button class="recipe-btn" onclick="toggleRecipePopup({{ dish.id }})">{% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}</button>
-                            <div class="popup" id="recipe-popup-{{ dish.id }}">
-                                <div class="overlay"></div>
-                                <div class="content">
-                                    <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
-                                    {% if session.get('language') == 'de' and dish.recipe_de %}
-                                    {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
-                                    {% if recipe_parts|length > 1 %}
-                                    <div class="space-y-6">
-                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
-                                        {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
-                                        {% if ingredients_instructions|length > 1 %}
-                                        <div class="mt-4">
-                                            <h5 class="font-medium mb-2">Zutaten:</h5>
-                                            <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
-                                                {% for line in ingredients_instructions[0].split('\n') %}
-                                                {% if line.strip().startswith('-') %}
-                                                <li>{{ line.strip('- ') }}</li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                        <div class="mt-4">
-                                            <h5 class="font-medium mb-2">Anleitung:</h5>
-                                            <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
-                                                {% for line in ingredients_instructions[1].split('\n') %}
-                                                {% if line.strip() and line.strip()[0].isdigit() %}
-                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ol>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    {% else %}
-                                    <p class="text-gray-600">Kein Rezept verfügbar</p>
-                                    {% endif %}
-                                    {% elif dish.recipe_en %}
-                                    {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
-                                    {% if recipe_parts|length > 1 %}
-                                    <div class="space-y-6">
-                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
-                                        {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
-                                        {% if ingredients_instructions|length > 1 %}
-                                        <div class="mt-4">
-                                            <h5 class="font-medium mb-2">Ingredients:</h5>
-                                            <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
-                                                {% for line in ingredients_instructions[0].split('\n') %}
-                                                {% if line.strip().startswith('-') %}
-                                                <li>{{ line.strip('- ') }}</li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ul>
-                                        </div>
-                                        <div class="mt-4">
-                                            <h5 class="font-medium mb-2">Instructions:</h5>
-                                            <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
-                                                {% for line in ingredients_instructions[1].split('\n') %}
-                                                {% if line.strip() and line.strip()[0].isdigit() %}
-                                                <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
-                                                {% endif %}
-                                                {% endfor %}
-                                            </ol>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    {% else %}
-                                    <p class="text-gray-800">No recipe available</p>
-                                    {% endif %}
-                                    {% else %}
-                                    <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex">
+                        
+                        <div class="flex items-center justify-between gap-4">
                             <!-- Ratings -->
-                            <div class="rating mt-4 text-4xl flex justify-end">
+                            <div class="rating text-4xl flex">
                                 <input type="radio" id="star5_{{ dish.id }}" name="rating_{{ dish.id }}" value="5" />
                                 <label for="star5_{{ dish.id }}">&#9733;</label>
                                 <input type="radio" id="star4_{{ dish.id }}" name="rating_{{ dish.id }}" value="4" />
@@ -835,54 +868,16 @@
                                 <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
                                 <label for="star1_{{ dish.id }}">&#9733;</label>
                             </div>
-                        </div>
-                        <div class="flex">
-                            <button class="submit-rating mt-2" data-id="{{ dish.id }}">
+                        
+                            <!-- Submit Rating Button -->
+                            <button class="submit-rating" data-id="{{ dish.id }}">
                                 {% if session.get('language') == 'de' %}
                                 Bewertung senden
                                 {% else %}
                                 Submit Rating
                                 {% endif %}
                             </button>
-                            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
-                                {% if session.get('language') == 'de' %}
-                                Bewertung erhalten!
-                                {% else %}
-                                Rating received!
-                                {% endif %}
-                            </p>
-                        </div>
-                        <div class="flex">
-                            <div class="mt-4 p-2 bg-gray-200 text-gray-700 rounded">
-                                <!-- Average Rating and Count -->
-                                <span>
-                                    {% if dish.average_rating is not none %}
-                                    {{ dish.average_rating }}
-                                    {% else %}
-                                    0
-                                    {% endif %}
-                                    {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
-                                    (
-                                    {% if dish.rating_count is not none %}
-                                    {{ dish.rating_count }}
-                                    {% else %}
-                                    0
-                                    {% endif %}
-                                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
-                                    )
-                                </span>
-                                <!-- Recommendation Score -->
-                                {% if recommendation_switch and course in ['Hauptspeise', 'Main Dish'] %}
-                                <br>
-                                <span>
-                                    {% if session.get('language') == 'de' %}
-                                    Personalisierter Menu Score: {{ dish.recommendation_score }}
-                                    {% else %}
-                                    Personalized menu score: {{ dish.recommendation_score }}
-                                    {% endif %}
-                                </span>
-                                {% endif %}
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -902,10 +897,10 @@
         <!-- Dessert -->
         <div>
             <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
-                {% if session.get('language') == 'de' %}Dessert{% else %}Dessert{% endif %}
+                {% if session.get('language') == 'de' %}Nachspeisen{% else %}Desserts{% endif %}
             </h2>
-            {% if dishes.get('Dessert') %}
-                {% for dish in dishes.get('Dessert', []) %}
+            {% if dishes.get('Dessert') or dishes.get('Nachspeise') %}
+                {% for dish in dishes.get('Nachspeise', []) or dishes.get('Dessert', [])%}
                     <!-- Dish card code here -->
                     <div class="card w-full">
                         <div class="grid items-start w-full p-6">
@@ -916,19 +911,55 @@
                                         {% if dish.is_top_recommendation_in_course and recommendation_switch %}
                                             <p class="text-xl text-green-600 text-left">
                                                 {% if session.get('language') == 'de' %}
-                                                    Wir empfehlen Ihnen dieses Hauptgericht basierend auf Ihren persönlichen Vorlieben!
+                                                    Wir empfehlen Ihnen diese Nachspeise basierend auf Ihren persönlichen Vorlieben!
                                                 {% else %}
-                                                    We recommend this dish to you based on your personal preferences!
+                                                    We recommend this dessert to you based on your personal preferences!
                                                 {% endif %}
                                             </p>
                                         {% endif %}
                                     </div>
                                 </div>
-                                {% if selected_mensa == 'all' %}
-                                <h3 class="text-sm text-gray-600">{{ dish.location }}</h3>
-                                {% endif %}  
-                                <!-- If lang == de then we use in dishes table menuLine, and menu
-                                If lang == en then we use in dishes_eng table menuLineEng and menuEng -->  
+                                <!-- Display location and average rating and score in on row -->
+                                <div class="flex justify-between items-center gap-4">
+                                    {% if selected_mensa == 'all' %}
+                                    <h3 class="text-sm text-gray-600">
+                                        {{ dish.location }}
+                                    </h3>
+                                    {% else %}
+                                    <div class="flex-grow"></div>
+                                    {% endif %}
+
+                                    <!-- Average Rating and Count -->
+                                    <div class="p-2 bg-gray-200 text-gray-700 rounded">
+                                        <span>
+                                            {% if dish.average_rating is not none %}
+                                            {{ dish.average_rating }}
+                                            {% else %}
+                                            0
+                                            {% endif %}
+                                            {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %}
+                                            (
+                                            {% if dish.rating_count is not none %}
+                                            {{ dish.rating_count }}
+                                            {% else %}
+                                            0
+                                            {% endif %}
+                                            {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
+                                            )
+                                        </span>
+                                        <!-- Recommendation Score -->
+                                        {% if recommendation_switch %}
+                                        <br>
+                                        <span>
+                                            {% if session.get('language') == 'de' %}
+                                            Personalisierter Menu Score: {{ dish.recommendation_score }}
+                                            {% else %}
+                                            Personalized menu score: {{ dish.recommendation_score }}
+                                            {% endif %}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>  
                                 <h3 class="card-title menu-line text-2xl font-bold">
                                     {% if session.get('language') == 'de' %}
                                         {{ dish.menuLine }}
@@ -1075,102 +1106,10 @@
                                             {% endif %}
                                     </p>
                                 </div>      
-                                
-                                <div class="flex gap-2 mb-2">
-                                    <button class="description-btn" onclick="toggleDescriptionPopup({{ dish.id }})">{% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}</button>
-                                    <div class="popup" id="description-popup-{{ dish.id }}">
-                                        <div class="overlay"></div>
-                                        <div class="content">
-                                            <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
-                                            {% if session.get('language') == 'de' %}
-                                            {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
-                                            {% else %}
-                                            {{ dish.description_en if dish.description_en else 'No description available' }}
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
     
-                                <div class="flex gap-2 mb-2">
-                                    <button class="recipe-btn" onclick="toggleRecipePopup({{ dish.id }})">{% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}</button>
-                                    <div class="popup" id="recipe-popup-{{ dish.id }}">
-                                        <div class="overlay"></div>
-                                        <div class="content">
-                                            <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
-                                            {% if session.get('language') == 'de' and dish.recipe_de %}
-                                                {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
-                                                {% if recipe_parts|length > 1 %}
-                                                    <div class="space-y-6">
-                                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
-                                                        {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
-                                                        {% if ingredients_instructions|length > 1 %}
-                                                            <div class="mt-4">
-                                                                <h5 class="font-medium mb-2">Zutaten:</h5>
-                                                                <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
-                                                                    {% for line in ingredients_instructions[0].split('\n') %}
-                                                                        {% if line.strip().startswith('-') %}
-                                                                            <li>{{ line.strip('- ') }}</li>
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                </ul>
-                                                            </div>
-                                                            <div class="mt-4">
-                                                                <h5 class="font-medium mb-2">Anleitung:</h5>
-                                                                <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
-                                                                    {% for line in ingredients_instructions[1].split('\n') %}
-                                                                        {% if line.strip() and line.strip()[0].isdigit() %}
-                                                                            <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                </ol>
-                                                            </div>
-                                                        {% endif %}
-                                                    </div>
-                                                {% else %}
-                                                    <p class="text-gray-600">Kein Rezept verfügbar</p>
-                                                {% endif %}
-                                            {% elif dish.recipe_en %}
-                                                {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
-                                                {% if recipe_parts|length > 1 %}
-                                                    <div class="space-y-6">
-                                                        <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
-                                                        {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
-                                                        {% if ingredients_instructions|length > 1 %}
-                                                            <div class="mt-4">
-                                                                <h5 class="font-medium mb-2">Ingredients:</h5>
-                                                                <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
-                                                                    {% for line in ingredients_instructions[0].split('\n') %}
-                                                                        {% if line.strip().startswith('-') %}
-                                                                            <li>{{ line.strip('- ') }}</li>
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                </ul>
-                                                            </div>
-                                                            <div class="mt-4">
-                                                                <h5 class="font-medium mb-2">Instructions:</h5>
-                                                                <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
-                                                                    {% for line in ingredients_instructions[1].split('\n') %}
-                                                                        {% if line.strip() and line.strip()[0].isdigit() %}
-                                                                            <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
-                                                                        {% endif %}
-                                                                    {% endfor %}
-                                                                </ol>
-                                                            </div>
-                                                        {% endif %}
-                                                    </div>
-                                                {% else %}
-                                                    <p class="text-gray-800">No recipe available</p>
-                                                {% endif %}
-                                            {% else %}
-                                                <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-    
-                                <div class="flex">
+                                <div class="flex items-center justify-between gap-4">
                                     <!-- Ratings -->
-                                    <div class="rating mt-4 text-4xl flex justify-end">
+                                    <div class="rating text-4xl flex">
                                         <input type="radio" id="star5_{{ dish.id }}" name="rating_{{ dish.id }}" value="5" />
                                         <label for="star5_{{ dish.id }}">&#9733;</label>
                                         <input type="radio" id="star4_{{ dish.id }}" name="rating_{{ dish.id }}" value="4" />
@@ -1182,59 +1121,18 @@
                                         <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
                                         <label for="star1_{{ dish.id }}">&#9733;</label>
                                     </div>
-                                </div> 
-    
-                                <div class="flex">
-                                    <button class="submit-rating mt-2" data-id="{{ dish.id }}">
-                                    {% if session.get('language') == 'de' %}
-                                        Bewertung senden
-                                    {% else %}
-                                        Submit Rating
-                                    {% endif %}
-                                    </button>
-                                    <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                                
+                                    <!-- Submit Rating Button -->
+                                    <button class="submit-rating" data-id="{{ dish.id }}">
                                         {% if session.get('language') == 'de' %}
-                                            Bewertung erhalten!
+                                        Bewertung senden
                                         {% else %}
-                                            Rating received!
+                                        Submit Rating
                                         {% endif %}
-                                    </p>
+                                    </button>
+        
                                 </div>
-    
-                                <div class="flex">
-                                    <div class="mt-4 p-2 bg-gray-200 text-gray-700 rounded">
-                                        <!-- Average Rating and Count -->
-                                        <span>
-                                            {% if dish.average_rating is not none %}
-                                                {{ dish.average_rating }}
-                                            {% else %}
-                                                0
-                                            {% endif %} 
-                                            {% if session.get('language') == 'de' %}Sterne{% else %}Stars{% endif %} 
-    
-                                            (
-                                            {% if dish.rating_count is not none %}
-                                                {{ dish.rating_count }}
-                                            {% else %}
-                                                0
-                                            {% endif %}
-                                            {% if session.get('language') == 'de' %}Bewertungen{% else %}Ratings{% endif %}
-                                            )
-                                        </span>
-                                        <!-- Recommendation Score -->
-                                        {% if recommendation_switch and course in ['Hauptspeise', 'Main Dish'] %}
-                                            <br> 
-                                            <span>
-                                                {% if session.get('language') == 'de' %}
-                                                    Personalisierter Menu Score: {{ dish.recommendation_score }}
-                                                {% else %}
-                                                    Personalized menu score: {{ dish.recommendation_score }}
-                                                {% endif %}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                        </div>       
+                            </div>       
                         </div>
                     </div>
                 {% endfor %}

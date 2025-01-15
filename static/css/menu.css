@@ -155,7 +155,7 @@ p {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin-bottom: 20px;
-  height: 900px; /* Set a fixed height */
+  height: auto; /* Set a fixed height */
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* Distribute space between elements */
@@ -360,6 +360,7 @@ input:checked + .slider:before {
   border-radius: 8px; /* Rounded corners */
   cursor: pointer; /* Pointer cursor on hover */
   font-size: 16px; /* Adjust font size */
+  margin-left: 20px;
 }
 
 
@@ -469,4 +470,26 @@ input:checked + .slider:before {
 
 .recipe-btn:hover {
   background-color: #161894;
+}
+
+
+ /* Submit rating button styling */
+.submit-rating {
+  background-color: white; /* Set background to white */
+  color: black; /* Set text color to black */
+  padding: 12px 24px; /* Adjust padding for size */
+  border-radius: 8px; /* Rounded corners */
+  font-weight: 500; /* Slightly bold font */
+  transition: all 0.3s ease; /* Smooth transitions for hover */
+  border: 2px solid #6366F1; /* Blue border with 2px thickness */
+  white-space: nowrap; /* Prevent text wrapping */
+  min-width: 150px; /* Ensure minimum button width */
+  text-align: center; /* Center-align the text */
+  cursor: pointer; /* Show pointer on hover */
+}
+
+.submit-rating:hover {
+  background-color: #E6F0FF; /* Light blue background on hover */
+  color: black; /* Keep text black */
+  border-color: #3F42C8; /* Darker blue border on hover */
 }
