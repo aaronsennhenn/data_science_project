@@ -333,7 +333,7 @@ def menu():
                         'embedding':dish[10],
                         'average_rating':dish[11] or 0, # zero if dish is not rated yet
                         'rating_count':dish[12] or 0, # zero if is not rated yet 
-                        'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
+                        'recommendation_score': compute_cosine_similarity(user_vector, dish[10]) if user_vector and dish[10] is not None else 0,
                         'is_top_recommendation_in_course': False  # Initialize to False
                         })
         
