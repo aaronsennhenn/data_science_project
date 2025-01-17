@@ -425,7 +425,7 @@
                                 {% else %}
                                 Student Price:
                                 {% endif %}
-                                {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
+                                {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPriceFormatted }} € {% endif %}
                             </div>
                             {% endif %}
                             {% if selected_price == 'guestPrice' %}
@@ -435,7 +435,7 @@
                                 {% else %}
                                 Guest Price:
                                 {% endif %}
-                                {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
+                                {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPriceFormatted }} € {% endif %}
                             </div>
                             {% endif %}
                         </div>
@@ -773,7 +773,7 @@
                                 {% else %}
                                 Student Price:
                                 {% endif %}
-                                {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
+                                {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPriceFormatted }} € {% endif %}
                             </div>
                             {% endif %}
                             {% if selected_price == 'guestPrice' %}
@@ -783,7 +783,7 @@
                                 {% else %}
                                 Guest Price:
                                 {% endif %}
-                                {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
+                                {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPriceFormatted }} € {% endif %}
                             </div>
                             {% endif %}
                         </div>
@@ -1016,7 +1016,7 @@
                                             {% else %}
                                                 Student Price: 
                                             {% endif %}
-                                            {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPrice }} € {% endif %}
+                                            {% if dish.studentPrice == -1 %} / {% else %} {{ dish.studentPriceFormatted }} € {% endif %}
                                         </div>
                                         {% endif %}
                                         {% if selected_price == 'guestPrice' %}
@@ -1026,7 +1026,7 @@
                                             {% else %}
                                                 Guest Price: 
                                             {% endif %}
-                                            {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPrice }} € {% endif %}
+                                            {% if dish.guestPrice == -1 %} / {% else %} {{ dish.guestPriceFormatted }} € {% endif %}
                                         </div>
                                         {% endif %}
                                 </div> 

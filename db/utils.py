@@ -176,3 +176,7 @@ def impute_missing_prices(df,price_column):
 
     return pd.concat([regress_df,majvot_df])
 
+
+#Price formatting to 
+def format_price(price):
+    return f"{price:,.2f}".replace('.', ',')
