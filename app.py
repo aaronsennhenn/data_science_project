@@ -263,6 +263,7 @@ def menu():
         price_switch = None
         rating_count_switch = None
         rating_switch = None
+        
 
         # if user is logged in, get user_id
         user_name = session.get('username')
@@ -334,7 +335,9 @@ def menu():
                         'average_rating':dish[11] or 0, # zero if dish is not rated yet
                         'rating_count':dish[12] or 0, # zero if is not rated yet 
                         'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
-                        'is_top_recommendation_in_course': False  # Initialize to False
+                        'is_top_recommendation_in_course': False,  # Initialize to False
+                        "studentPrice_imputed":dish[13],
+                        "guestPrice_imputed":dish[14]
                         })
         
         # Implement sorting based on switches

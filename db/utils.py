@@ -8,6 +8,10 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.compose import ColumnTransformer
 from pandas.api.types import is_datetime64_any_dtype
 from scipy.stats import mode
+import warnings
+
+warnings.simplefilter(action='ignore', category=UserWarning)
+warnings.simplefilter(action='ignore', category=pd.errors.SettingWithCopyWarning)
 
 
 def translate_text_all_capitalized(text: str) -> str:

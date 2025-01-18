@@ -83,10 +83,12 @@ def update_FiltersClean():
 
     with Session() as db_session:
         write_to_filters_clean(dish,engine,db_session)
+    print("FiltersClean is updated")
 
 def update_Course():
     with Session() as db_session:
         write_to_course(engine,db_session)
+    print("Course is updated")
 
 def update_embeddings():
     df = load_dishes_table_for_filter_cleaning(Session,"Embedding")
@@ -97,6 +99,7 @@ def update_embeddings():
     with Session() as db_session:
         embeddings_df = embedding_extraction(df, 'menu')
         write_to_embedding(embeddings_df, engine, db_session)
+    print("Embedding is updated")
 
 def update_description():
     df = load_dishes_table_for_filter_cleaning(Session,"Description")
@@ -107,6 +110,7 @@ def update_description():
     with Session() as db_session:
         description_df = generate_description(df, 'menu','menuLine')
         write_to_description(description_df,engine,db_session)
+    print("Description is updated")
 
 def update_taste():
     df = load_dishes_table_for_filter_cleaning(Session,"Taste")
@@ -117,6 +121,7 @@ def update_taste():
     with Session() as db_session:
         taste_df = classify_dish_taste(df, 'menu')
         write_to_taste(taste_df, engine,db_session)
+    print("Taste is updated")
 
 def update_recipe():
     df = load_dishes_table_for_filter_cleaning(Session,"Recipe")
@@ -127,6 +132,7 @@ def update_recipe():
     with Session() as db_session:
         recipe_df = generate_recipe(df, 'menu', 'menuLine')
         write_to_recipe(recipe_df, engine,db_session)
+    print("Recipe is updated")
 
 def update_ingredients():
     df = load_dishes_table_for_filter_cleaning(Session,"Ingredient")
@@ -137,7 +143,7 @@ def update_ingredients():
     with Session() as db_session:
         ingredients_df = ingredient_extraction(df, 'menu')
         write_to_ingredient(ingredients_df, engine,db_session)
-
+    print("Ingredients is updated")
 
 def update_cleanprices():
 
@@ -147,7 +153,7 @@ def update_cleanprices():
     with Session() as db_session:
         write_imputed_price_to_filtersclean(impute_studentPrice,db_session,"studentPrice",engine)
         write_imputed_price_to_filtersclean(impute_guestPrice,db_session,"guestPrice",engine)
-
+    print("Prices are updated")
 
 if __name__ == "__main__":
     update_FiltersClean()

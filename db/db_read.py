@@ -89,6 +89,8 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
 
     )
 
+    query = query.outerjoin(PriceClean, Dish.id == PriceClean.menu_id).add_columns(PriceClean.studentPrice_imputed,PriceClean.guestPrice_imputed)
+
     return query.all()
 
 def get_random_dishes(selected_date, lang, user_name, db_session: Session):
