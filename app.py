@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
 import json
-from db.utils import compute_cosine_similarity
+from db.utils import compute_cosine_similarity, format_price
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
@@ -309,7 +309,7 @@ def menu():
 
         # filter dishes column and merge additional information. Also apply filter of the user directly in the sql query
         dishes = get_dishes_by_date_location_filtered(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name, selected_diet_meat, session.get('language'))
-
+        
         menu_data = []
 
         for dish in dishes:
@@ -319,6 +319,8 @@ def menu():
                         'menuLine': dish[0].menuLine,
                         'studentPrice': dish[0].studentPrice,
                         'guestPrice': dish[0].guestPrice,
+                        'studentPriceFormatted': format_price(dish[0].studentPrice),  # Formatted for display
+                        'guestPriceFormatted': format_price(dish[0].guestPrice),      # Formatted for display
                         'allergens': dish[0].allergens,
                         'additives': dish[0].additives,
                         'location': dish[0].location,
