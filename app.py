@@ -164,6 +164,8 @@ def user_page():
     user_name = session.get('username')
     if not user_name:
         return redirect(url_for('login'))
+    
+    # if not user_vector -> auf rating page umleiten
 
     db_session = Session()
     try:
@@ -251,7 +253,7 @@ def menu():
         additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng  = get_written_forms(db_session)
  
         # set default values
-        mensa_name = 'all'  # Changed default to 'all' to show dishes of all mensas
+        mensa_name = request.args.get('selected_mensa', 'all')  # Changed default to 'all'
         today = datetime.now().date()
         available_dates = [(today + timedelta(days=x)).strftime('%Y-%m-%d') for x in range(5)]
         date = today.strftime('%Y-%m-%d')
