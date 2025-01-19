@@ -368,9 +368,15 @@ def menu():
                 # Find the dish with the highest recommendation score
                 top_dish = max(dishes, key=lambda x: x['recommendation_score'])
                 
-                # Set the flag only for the top dish in the current course
-                for dish in dishes:
-                    dish['is_top_recommendation_in_course'] = dish == top_dish
+                # Check if the highest recommendation score is greater than 0
+                if top_dish['recommendation_score'] > 0:
+                    # Set the flag only for the top dish in the current course
+                    for dish in dishes:
+                        dish['is_top_recommendation_in_course'] = dish == top_dish
+                else:
+                    # If the top dish has a score of 0 or less, do not set any flag
+                    for dish in dishes:
+                        dish['is_top_recommendation_in_course'] = False
 
         # Check for no results after filtering
         if not grouped_menu_data:

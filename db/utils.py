@@ -9,6 +9,7 @@ from sklearn.compose import ColumnTransformer
 from pandas.api.types import is_datetime64_any_dtype
 from scipy.stats import mode
 import warnings
+import ast
 
 warnings.simplefilter(action='ignore', category=UserWarning)
 warnings.simplefilter(action='ignore', category=pd.errors.SettingWithCopyWarning)
@@ -37,12 +38,19 @@ def compute_cosine_similarity(user_vector_str, dish_embedding_str):
     Returns:
         float: The cosine similarity score between the user vector and the dish embedding.
     """
-    # Convert string inputs to NumPy arrays
-    user_vector = np.array(eval(user_vector_str))
-    dish_embedding = np.array(eval(dish_embedding_str))
 
-    # Compute cosine similarity
-    score = cosine_similarity(user_vector.reshape(1, -1), dish_embedding.reshape(1, -1))[0, 0]
+    if user_vector_str:
+
+        # Convert string inputs to NumPy arrays
+        user_vector = np.array(ast.literal_eval(user_vector_str))
+        dish_embedding = np.array(ast.literal_eval(dish_embedding_str))
+
+        # Compute cosine similarity
+        score = cosine_similarity(user_vector.reshape(1, -1), dish_embedding.reshape(1, -1))[0, 0]
+
+    else:
+        # return 0 if user vector is empty
+        score = 0
 
     return round(score,3)
 
