@@ -9,6 +9,8 @@
     <link href="{{ url_for('static', filename='css/analysis.css') }}" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="{{ url_for('static', filename='css/user.css') }}" rel="stylesheet">
+
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
@@ -157,6 +159,59 @@
         </div>
     </div>
 </section>
+
+<h1>Your Weekly Dining Schedule</h1>
+<div class="grid-container">
+    <!-- Headers for days -->
+    <div class="grid-row">
+        <div class="header"></div> <!-- Empty header for the first column -->
+        {% for day in dishes.keys() %}
+            <div class="header">{{ day }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- German -->
+    {% set language = session.get('language') %}
+    {% if language == "de" %}
+        {% set course_types = ['Hauptspeise', 'Beilage', 'Nachspeise'] %}
+        {% for course in course_types %}
+            <div class="grid-row">
+                <!-- Column for the course name -->
+                <div class="dish-box">{{ course }}</div>
+                <!-- Columns for each day -->
+                {% for day, course_dishes in dishes.items() %}
+                    <div class="dish-box">
+                        {% for dish in course_dishes %}
+                            {% if dish.course == course %}
+                                {{dish.location}} <br> {{ dish.menu }} <br> Studentenpreis: {{ dish.studentPrice }} € <br> Menu Score: {{ dish.cosine_similarity }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    <!-- English -->
+    {% else %}
+        {% set course_types = ['Main Dish', 'Side Dish', 'Dessert'] %}
+        {% for course in course_types %}
+            <div class="grid-row">
+                <!-- Column for the course name -->
+                <div class="dish-box">{{ course }}</div>
+                <!-- Columns for each day -->
+                {% for day, course_dishes in dishes.items() %}
+                    <div class="dish-box">
+                        {% for dish in course_dishes %}
+                            {% if dish.course_eng == course %}
+                                {{dish.location}} <br> {{ dish.menuEng }} <br> Student Price: {{ dish.studentPrice }} € <br> Menu Score: {{ dish.cosine_similarity }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
 
    
 </main>

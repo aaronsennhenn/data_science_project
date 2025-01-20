@@ -104,7 +104,7 @@
             {% if session.get('language') == 'de' %}
                 Wählen Sie Ihr Menü nach Ihren Vorlieben!
             {% else %}
-                Choose your menu based on your preferences!
+                <!-- Choose your menu based on your preferences! -->
             {% endif %}
         </h2>
         <form action="{{ url_for('menu') }}" method="POST" class="flex flex-wrap gap-4" id="filter-form">

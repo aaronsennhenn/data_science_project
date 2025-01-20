@@ -1,0 +1,21 @@
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 6 equal-width columns */
+    gap: 10px;
+}
+
+.grid-row {
+    display: contents; /* Allow rows to span multiple columns */
+}
+
+.header, .dish-box {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+}
+
+.header {
+    font-weight: bold;
+    background-color: #e0e0e0;
+}

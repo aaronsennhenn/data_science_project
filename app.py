@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import os
 from secret import *
 from db.db_write import update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user
-from db.db_read import get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas, compute_tasteprofile_similiarity_by_uservector
+from db.db_read import get_weekday_dates,get_week_recommended_dishes,get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_dishes_of_user, get_favorite_mensas_of_user,get_unique_mensas, compute_tasteprofile_similiarity_by_uservector
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime, timedelta
 import plotly
@@ -16,6 +16,7 @@ from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
 from charts.plotly import generate_price_chart, create_taste_radarchart
+import pandas as pd
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -213,6 +214,45 @@ def user_page():
         country_chart = create_taste_radarchart(cluster_df.iloc[:-3], 'cluster_name', 'scaled')
         regional_chart = create_taste_radarchart(cluster_df.iloc[-3:], 'cluster_name', 'scaled')
 
+        
+        # get dishes for the week and compute user vector with user_name
+        df = get_week_recommended_dishes(db_session, get_weekday_dates(), user_name, lang)
+
+        # add day of week to dataframe
+        day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+        course_order = ['Hauptspeise', 'Beilage', 'Nachspeise']
+
+        df['day_of_week'] = pd.Categorical(
+            pd.to_datetime(df['Dish'].apply(lambda x: x.menuDate)).dt.day_name(),
+            categories=day_order,
+            ordered=True
+        )
+        df['course'] = pd.Categorical(
+            df['course'],
+            categories=course_order,
+            ordered=True
+        )
+
+        df.drop(columns=["Dish"], inplace=True)
+
+
+        # Get top dish for each day and course
+        top_dishes = (
+            df.sort_values('cosine_similarity', ascending=False)  # Sort by similarity first
+            .groupby(["day_of_week", "course"], group_keys=False)  # Group without adding levels
+            .head(1)  # Take top dish per group
+        )
+
+        # Organize the final result into a dictionary by day
+        top_dishes.sort_values(["day_of_week", "course"], inplace=True)
+        grouped_menu_data = {
+                        day: top_dishes[top_dishes["day_of_week"] == day]
+                        .to_dict(orient="records")
+                        for day in top_dishes["day_of_week"].unique()
+                    }
+
+        
+
     finally:
         db_session.close()
 
@@ -225,7 +265,8 @@ def user_page():
                            mensa_user_chart=mensa_user_chart,
                            dish_user_chart=dish_user_chart,
                            country_chart = country_chart,
-                           regional_chart=regional_chart)
+                           regional_chart=regional_chart,
+                           dishes=grouped_menu_data)
 
 @app.route('/rating')
 def rating():
@@ -241,6 +282,8 @@ def rating():
         
         random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(), lang, user_name, db_session)  # Assuming you have a function to get a random dish
         return render_template('rating.html', username=username, random_dish=random_dish)  # Pass username to the template
+    
+
 
 @app.route('/menu', methods=['GET','POST'])
 def menu():
