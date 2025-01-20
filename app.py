@@ -106,7 +106,7 @@ def register():
         write_to_user(username, password, engine, Session)
         
         session['username'] = username
-        return redirect(url_for('menu'))
+        return redirect(url_for('rating'))
 
 
 # login for google
