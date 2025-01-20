@@ -253,6 +253,20 @@ def write_to_rating(menu_id: int, rating: int, user_name: int, on_rating_page: b
         # Commit the changes
         db_session.commit()
 
+def remove_rating(menu_id, user_name, engine, Session):
+    Rating.metadata.create_all(engine)
+
+    with Session() as db_session:
+        # Check if the user already gave a rating for the menu_id
+        existing_rating = db_session.query(Rating).filter_by(menu_id=menu_id, user_name=user_name).first()
+
+        if existing_rating:
+            # Remove the existing rating
+            db_session.delete(existing_rating)
+
+        # Commit the changes
+        db_session.commit()
+
 def write_to_filters_clean(icons_df: pd.DataFrame, engine, session):
     FiltersClean.metadata.create_all(engine) 
 

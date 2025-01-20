@@ -543,6 +543,22 @@ def get_favorite_dishes_of_user(session: Session, username: str, lang: str = 'en
 
     return [(dish.menuEng if lang == 'en' and dish.menuEng else dish.menu, round(dish.avg_rating, 2)) for dish in favorite_dishes]
 
+def get_dishes_of_user(session: Session, username: str):
+    rated_dishes = session.query(
+        Dish.id,
+        Dish.menu,
+        DishEng.menuEng,
+        Rating.rating
+    ).join(Rating, Dish.id == Rating.menu_id
+    ).outerjoin(DishEng, Dish.id == DishEng.menu_id
+    ).filter(Rating.user_name == username
+    ).order_by(Rating.rating.desc()
+    ).all()
+
+    menu_list = [{"menu_id": item[0],"menu":item[1],"menuEng": item[2], "rating": item[3]} for item in rated_dishes]
+
+    return menu_list
+
 # Get favorite mensas (top 3) of user over entire period
 def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3) -> List[Tuple[str, float]]:
     favorite_mensas = session.query(
@@ -612,19 +628,6 @@ def get_combined_dishes(db_session: Session):
     return df
 
 
-
-def compute_tasteprofile_similiarity_by_uservector(session: Session, username: str):
-    user_vector_query = session.query(User.user_vector).filter(User.username == username).first()
-    user_vector_str = user_vector_query[0]
-    df = pd.read_csv(r'static\csv\tasteprofile_static.csv') #load static embeddings for tastelabels
-    similarity_scores =[]
-    
-    for dish_embedding_str in df['gpt_embedding']:
-        score = compute_cosine_similarity(user_vector_str, dish_embedding_str)
-        similarity_scores.append(score)       
-    df['similarity'] = similarity_scores
-        
-    return df
 
 
 def get_embedding_cluster(db_session):

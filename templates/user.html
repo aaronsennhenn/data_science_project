@@ -10,6 +10,8 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="{{ url_for('static', filename='css/user.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', filename='js/user.js') }}" defer></script>
+
 
 </head>
 
@@ -118,20 +120,43 @@
         </div>
     </section>
     <section class="mb-12 w-full">
-    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre Favoriten{% else %}Your Favorites{% endif %}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-4 bg-gray-50 rounded-lg w-full">
-                <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Deine Lieblingsmensen{% else %}Your Favorite Mensas{% endif %}</h4>
-                <div id="top-mensa-user-chart" style="width: 100%; height: 300px;"></div>
-            </div>
-            <div class="p-4 bg-gray-50 rounded-lg w-full">
-                <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Deine Liebglingsmenüs{% else %}Your Favorite Dishes{% endif %}</h4>
-                <div id="top-dishes-user-chart" style="width: 100%; height: 300px;"></div>
-            </div>
-        </div>  
-    </div>       
-</section>
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">
+                {% if session.get('language') == 'de' %}Ihre Favoriten{% else %}Your Favorites{% endif %}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded-lg w-full">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">
+                        {% if session.get('language') == 'de' %}Deine Lieblingsmensen{% else %}Your Favorite Mensas{% endif %}
+                    </h4>
+                    <div id="top-mensa-user-chart" style="width: 100%; height: 300px;"></div>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-lg w-full max-h-96 overflow-y-auto">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-2">
+                        {% if session.get('language') == 'de' %}Deine Bewertungen{% else %}Your Rated Dishes{% endif %}
+                    </h4>
+                    <div class="rated-dishes-container">
+                        {% for dish in rated_dishes %}
+                            <div class="dish-rating mb-2 p-2 bg-white border border-gray-300 rounded relative">
+                                <!-- Cross button -->
+                                <button class="remove-dish-button absolute top-2 right-2 text-gray-600" data-id="{{ dish.menu_id }}">
+                                    ×
+                                </button>
+                                
+                                <p>
+                                    {% if session.get('language') == 'de' %}Gericht:{% else %}Dish:{% endif %} {{ dish.menu }}
+                                </p>
+                                <p>
+                                    {% if session.get('language') == 'de' %}Bewertung:{% else %}Rating:{% endif %} {{ dish.rating }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>  
+        </div>       
+    </section>
+    
 
 
 <!-- Radar Chart Section for Taste Profile -->
@@ -225,7 +250,6 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script>
         Plotly.newPlot('top-mensa-user-chart', {{ mensa_user_chart | safe }}.data, {{ mensa_user_chart | safe }}.layout);
-        Plotly.newPlot('top-dishes-user-chart', {{ dish_user_chart | safe }}.data, {{ dish_user_chart | safe }}.layout);
     </script>
     <script>
             const menuToggle = document.getElementById('menu-toggle');
