@@ -70,6 +70,11 @@ h1 {
     cursor: pointer;
 }
 
+/* Change color of mensa-label on hover */
+.mensa-label:hover {
+    background-color: #e9ecef; 
+}
+
 /* Close button */
 .close-menu:hover {
     cursor: pointer;

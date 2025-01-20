@@ -71,8 +71,8 @@
                 <a href="/rating" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}
                 </a>
-                <a href="/about" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
-                    {% if session.get('language') == 'de' %}Über uns{% else %}About{% endif %}
+                <a href="/navigation" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Navigation{% else %}Navigation{% endif %}
                 </a>
                 {% if username %}
                 <a href="/user" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">{% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}</a> 

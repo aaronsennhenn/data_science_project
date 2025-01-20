@@ -64,13 +64,13 @@ def index():
     }
     return render_template('index.html', username=user_name, mensa_coordinates=mensa_coordinates)
 
-@app.route('/about')
-def about():
+@app.route('/navigation')
+def navigation():
    lang = session.get('language', 'en')
    session['language'] = lang
    session.permanent = True
    username = session.get('username')  # Get the username from the session
-   return render_template('about.html', username=username)  # Pass username to the template
+   return render_template('navigation.html', username=username)  # Pass username to the template
                                    
 # check username and password that user puts into form with db
 @app.route('/login', methods=['GET', 'POST'])
