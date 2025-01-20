@@ -72,7 +72,8 @@ h1 {
 
 /* Change color of mensa-label on hover */
 .mensa-label:hover {
-    background-color: #e9ecef; 
+    color: white; 
+    background-color: #6366F1; 
 }
 
 /* Close button */
