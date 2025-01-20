@@ -654,3 +654,57 @@ def get_cluster_similarity(db_session,user_name):
 
 
     return centroid_df
+
+
+def get_week_recommended_dishes(db_session, week_dates, user_name, selected_lang):
+
+    # get dishes for the week
+    query = db_session.query(Dish).filter(
+        Dish.menuDate.in_(week_dates),
+        Dish.menu != "NA"
+    )
+
+    # Join additional tables
+    query = (
+        query
+        .outerjoin(FiltersClean, Dish.id == FiltersClean.menu_id)
+        .outerjoin(Recipe, Dish.id == Recipe.menu_id)
+        .outerjoin(Description, Dish.id == Description.menu_id)
+        .outerjoin(DishEng, Dish.id == DishEng.menu_id)
+        .outerjoin(Course, Dish.id == Course.menu_id)
+        .outerjoin(Embedding, Dish.id == Embedding.menu_id)
+        .outerjoin(PriceClean, Dish.id == PriceClean.menu_id)
+        .add_columns(
+            Dish.id,Dish.menu,Dish.menuLine,Dish.studentPrice,Dish.guestPrice,Dish.allergens,Dish.additives,Dish.location,
+            FiltersClean.icons_clean.label("icons_clean"),
+            Recipe.recipe_de,
+            Description.description_de,
+            Embedding.embedding,
+            Course.course,
+            PriceClean.studentPrice_imputed,
+            PriceClean.guestPrice_imputed,
+            *( 
+                [DishEng.menuLineEng, DishEng.menuEng, Description.description_en, Recipe.recipe_en, Course.course_eng]
+                if selected_lang == "en" else []
+            )
+        )
+    )
+    # Convert to DataFrame
+    df = pd.DataFrame(query.all())
+
+    # get user vector
+    user_vector = get_user_vector(user_name, db_session)
+
+    # Compute cosine similarity if user vector exists
+    if user_vector:
+        df["cosine_similarity"] = df["embedding"].apply(lambda x: compute_cosine_similarity(x, user_vector))
+
+    return df
+
+
+def get_weekday_dates():
+    today = datetime.today()
+    start_of_week = today - timedelta(days=today.weekday())  # Get Monday of the current week
+
+    weekdays = [(start_of_week + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]  # Monday to Friday
+    return weekdays
