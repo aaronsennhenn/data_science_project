@@ -22,6 +22,7 @@ def convert_dblist_to_df(db_list):
 def get_user_by_username(session: Session, username: str):
     return session.query(User).filter_by(username=username).first()
 
+
 def get_all_dishes(session: Session) -> List[Dish]:
     return session.query(Dish).all()
 
@@ -99,26 +100,31 @@ def get_random_dishes(selected_date, lang, user_name, db_session: Session):
     # Query one random main dish that has not been rated by the user yet and is not on the selected date
     if lang == "de":
         query = (
-            select(Dish.id, Dish.menu)
+            select(Dish.id, Dish.menu, Dish.studentPrice,Dish.guestPrice)
             .outerjoin(Rating, (Dish.id == Rating.menu_id) & (Rating.user_name == user_name))
             .outerjoin(Course, Course.menu_id == Dish.id)
             .where(Rating.menu_id == None,
                 Dish.menuDate != selected_date,
                 Course.course == "Hauptspeise",
-                Dish.menu != None
+                Dish.menu != "NA",
+                Dish.studentPrice > 0,
+                Dish.guestPrice > 0
             )
             .order_by(func.random())
             .limit(1)  # Limit to 1 random dish
         )
     else:
         query = (
-            select(DishEng.menu_id, DishEng.menuEng)
+            select(DishEng.menu_id, DishEng.menuEng,Dish.studentPrice,Dish.guestPrice)
+            .outerjoin(Dish, Dish.id == DishEng.menu_id)
             .outerjoin(Rating, (DishEng.menu_id == Rating.menu_id) & (Rating.user_name == user_name))
             .outerjoin(Course, Course.menu_id == DishEng.menu_id)
             .where(Rating.menu_id == None,
                 DishEng.menuDate != selected_date,
                 Course.course_eng == "Main Dish",
-                DishEng.menuEng != None
+                DishEng.menuEng != "N/a",
+                Dish.studentPrice > 0,
+                Dish.guestPrice > 0
             )
             .order_by(func.random())
             .limit(1)  # Limit to 1 random dish

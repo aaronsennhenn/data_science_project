@@ -254,219 +254,32 @@ body {
       overflow: hidden;
   }
   
-  .expanded {
-      height: auto !important;
-  }
-  
-  .expand-button {
-      background-color: #f3f4f6;
-      border: none;
-      padding: 4px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-  }
-  
-  .expand-button:hover {
-      background-color: #e5e7eb;
-  }
-  
-   /* The switch - the box around the slider */
-   .switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
-    max-width: 60px; /* Ensures it doesn't stretch */
-    box-sizing: border-box; /* Avoids extra padding issues */
-  }
-  
-  /* Hide default HTML checkbox */
-  .switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  
-  /* The slider */
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    -webkit-transition: .4s;
-    transition: .4s;
-    box-sizing: border-box; /* Ensures dimensions stay consistent */
-  }
-  
-  .slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
-  }
-  
-  input:checked + .slider {
-    background-color: #2196F3;
-  }
-  
-  input:focus + .slider {
-    box-shadow: 0 0 1px #2196F3;
-  }
-  
-  input:checked + .slider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
-  }
-  
-  /* Rounded sliders */
-  .slider.round {
-    border-radius: 34px;
-  }
-  
-  .slider.round:before {
-    border-radius: 50%;
-  }
-  
-  /* Responsive design adjustments */
-  @media (max-width: 768px) {
-    .switch {
-        width: 40px;
-        height: 24px;
-    }
-  
-    .slider:before {
-        height: 20px;
-        width: 20px;
-    }
-  }
-  
-  /* Rate Dishes Button */
-  .rate-dishes-btn {
-    display: block; /* Ensures it behaves like a block element */
-    padding: 12px 24px; /* Adds padding around the text */
-    background-color: #6366F1; /* Green background color */
-    color: white; /* White text */
-    border: none; /* Removes default border */
-    border-radius: 8px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    font-size: 16px; /* Adjust font size */
-  }
-  
-  
-  /* Hover Effect */
-  .rate-dishes-btn:hover {
-    background-color: #3F42C8; /* Darker green for hover effect */
-  }
-  
-  
-  .rate-more-dishes-button {
-    padding: 12px 6px; /* Adds padding around the text */
-    background-color: #6366F1; 
-    color: white; /* White text */
-    border: none; /* Removes default border */
-    border-radius: 8px; /* Rounded corners */
-    cursor: pointer; /* Pointer cursor on hover */
-    font-size: 14px; /* Adjust font size */
-  }
-  
-  .rate-more-dishes-button:hover {
-    background-color: #3F42C8;
-  }
-  .popup {
-    position: absolute; /* Position the popup absolutely within its container */
-    display: none; /* Hide the popup by default */
-    z-index: 2; /* Ensure it appears above other content */
-  }
-  
-  .popup .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none; /* Hide the overlay by default */
-  }
-  
-  .popup .content {
-    position: relative; /* Position the content relative to the popup */
-    background: white;
-    width: 450px;
-    max-height: 80vh; /* Set a maximum height to ensure it doesn't overflow the viewport */
-    overflow-y: auto; /* Enable vertical scrolling if content exceeds max-height */
-    text-align: left;
-    padding: 20px;
-    box-sizing: border-box;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .popup .close-btn {
-    cursor: pointer;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 30px;
-    background: #222;
-    color: #fff;
-    font-size: 25px;
-    font-weight: 600;
-    line-height: 30px;
-    text-align: center;
-    border-radius: 50%;
-  }
-  
-  .popup.active {
-    display: block; /* Show the popup when active */
-  }
-  
-  .popup.active .overlay {
-    display: block; /* Show the overlay when active */
-  }
-  
-  .popup.active .content {
-    transition: all 300ms ease-in-out;
-  }
-  
-  /* Description Button */
-  .description-btn {
-    display: block;
-    padding: 12px 24px;
-    background-color: #1B1EAF;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    width: 200px;
-  }
-  
-  .description-btn:hover {
-    background-color: #161894;
-  }
-  
-  /* Recipe Button */
-  .recipe-btn {
-    display: block;
-    padding: 12px 24px;
-    background-color:  #1B1EAF;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    width: 200px;
-  }
-  
-  .recipe-btn:hover {
-    background-color: #161894;
-  }
+
+  .rate-dishes-section {
+    border: 2px solid black; /* Black border */
+    padding: 16px; /* Add padding inside the section */
+    margin-top: 16px; /* Optional: Add space above the section */
+    width: 600px; /* Set a fixed width */
+    height: 350px; /* Set a fixed height */
+    overflow-y: auto; /* Add a vertical scrollbar if content overflows */
+    box-sizing: border-box; /* Ensure padding is included in the width/height */
+}
+
+.rate-dishes-section .content {
+    text-align: left; /* Left-align text */
+    word-wrap: break-word; /* Ensure long words break properly */
+    overflow-wrap: break-word; /* For compatibility */
+}
+
+.rating-count.red {
+    color: red; /* Red color for counts below 5 */
+}
+
+.rating-count.green {
+    color: green; /* Green color for counts 5 or above */
+}
+
+.rate-more {
+    color: red; /* Red color for "Rate more dishes" message */
+    margin-top: 8px; /* Add space above the message */
+}

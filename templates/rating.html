@@ -92,64 +92,91 @@
             <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}</h1>
             <p class="text-gray-600 text-center">
                 {% if session.get('language') == 'de' %}
-                    Erfahre alles über Bewertungen oder bewerte selbst Gerichte und Mensen in Tübingen!
+                    Bitte bewerten Sie die Gerichte, um die Qualität der Empfehlungen zu verbessern.
                 {% else %}
-                    Learn all about ratings or rate the dishes and cafeterias in Tübingen yourself!
+                    Please rate the dishes to improve the quality of the recommendations.
                 {% endif %}
             </p>
         </div>
 
-    <!-- Rate more dishes button -->
-    {% if username %}
-    <div class="popup" id="popup-1">
-        <div class="overlay"></div>
-        <div class="content">
-            <div class="close-btn" onclick="togglePopup()">&times;</div>
-            {% if session.get('language') == 'de' %}
-                <h1>Bewerte Gerichte um eine bessere Empfehlung zu erhalten</h1>
-            {% else %}
-                <h1>Rate dishes to improve the recommendation</h1>
-            {% endif %}
-            <p id="random-dish-name">{{ random_dish[1] }}</p>
-            
-            <!-- Ratings -->
-            <div class="rating mt-4 text-4xl flex justify-end">
-                <input type="radio" id="star5_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="5" />
-                <label for="star5_{{ random_dish[0] }}">&#9733;</label>
-                <input type="radio" id="star4_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="4" />
-                <label for="star4_{{ random_dish[0] }}">&#9733;</label>
-                <input type="radio" id="star3_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="3" />
-                <label for="star3_{{ random_dish[0] }}">&#9733;</label>
-                <input type="radio" id="star2_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="2" />
-                <label for="star2_{{ random_dish[0] }}">&#9733;</label>
-                <input type="radio" id="star1_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="1" />
-                <label for="star1_{{ random_dish[0] }}">&#9733;</label>
+        <!-- Rate More Dishes Section -->
+        {% if username %}
+            <div class="rate-dishes-section">
+                <div class="content">
+
+                    <p id="random-dish-name">{{ random_dish[1] }}</p>
+                    {% if session.get('language') == 'de' %}
+                        Studentenpreis:
+                    {% else %}
+                        Student Price:
+                    {% endif %}
+                    {{random_dish.studentPrice}} € 
+                    <br>
+                    {% if session.get('language') == 'de' %}
+                        Gästepreis:
+                    {% else %}
+                        Guest Price:
+                    {% endif %}
+                    {{random_dish.guestPrice}} €
+
+                    <!-- Ratings -->
+                    <div class="rating mt-4">
+                        <input type="radio" id="star5_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="5" />
+                        <label for="star5_{{ random_dish[0] }}">&#9733;</label>
+                        <input type="radio" id="star4_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="4" />
+                        <label for="star4_{{ random_dish[0] }}">&#9733;</label>
+                        <input type="radio" id="star3_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="3" />
+                        <label for="star3_{{ random_dish[0] }}">&#9733;</label>
+                        <input type="radio" id="star2_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="2" />
+                        <label for="star2_{{ random_dish[0] }}">&#9733;</label>
+                        <input type="radio" id="star1_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="1" />
+                        <label for="star1_{{ random_dish[0] }}">&#9733;</label>
+                    </div>
+
+                    <button class="submit-rating mt-2" data-id="{{ random_dish[0] }}">
+                        {% if session.get('language') == 'de' %}
+                            Bewertung senden
+                        {% else %}
+                            Submit Rating
+                        {% endif %}
+                    </button>
+
+                    <button class="submit-rating mt-2" onclick="location.href='/rating';">
+                        {% if session.get('language') == 'de' %}
+                            Nächstes Gericht
+                        {% else %}
+                            Next Dish
+                        {% endif %}
+                    </button>
+                    <div>
+                        {% if session.get('language') == 'de' %}
+                            <span class="rating-count {{ 'red' if rating_count < 5 else 'green' }}">
+                                Anzahl Bewertungen: {{ rating_count }}
+                            </span>
+                            {% if rating_count < 5 %}
+                                <p class="rate-more">Bewerten Sie weitere Gerichte</p>
+                            {% endif %}
+                        {% else %}
+                            <span class="rating-count {{ 'red' if rating_count < 5 else 'green' }}">
+                                Rating Count: {{ rating_count }}
+                            </span>
+                            {% if rating_count < 5 %}
+                                <p class="rate-more">Rate more dishes</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                        {% if session.get('language') == 'de' %}
+                            Bewertung erhalten!
+                        {% else %}
+                            Rating received!
+                        {% endif %}
+                    </p>
+                </div>
             </div>
-            <button class="submit-rating mt-2" data-id="{{ random_dish[0] }}">
-                {% if session.get('language') == 'de' %}
-                    Bewertung senden
-                {% else %}
-                    Submit Rating
-                {% endif %}
-            </button>
-            <button class="submit-rating mt-2" onclick="location.href='/menu?popup=1';">
-                {% if session.get('language') == 'de' %}
-                    Nächstes Gericht
-                {% else %}
-                    Next Dish
-                {% endif %}
-            </button>
-            <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
-                {% if session.get('language') == 'de' %}
-                    Bewertung erhalten!
-                {% else %}
-                    Rating received!
-                {% endif %}
-            </p>
-        </div>
-    </div>
-    <button class="rate-dishes-btn" onclick="togglePopup()">{% if session.get('language') == 'de' %}Bewerte weitere Gerichte{% else %}Rate more dishes{% endif %}</button>
-    {% endif %}
+        {% endif %}
+
 
 </main>
 <!-- Footer -->

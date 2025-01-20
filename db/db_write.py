@@ -1,7 +1,7 @@
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, Integer, String, Date, Boolean
 import pandas as pd
 import sys
 from datetime import datetime
@@ -75,6 +75,7 @@ class Rating(Base):
     menu_id = Column(Integer, nullable=False)
     rating = Column(Integer, nullable=False)
     timestamp = Column(DateTime,default=datetime.now, nullable=False)
+    on_rating_page = Column(Boolean, nullable=True,default=False)
 
 class Directory(Base):
     __tablename__ = 'directory'
@@ -233,7 +234,7 @@ def write_to_dishes_eng(engine, Session):
 
 
 
-def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):
+def write_to_rating(menu_id: int, rating: int, user_name: int, on_rating_page: bool, engine, Session):
     Rating.metadata.create_all(engine)
 
     with Session() as db_session:
@@ -243,9 +244,10 @@ def write_to_rating(menu_id: int, rating: int, user_name: int, engine, Session):
         if existing_rating and user_name:
             # Update the existing rating
             existing_rating.rating = rating
+            existing_rating.on_rating_page = on_rating_page
         else:
             # Add a new rating if none exists
-            new_rating = Rating(menu_id=menu_id, rating=rating, user_name=user_name)
+            new_rating = Rating(menu_id=menu_id, rating=rating, user_name=user_name, on_rating_page=on_rating_page)
             db_session.add(new_rating)
 
         # Commit the changes

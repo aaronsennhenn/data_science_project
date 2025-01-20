@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('id', id);
             formData.append('rating', rating);
 
-            fetch('/menu', {
+            fetch('/rating', {
                 method: 'POST',
                 body: formData,
             });
@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// Function for rate more dishes popup
-function togglePopup() {
-    document.getElementById("popup-1").classList.toggle("active");
-}
+
+
+

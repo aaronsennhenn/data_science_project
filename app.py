@@ -163,12 +163,19 @@ def user_page():
     session['language'] = lang
     session.permanent = True
     user_name = session.get('username')
+
+    # if user is not logged in, redirect to login page
     if not user_name:
         return redirect(url_for('login'))
     
-    # if not user_vector -> auf rating page umleiten
 
+    # if user has not rated dishes yet, redirect to rating page
     db_session = Session()
+    user_vector = get_user_vector(user_name, db_session)
+    if not user_vector:
+        return redirect(url_for('rating'))
+    
+
     try:
         total_ratings = get_total_ratings_by_user(db_session, user_name)
         first_rating_date = get_first_rating_date_of_user(db_session, user_name)
@@ -268,20 +275,32 @@ def user_page():
                            regional_chart=regional_chart,
                            dishes=grouped_menu_data)
 
-@app.route('/rating')
+@app.route('/rating', methods=['GET','POST'])
 def rating():
     lang = session.get('language', 'en')
     session['language'] = lang
     session.permanent = True
     username = session.get('username')
+    on_rating_page = True
     
     with Session() as db_session:
         today = datetime.now().date()
         date = today.strftime('%Y-%m-%d')
         user_name = session.get('username')
-        
-        random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(), lang, user_name, db_session)  # Assuming you have a function to get a random dish
-        return render_template('rating.html', username=username, random_dish=random_dish)  # Pass username to the template
+
+        if request.method == 'POST':
+            rating, menu_id = request.form.get('rating'), request.form.get('id')
+            print(rating, menu_id)
+
+            # write rating to rating table if user submitted rating
+            if rating:
+                write_to_rating(menu_id, rating, user_name, on_rating_page, engine, Session)
+
+        # get random dish that user has not rated before and that is not contained in todays selected
+        random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(), lang, user_name, db_session)
+        rating_count = get_total_ratings_by_user(db_session, user_name)
+
+        return render_template('rating.html', username=username, random_dish=random_dish, rating_count=rating_count)
     
 
 
@@ -290,6 +309,8 @@ def menu():
     lang = session.get('language', 'en')
     session['language'] = lang
     session.permanent = True
+    on_rating_page = False
+
     with Session() as db_session:
         
         # Get additives and allergens 
@@ -314,7 +335,9 @@ def menu():
         user_name = session.get('username')
         user_vector = get_user_vector(user_name, db_session)
 
-
+        # if user has not rated dishes yet, redirect to rating page
+        if not user_vector:
+            return redirect(url_for('rating'))
 
         # When user filters, get filtered values
         if request.method == 'POST':
@@ -334,7 +357,7 @@ def menu():
             # write rating and id to database. If user is not logged in, still safe the rating but with NA username
             if rating:
                 # write rating to database
-                write_to_rating(menu_id, rating, user_name, engine, Session)
+                write_to_rating(menu_id, rating, user_name, on_rating_page, engine, Session)
 
                 # update user vector based on new rating if rating is submitted and user is logged in and get new user vector
                 if user_name:
