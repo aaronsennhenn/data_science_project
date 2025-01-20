@@ -392,8 +392,8 @@ def menu():
                         'rating_count':dish[12] or 0, # zero if is not rated yet 
                         'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
                         'is_top_recommendation_in_course': False,  # Initialize to False
-                        "studentPrice_imputed":float(dish[13]),
-                        "guestPrice_imputed":float(dish[14])
+                        "studentPrice_imputed":dish[13],
+                        "guestPrice_imputed":dish[14]
                         })
         
         # Implement sorting based on switches
