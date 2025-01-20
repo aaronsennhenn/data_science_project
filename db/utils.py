@@ -191,4 +191,4 @@ def impute_missing_prices(df,price_column):
 
 #Price formatting to 
 def format_price(price):
-    return f"{price:,.2f}".replace('.', ',')
+    return f"{price:,.2f}".replace(',', '.')

@@ -387,8 +387,6 @@ def menu():
                         'menuLine': dish[0].menuLine,
                         'studentPrice': dish[0].studentPrice,
                         'guestPrice': dish[0].guestPrice,
-                        'studentPriceFormatted': format_price(dish[0].studentPrice),  # Formatted for display
-                        'guestPriceFormatted': format_price(dish[0].guestPrice),      # Formatted for display
                         'allergens': dish[0].allergens,
                         'additives': dish[0].additives,
                         'location': dish[0].location,
@@ -406,15 +404,15 @@ def menu():
                         'rating_count':dish[12] or 0, # zero if is not rated yet 
                         'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
                         'is_top_recommendation_in_course': False,  # Initialize to False
-                        "studentPrice_imputed":dish[13],
-                        "guestPrice_imputed":dish[14]
+                        "studentPrice_imputed":float(dish[13]),
+                        "guestPrice_imputed":float(dish[14])
                         })
         
         # Implement sorting based on switches
         if recommendation_switch:
             menu_data = sorted(menu_data, key=lambda x: x.get('recommendation_score', 0), reverse=True)
         elif price_switch:
-            menu_data = sorted(menu_data, key=lambda x: x.get('studentPrice', 0))
+            menu_data = sorted(menu_data, key=lambda x: x['studentPrice'] if x['studentPrice'] != -1 else float(x['studentPrice_imputed']))
         elif rating_switch:
             menu_data = sorted(menu_data, key=lambda x: x.get('average_rating', 0), reverse=True)
         elif rating_count_switch:

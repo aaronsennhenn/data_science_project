@@ -362,7 +362,7 @@
                                 {% else %}
                                     Student Price:
                                 {% endif %}
-                                {% if dish.studentPrice != -1 %} 
+                                {% if dish.studentPrice != -1.00 %} 
                                     {{dish.studentPrice}} € 
                                 {% else %}
                                     {{ dish.studentPrice_imputed }} € 
@@ -720,7 +720,7 @@
                                 {% else %}
                                     Student Price:
                                 {% endif %}
-                                {% if dish.studentPrice != -1 %} 
+                                {% if dish.studentPrice != -1.00 %} 
                                     {{dish.studentPrice}} € 
                                 {% else %}
                                     {{ dish.studentPrice_imputed }} € 
@@ -973,7 +973,7 @@
                                         {% else %}
                                             Student Price:
                                         {% endif %}
-                                        {% if dish.studentPrice != -1 %} 
+                                        {% if dish.studentPrice != -1.00 %} 
                                             {{dish.studentPrice}} € 
                                         {% else %}
                                             {{ dish.studentPrice_imputed }} € 
