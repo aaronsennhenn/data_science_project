@@ -10,6 +10,8 @@ from db.utils import compute_cosine_similarity, get_month_name
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics.pairwise import cosine_similarity
+from collections import defaultdict
+
 
 
 def convert_dblist_to_df(db_list):
@@ -26,6 +28,34 @@ def get_user_by_username(session: Session, username: str):
 def get_all_dishes(session: Session) -> List[Dish]:
     return session.query(Dish).all()
 
+def get_average_ratings(db_session, user_name=None):
+
+    # Query the database
+    query = db_session.query(
+        FiltersClean.icons_clean,
+        Rating.rating
+    ).join(Rating, FiltersClean.menu_id == Rating.menu_id)
+
+    if user_name:
+        query = query.filter(Rating.user_name == user_name)
+
+    raw_ratings = query.all()
+
+    # Process the results to handle multiple categories
+    category_ratings = defaultdict(list)
+
+    for icons, rating in raw_ratings:
+        # Split the icons_clean field by ", " and assign the rating to each category
+        categories = icons.split(", ")
+        for category in categories:
+            category_ratings[category].append(rating)
+
+    # Compute the average rating for each category
+    average_ratings = {
+        category: sum(ratings) / len(ratings) for category, ratings in category_ratings.items()
+    }
+
+    return average_ratings
 
 def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_diet_meat, selected_lang):
 

@@ -3,23 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const mensaDropdown = document.getElementById('mensa-dropdown');
     const expandButtons = document.querySelectorAll('.expand-button');
 
-    expandButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const content = this.previousElementSibling;
-            const isExpanded = content.classList.contains('expanded');
-            
-            if (isExpanded) {
-                content.style.height = '8rem';
-                content.classList.remove('expanded');
-                this.textContent = this.getAttribute('data-expand-text');
-            } else {
-                content.style.height = content.scrollHeight + 'px';
-                content.classList.add('expanded');
-                this.textContent = this.getAttribute('data-collapse-text');
-            }
-        });
-    });
-    
     submitRatingButtons.forEach(button => {
         button.addEventListener('click', function () {
             const id = this.getAttribute('data-id');
@@ -31,7 +14,9 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch('/menu', {
                 method: 'POST',
                 body: formData,
-            })                              
+            })
+            // Call the function to display the success message
+            showRatingFeedback();          
         });
     });
 
@@ -81,3 +66,12 @@ document.addEventListener('DOMContentLoaded', function () {
         togglePopup();
     }
 });
+
+
+function showRatingFeedback() {
+    var feedbackElement = document.getElementById('rating-feedback');
+    feedbackElement.classList.remove('hidden');
+    setTimeout(function() {
+        feedbackElement.classList.add('hidden');
+    }, 3000); // Hide after 3 seconds
+}

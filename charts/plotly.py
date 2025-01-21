@@ -95,6 +95,48 @@ def create_taste_radarchart(df, taste_label, similarity):
     
     return fig_html
 
+def plot_average_ratings(user_ratings, all_ratings):
+    """
+    Plots the average ratings of a specific user alongside the average ratings of all users using Plotly.
+
+    Parameters:
+        user_ratings (dict): Average ratings for a specific user.
+        all_ratings (dict): Average ratings for all users.
+    """
+    categories = sorted(set(user_ratings.keys()).union(all_ratings.keys()))
+    user_values = [user_ratings.get(category, 0) for category in categories]
+    all_values = [all_ratings.get(category, 0) for category in categories]
+
+    fig = go.Figure()
+
+    # Add user ratings to the bar chart
+    fig.add_trace(go.Bar(
+        x=categories,
+        y=user_values,
+        name="Your Ratings",
+        marker_color="blue"
+    ))
+
+    # Add all users' ratings to the bar chart with transparency
+    fig.add_trace(go.Bar(
+        x=categories,
+        y=all_values,
+        name="Other Users' Ratings",
+        marker_color="lightblue",
+        opacity=0.5
+    ))
+
+    # Update layout for better visualization
+    fig.update_layout(
+        xaxis_title="Categories",
+        yaxis_title="Average Rating",
+        barmode="group",
+        xaxis_tickangle=-45
+    )
+
+    fig_html = pio.to_html(fig, full_html=False)
+    return fig_html
+
 
 def create_past_6_month_spending_chart(df, user_type):
     # Get months and spending data from the DataFrame and reverse the order
