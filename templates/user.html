@@ -151,28 +151,17 @@
         </div>       
     </section>
     
-    
-<section class="mb-12 w-full">
-    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">
-            {% if session.get('language') == 'de' %}Ihre Ausgaben{% else %}Your Budget{% endif %}
-        </h2>
+    <!-- Budget -->
+    <section class="mb-12 w-full">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre Ausgaben{% else %}Your Budget{% endif %}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Past Months Spending Chart Section -->
-            <div class="p-4 bg-gray-50 rounded-lg w-full">
-                <h4 class="text-lg font-semibold text-gray-900 mb-2">
-                    {% if session.get('language') == 'de' %}In den letzten Monaten{% else %}In the past months{% endif %}
-                </h4>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In den letzten Monaten{% else %}In the past months{% endif %}</h3>
                 <div>{{ past_6_month_speding_chart | safe }}</div>
             </div>
-            
-            <!-- This Month Section -->
-            <div class="p-4 bg-gray-50 rounded-lg w-full h-full flex flex-col justify-between">
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                 <div>
-                    <h4 class="text-lg font-semibold text-gray-900 mb-2">
-                        {% if session.get('language') == 'de' %}In diesem Monat{% else %}This month{% endif %}
-                    </h4>
-
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In diesem Monat{% else %}This month{% endif %}</h3>
                     <!-- Bold Text Container -->
                     <div class="mb-2">
                         <p class="text-gray-900 font-bold text-5xl">
@@ -210,35 +199,29 @@
                     <p class="mt-4 text-sm text-gray-600">
                         {% if session.get('language') == 'de' %}Diese Zahlen basieren auf den Gerichten die Sie bewertet haben.{% else %}These numbers are based on the dishes you have rated.{% endif %}
                     </p>
-                </div>
-            </div>
-        </div>  
-    </div>       
-</section>
+                </div>  
+            </div>       
+        </div>
+    </section>
 
-
-<!-- Radar Chart Section for Taste Profile -->
-<section class="mb-12 w-full">
-    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">
-            {% if session.get('language') == 'de' %}Dein Geschmacksprofil{% else %}Your Taste-Profile{% endif %}
-        </h2>
-        <div class="flex justify-center items-center gap-6">
-            <!-- First Chart -->
-            <div id="taste-profile-chart" style="flex: 1; max-width: 50%; height: 650px; border: 2px solid #ccc; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2"">
-                    {% if session.get('language') == 'de' %}Geschmacksvorlieben nach Küche{% else %}Taste Preferences by Cuisine{% endif %}
-                </h3>
+    <!-- Taste Profile -->
+    <section class="mb-12 w-full">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Dein Geschmacksprofil{% else %}Your Taste-Profile{% endif %}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;"> {% if session.get('language') == 'de' %}Geschmacksvorlieben nach Küche{% else %}Taste Preferences by Cuisine{% endif %}</h3>
+                <div class="flex justify-center items-center">
                 {{ country_chart | safe }}
+                </div>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Ernährungsspezifische Präferenzen{% else %}Dietary Preferences{% endif %}</h3>
                 <div class="flex justify-center items-center">
                     {{ regional_chart | safe }}
                 </div>
-            </div>     
+            </div>       
         </div>
-    </section>    
+    </section>
 
     <!-- Weekly Schedule -->
     <section class="mb-12 w-full">
