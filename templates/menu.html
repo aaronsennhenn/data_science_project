@@ -519,16 +519,17 @@
                                 {% endif %}
                             </button>
 
+                            <!-- Success Message (Initially hidden) -->
+                            <p id="rating-feedback" class="text-sm text-green-600 hidden">
+                                {% if session.get('language') == 'de' %}
+                                    Bewertung erhalten, danke!
+                                {% else %}
+                                    Rating received, thank you!
+                                {% endif %}
+                            </p>
+
                         </div>
                         
-                        <!-- Feedback -->
-                        <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
-                            {% if session.get('language') == 'de' %}
-                            Bewertung erhalten!
-                            {% else %}
-                            Rating received!
-                            {% endif %}
-                        </p>
 
                         <div class="flex gap-4 mb-2">
                             <!-- Description Button -->
