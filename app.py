@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import os
 from secret import *
 from db.db_write import remove_rating,update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user
-from db.db_read import get_dishes_of_user,get_weekday_dates,get_week_recommended_dishes,get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_mensas_of_user,get_unique_mensas
+from db.db_read import get_dishes_of_user,get_weekday_dates,get_week_recommended_dishes,get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_mensas_of_user,get_unique_mensas, get_past_6_month_spending, get_current_month_spending
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime, timedelta
 import plotly
@@ -15,7 +15,7 @@ from db.utils import compute_cosine_similarity, format_price
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
-from charts.plotly import generate_price_chart, create_taste_radarchart
+from charts.plotly import generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart
 import pandas as pd
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -185,7 +185,9 @@ def user_page():
         total_ratings = get_total_ratings_by_user(db_session, user_name)
         first_rating_date = get_first_rating_date_of_user(db_session, user_name)
         rated_dishes = get_dishes_of_user(db_session, user_name)
-        favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)
+        favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)        
+        current_month_spending = get_current_month_spending(db_session, user_name , lang)
+        past_6_month_spending = get_past_6_month_spending(db_session, user_name, lang)
 
         # Create top mensas chart
         mensa_trace = {
@@ -202,15 +204,28 @@ def user_page():
         }
         mensa_user_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
 
-    
-            # get cosine similarity of user vector
-        cluster_df = get_cluster_similarity(db_session, user_name)
+       
 
         #Create tasteprofile radarchart
+        cluster_df = get_cluster_similarity(db_session, user_name)
         country_chart = create_taste_radarchart(cluster_df.iloc[:-3], 'cluster_name', 'scaled')
         regional_chart = create_taste_radarchart(cluster_df.iloc[-3:], 'cluster_name', 'scaled')
 
-        
+
+        #Budget feature
+        if request.method == 'POST':
+            selected_user_type = request.form['user_type']
+        else:
+            selected_user_type = 'student'
+                
+        if selected_user_type in ['student', 'pupil', 'guest']:
+            past_6_month_speding_chart = create_past_6_month_spending_chart(past_6_month_spending, selected_user_type)
+            current_spending = current_month_spending[selected_user_type].iloc[0]
+            current_spending_formatted = format_price(current_spending)
+            current_month = current_month_spending['month_name'].iloc[0]
+            
+
+
         # get dishes for the week and compute user vector with user_name
         df = get_week_recommended_dishes(db_session, get_weekday_dates(), user_name, lang)
 
@@ -261,7 +276,12 @@ def user_page():
                            mensa_user_chart=mensa_user_chart,
                            country_chart = country_chart,
                            regional_chart=regional_chart,
-                           dishes=grouped_menu_data)
+                           dishes=grouped_menu_data,
+                           past_6_month_speding_chart = past_6_month_speding_chart,
+                           current_spending_formatted = current_spending_formatted,
+                           current_month = current_month,
+                           user_type = selected_user_type)
+
 
 @app.route('/rating', methods=['GET','POST'])
 def rating():
