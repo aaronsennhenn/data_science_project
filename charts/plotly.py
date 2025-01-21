@@ -3,6 +3,9 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from db.db_read import get_combined_dishes
 
+# Define the colors
+colors = ['#4F46E5', '#6366F1', '#818CF8']
+
 def generate_price_chart(db_session, selected_category, selected_price_type, show_icons):
     ### Get Data ###
     df = get_combined_dishes(db_session)
@@ -26,7 +29,8 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
                 x=icon_data['menuDate'],
                 y=icon_data[selected_price_type],
                 mode='markers',
-                name=f'{icon}'
+                name=f'{icon}',
+                marker=dict(color=colors[i % len(colors)])
             )
     else:
         fig.add_scatter(
@@ -55,9 +59,6 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
 
     return plot_html,df['menuLine'].unique()
 
-
-
-
 def create_taste_radarchart(df, taste_label, similarity):
 
     r = df[similarity].tolist()  
@@ -71,7 +72,7 @@ def create_taste_radarchart(df, taste_label, similarity):
         r=r, 
         theta=theta, 
         fill='toself',  
-        marker=dict(color='blue'),
+        marker=dict(color=colors[0]),
         name = None,
         hoverinfo = 'none'
     ))
@@ -114,7 +115,7 @@ def plot_average_ratings(user_ratings, all_ratings):
         x=categories,
         y=user_values,
         name="Your Ratings",
-        marker_color="blue"
+        marker=dict(color=colors[1])
     ))
 
     # Add all users' ratings to the bar chart with transparency
@@ -122,7 +123,7 @@ def plot_average_ratings(user_ratings, all_ratings):
         x=categories,
         y=all_values,
         name="Other Users' Ratings",
-        marker_color="lightblue",
+        marker=dict(color=colors[2]),
         opacity=0.5
     ))
 

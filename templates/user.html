@@ -11,8 +11,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="{{ url_for('static', filename='css/user.css') }}" rel="stylesheet">
     <script src="{{ url_for('static', filename='js/user.js') }}" defer></script>
-
-
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
@@ -99,7 +97,7 @@
     </div>
 
 	
-    <!-- Key Metrics Section -->
+    <!-- Key Metrics -->
     <section class="mb-12 w-full">
         <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Zentralen Kennzahlen{% else %}Your Key Metrics{% endif %}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -119,123 +117,113 @@
             </div>        
         </div>
     </section>
+
+    <!-- Favorites -->
     <section class="mb-12 w-full">
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="p-4 bg-gray-50 rounded-lg w-full">
-                    <h4 class="text-lg font-semibold text-gray-900 mb-2">
-                        {% if session.get('language') == 'de' %}Deine Lieblingsmensen{% else %}Your Favorite Mensas{% endif %}
-                    </h4>
-                    <div id="top-mensa-user-chart" style="width: 100%; height: 300px;"></div>
-                </div>
-                <div class="p-4 bg-gray-50 rounded-lg w-full max-h-96 overflow-y-auto">
-                    <h4 class="text-lg font-semibold text-gray-900 mb-2">
-                        {% if session.get('language') == 'de' %}Deine Bewertungen{% else %}Your Rated Dishes{% endif %}
-                    </h4>
-                    <div class="rated-dishes-container">
-                        {% for dish in rated_dishes %}
-                            <div class="dish-rating mb-2 p-2 bg-white border border-gray-300 rounded relative">
-                                <!-- Cross button -->
-                                <button class="remove-dish-button absolute top-2 right-2 text-gray-600" data-id="{{ dish.menu_id }}">
-                                    ×
-                                </button>
-                                
-                                <p>
-                                    {% if session.get('language') == 'de' %}Gericht:{% else %}Dish:{% endif %} {{ dish.menu }}
-                                </p>
-                                <p>
-                                    {% if session.get('language') == 'de' %}Bewertung:{% else %}Rating:{% endif %} {{ dish.rating }}
-                                </p>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>  
-        </div>       
-    </section>
-    
-
-
-<!-- Radar Chart Section for Taste Profile -->
-<section class="mb-12 w-full">
-    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">
-            {% if session.get('language') == 'de' %}Dein Geschmacksprofil{% else %}Your Taste-Profile{% endif %}
-        </h2>
-        <div class="flex justify-center items-center gap-6">
-            <!-- First Chart -->
-            <div id="taste-profile-chart" style="flex: 1; max-width: 50%; height: 650px; border: 2px solid #ccc; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2"">
-                    {% if session.get('language') == 'de' %}Geschmacksvorlieben nach Küche{% else %}Taste Preferences by Cuisine{% endif %}
-                </h3>
-                {{ country_chart | safe }}
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Deine Favoriten{% else %}Your Favorites{% endif %}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Lieblingsmensen{% else %}Favorite Mensas{% endif %}</h3>
+                <div class="flex justify-center items-center" id="top-mensa-user-chart" style="width: 100%; height: 300px;"></div>
             </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Abgegebene Bewertungen{% else %}Rated Dishes{% endif %}</h3>
+                <div class="rated-dishes-container">
+                    {% for dish in rated_dishes %}
+                        <div class="dish-rating mb-2 p-2 bg-white border border-gray-300 rounded relative">
+                            <!-- Cross button -->
+                            <button class="remove-dish-button absolute top-2 right-2 text-gray-600" data-id="{{ dish.menu_id }}">
+                                ×
+                            </button>
+                            
+                            <p>
+                                {% if session.get('language') == 'de' %}Gericht:{% else %}Dish:{% endif %} {{ dish.menu }}
+                            </p>
+                            <p>
+                                {% if session.get('language') == 'de' %}Bewertung:{% else %}Rating:{% endif %} {{ dish.rating }}
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>     
+        </div>
+    </section>    
 
-            <!-- Second Chart -->
-            <div id="second-chart" style="flex: 1; max-width: 50%; height: 650px; border: 2px solid #ccc; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2"">
-                    {% if session.get('language') == 'de' %}Was kommt auf den Teller? {% else %}What's on Your Plate?{% endif %}
-                </h3>
-                {{ regional_chart | safe }}
+    <!-- Taste Profile -->
+    <section class="mb-12 w-full">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Dein Geschmacksprofil{% else %}Your Taste-Profile{% endif %}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Geschmacksvorlieben nach Küche{% else %}Taste Preferences by Cuisine{% endif %}</h3>
+                <div class="flex justify-center items-center">
+                    {{ country_chart | safe }}
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Ernährungsspezifische Präferenzen{% else %}Dietary Preferences{% endif %}</h3>
+                <div class="flex justify-center items-center">
+                    {{ regional_chart | safe }}
+                </div>
+            </div>     
+        </div>
+    </section>    
+
+    <!-- Weekly Schedule -->
+    <section class="mb-12 w-full">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihr wöchentlicher Speiseplan{% else %}Your Weekly Dining Schedule{% endif %}</h2>
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+            <div class="grid-container" id="schedule">
+                <!-- Headers for days -->
+                <div class="grid-row">
+                    <div class="header"></div> <!-- Empty header for the first column -->
+                    {% for day in dishes.keys() %}
+                        <div class="header">{{ day }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- German -->
+                {% set language = session.get('language') %}
+                {% if language == "de" %}
+                    {% set course_types = ['Hauptspeise', 'Beilage', 'Nachspeise'] %}
+                    {% for course in course_types %}
+                        <div class="grid-row">
+                            <!-- Column for the course name -->
+                            <div class="dish-box">{{ course }}</div>
+                            <!-- Columns for each day -->
+                            {% for day, course_dishes in dishes.items() %}
+                                <div class="dish-box">
+                                    {% for dish in course_dishes %}
+                                        {% if dish.course == course %}
+                                            {{dish.location}} <br> {{ dish.menu }} <br> Studentenpreis: {{ dish.studentPrice }} € <br> Menu Score: {{ dish.cosine_similarity }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                <!-- English -->
+                {% else %}
+                    {% set course_types = ['Main Dish', 'Side Dish', 'Dessert'] %}
+                    {% for course in course_types %}
+                        <div class="grid-row">
+                            <!-- Column for the course name -->
+                            <div class="dish-box">{{ course }}</div>
+                            <!-- Columns for each day -->
+                            {% for day, course_dishes in dishes.items() %}
+                                <div class="dish-box">
+                                    {% for dish in course_dishes %}
+                                        {% if dish.course_eng == course %}
+                                            {{dish.location}} <br> {{ dish.menuEng }} <br> Student Price: {{ dish.studentPrice }} € <br> Menu Score: {{ dish.cosine_similarity }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
-    </div>
-</section>
-
-<h1>Your Weekly Dining Schedule</h1>
-<div class="grid-container">
-    <!-- Headers for days -->
-    <div class="grid-row">
-        <div class="header"></div> <!-- Empty header for the first column -->
-        {% for day in dishes.keys() %}
-            <div class="header">{{ day }}</div>
-        {% endfor %}
-    </div>
-
-    <!-- German -->
-    {% set language = session.get('language') %}
-    {% if language == "de" %}
-        {% set course_types = ['Hauptspeise', 'Beilage', 'Nachspeise'] %}
-        {% for course in course_types %}
-            <div class="grid-row">
-                <!-- Column for the course name -->
-                <div class="dish-box">{{ course }}</div>
-                <!-- Columns for each day -->
-                {% for day, course_dishes in dishes.items() %}
-                    <div class="dish-box">
-                        {% for dish in course_dishes %}
-                            {% if dish.course == course %}
-                                {{dish.location}} <br> {{ dish.menu }} <br> Studentenpreis: {{ dish.studentPrice }} € <br> Menu Score: {{ dish.cosine_similarity }}
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endfor %}
-    <!-- English -->
-    {% else %}
-        {% set course_types = ['Main Dish', 'Side Dish', 'Dessert'] %}
-        {% for course in course_types %}
-            <div class="grid-row">
-                <!-- Column for the course name -->
-                <div class="dish-box">{{ course }}</div>
-                <!-- Columns for each day -->
-                {% for day, course_dishes in dishes.items() %}
-                    <div class="dish-box">
-                        {% for dish in course_dishes %}
-                            {% if dish.course_eng == course %}
-                                {{dish.location}} <br> {{ dish.menuEng }} <br> Student Price: {{ dish.studentPrice }} € <br> Menu Score: {{ dish.cosine_similarity }}
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endfor %}
-    {% endif %}
-</div>
-
-
-   
+    </section>
 </main>
 
     <!-- Footer -->
@@ -249,17 +237,17 @@
         Plotly.newPlot('top-mensa-user-chart', {{ mensa_user_chart | safe }}.data, {{ mensa_user_chart | safe }}.layout);
     </script>
     <script>
-            const menuToggle = document.getElementById('menu-toggle');
-            const closeMenu = document.getElementById('close-menu');
-            const sidebar = document.getElementById('sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeMenu = document.getElementById('close-menu');
+        const sidebar = document.getElementById('sidebar');
 
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('translate-x-full');
-            });
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('translate-x-full');
+        });
 
-            closeMenu.addEventListener('click', () => {
-                sidebar.classList.add('translate-x-full');
-            });
+        closeMenu.addEventListener('click', () => {
+            sidebar.classList.add('translate-x-full');
+        });
     </script>
 </body>
 </html>

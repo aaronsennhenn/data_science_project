@@ -15,7 +15,7 @@ from db.utils import compute_cosine_similarity, format_price
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
-from charts.plotly import generate_price_chart, create_taste_radarchart,plot_average_ratings
+from charts.plotly import generate_price_chart, create_taste_radarchart, plot_average_ratings
 import pandas as pd
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -685,8 +685,7 @@ def update_plot():
     return jsonify({'plot': plot_html})
 
 
-
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)
-    app.run()
+    app.run(port=5001)
