@@ -138,3 +138,38 @@ def plot_average_ratings(user_ratings, all_ratings):
     fig_html = pio.to_html(fig, full_html=False)
     return fig_html
 
+
+def create_past_6_month_spending_chart(df, user_type):
+    # Get months and spending data from the DataFrame and reverse the order
+    months = df['month_name'].tolist()[::-1]  
+    spending = df[user_type].tolist()[::-1] 
+    
+    # Highlight the last item (current month) in yellow
+    colors = ['#6366F1'] * len(spending)
+    colors[-1] = '#FBBF24'
+    
+    # Create the bar plot
+    fig = go.Figure()
+
+    # Add the spending data as a bar plot
+    fig.add_trace(go.Bar(
+        x=months,
+        y=spending,
+        name='Spending',
+        marker=dict(color=colors)
+    ))
+
+    # Add title and labels
+    fig.update_layout(
+        showlegend=False,
+        plot_bgcolor='white',  
+        paper_bgcolor='white',
+        yaxis=dict(
+            showgrid=True,  # Enable grid lines on the x-axis
+            gridcolor='lightgray',  # Set grid line color
+    ))
+    
+    # Convert the figure to HTML and return it
+    fig_html = pio.to_html(fig, full_html=False)
+
+    return fig_html

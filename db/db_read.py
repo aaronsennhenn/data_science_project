@@ -4,9 +4,9 @@ from typing import List
 from sqlalchemy import func
 import datetime
 import pandas as pd
-from sqlalchemy import or_,func,select,desc,select, union, and_, not_
+from sqlalchemy import or_,func,select,desc,select, union, and_, not_, extract
 from typing import List, Tuple
-from db.utils import compute_cosine_similarity
+from db.utils import compute_cosine_similarity, get_month_name
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics.pairwise import cosine_similarity
@@ -747,3 +747,78 @@ def get_weekday_dates():
 
     weekdays = [(start_of_week + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]  # Monday to Friday
     return weekdays
+
+
+def get_current_month_spending(session: Session, user_name , lang='en'):
+    
+    current_year = datetime.utcnow().year
+    current_month = datetime.utcnow().month
+    current_month_name = get_month_name(current_month, lang)
+
+    result = session.query(
+        func.sum(Dish.studentPrice).label('total_student_spending'),
+        func.sum(Dish.guestPrice).label('total_guest_spending'),
+        func.sum(Dish.pupilPrice).label('total_pupil_spending')
+    ).select_from(Rating).join(
+        Dish, Rating.menu_id == Dish.id
+    ).filter(
+        Rating.user_name == user_name,
+        Rating.on_rating_page == False,
+        extract('year', Rating.timestamp) == current_year,
+        extract('month', Rating.timestamp) == current_month
+    ).one_or_none()
+        
+    df = pd.DataFrame([{
+        'year': current_year,
+        'month': current_month,
+        'month_name': current_month_name,
+        'student': result.total_student_spending if result and result.total_student_spending else 0.0,
+        'guest': result.total_guest_spending if result and result.total_guest_spending else 0.0,
+        'pupil': result.total_pupil_spending if result and result.total_pupil_spending else 0.0
+    }])  
+        
+    return df
+
+
+
+def get_past_6_month_spending(session: Session, user_name, lang='en'):
+    current_year = datetime.utcnow().year
+    current_month = datetime.utcnow().month
+
+    # List to store data for the past 6 months
+    month_data = []
+
+    for i in [0, 1, 2, 3, 4, 5]:
+        # Calculate the month and year for each of the last 6 months
+        month_offset = (current_month - i) if (current_month - i) > 0 else (12 + (current_month - i))
+        year_offset = current_year if current_month - i > 0 else current_year - 1
+        month_name = get_month_name(month_offset, lang)
+
+        result = session.query(
+            func.sum(Dish.studentPrice).label('total_student_spending'),
+            func.sum(Dish.guestPrice).label('total_guest_spending'),
+            func.sum(Dish.pupilPrice).label('total_pupil_spending')
+        ).select_from(Rating).join(
+            Dish, Rating.menu_id == Dish.id
+        ).filter(
+            Rating.user_name == user_name,
+            Rating.on_rating_page == False,
+            extract('year', Rating.timestamp) == year_offset,
+            extract('month', Rating.timestamp) == month_offset  # Adjust month for 1-12 range
+        ).one_or_none()
+
+        # Append the data for the current month
+        month_data.append({
+            'year': year_offset,
+            'month': month_offset,
+            'month_name': month_name,
+            'student': result.total_student_spending if result and result.total_student_spending else 0.0,
+            'guest': result.total_guest_spending if result and result.total_guest_spending else 0.0,
+            'pupil': result.total_pupil_spending if result and result.total_pupil_spending else 0.0
+        })
+
+    #Create df
+    df = pd.DataFrame(month_data)
+
+    return df
+    
