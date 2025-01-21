@@ -208,7 +208,7 @@ body {
   .rating input:checked ~ label {
     color: #FFD700;
   }
-  
+    
   .submit-rating {
     background-color: #6366F1;
     color: white;
@@ -217,12 +217,19 @@ body {
     font-weight: 500;
     transition: all 0.3s ease;
     border: none;
-    white-space: nowrap;
-    min-width: 150px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
   }
-  
+
+  .submit-rating i {
+      font-size: 1.2em;
+  }
+
   .submit-rating:hover {
-    background-color: #3F42C8;
+      background-color: #3F42C8;
+      transform: translateY(-1px);
   }
   
   .icon-tooltip {
@@ -256,30 +263,48 @@ body {
   
 
   .rate-dishes-section {
-    border: 2px solid black; /* Black border */
-    padding: 16px; /* Add padding inside the section */
-    margin-top: 16px; /* Optional: Add space above the section */
-    width: 600px; /* Set a fixed width */
-    height: 350px; /* Set a fixed height */
-    overflow-y: auto; /* Add a vertical scrollbar if content overflows */
-    box-sizing: border-box; /* Ensure padding is included in the width/height */
+    padding: 16px;
+    margin-top: 16px;
+    width: 80%;
+    max-width: 1200px;
+    height: auto;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .rate-dishes-section .content {
+      text-align: left;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+  }
+
+  .rating-count.red {
+      color: black; /* Adjust if needed red */
+  }
+
+  .rating-count.green {
+      color: black; /* Adjust if needed green */
+  }
+
+  .rate-more {
+    display: inline-block;
+    padding: 0.25rem 0.5rem; /* Adjust padding as needed */
+    margin-top: 0.5rem; /* Adjust margin as needed */
+    background-color: #edf2f7; /* bg-gray-200 */
+    color: #4a5568; /* text-gray-700 */
+    border-radius: 0.375rem; /* rounded */
 }
 
-.rate-dishes-section .content {
-    text-align: left; /* Left-align text */
-    word-wrap: break-word; /* Ensure long words break properly */
-    overflow-wrap: break-word; /* For compatibility */
+  .rating-count-container {
+    display: inline-block;
+    background-color: #edf2f7; /* bg-gray-200 */
+    color: #4a5568; /* text-gray-700 */
+    border-radius: 0.375rem; /* rounded */
+    padding: 0.5rem; /* Adjust padding as needed */
+    margin-top: 1rem; /* mt-4 */
 }
 
-.rating-count.red {
-    color: red; /* Red color for counts below 5 */
-}
-
-.rating-count.green {
-    color: green; /* Green color for counts 5 or above */
-}
-
-.rate-more {
-    color: red; /* Red color for "Rate more dishes" message */
-    margin-top: 8px; /* Add space above the message */
+.rating-count {
+    display: inline-block;
+    padding: 0.25rem 0.5rem; /* Adjust padding as needed */
 }

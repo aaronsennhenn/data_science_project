@@ -24,3 +24,15 @@
     font-weight: bold;
     background-color: #e0e0e0;
 }
+
+.remove-dish-button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.remove-dish-button:hover {
+    font-weight: bold;
+}

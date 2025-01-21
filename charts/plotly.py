@@ -23,7 +23,7 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     # Add traces based on the toggle state
     if show_icons:
         unique_icons = filtered_df['icons_clean'].unique()
-        for icon in unique_icons:
+        for i, icon in enumerate(unique_icons):
             icon_data = filtered_df[filtered_df['icons_clean'] == icon]
             fig.add_scatter(
                 x=icon_data['menuDate'],

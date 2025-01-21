@@ -226,60 +226,8 @@
                         </div>
                     </div>
                 </div>
-                
                 </div>
-            </div>
-
-            <!-- Price Analysis -->
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 w-full">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Preisanalyse{% else %}Price Analysis{% endif %}</h3>
-                <h4 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em; font-family: cursive;">{% if session.get('language') == 'de' %}Gerichte mit geringstem Preis pro Mensa {% else %}Menu with Lowest Prices per Menu Category{% endif %}</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {% for mensa, data in menus_with_lowest_price.items() %}
-                        {% if data %}
-                            <div class="p-4 bg-gray-50 rounded-lg">
-                                <div class="flex flex-col">
-                                    <div class="w-full mb-4">
-                                        <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
-                                        <p class="text-sm font-medium text-gray-600">
-                                            {% if session.get('language') == 'de' %}Menü{% else %}Menu{% endif %}: {{ data.menu }}
-                                        </p>
-                                        <p class="text-sm font-medium text-gray-600">
-                                            {% if session.get('language') == 'de' %}Menükategorie{% else %}Menu Category{% endif %}: {{ data.menu_line }}
-                                        </p>
-                                        <div class="mt-2">
-                                            <p class="text-sm font-medium text-gray-600">
-                                                {% if session.get('language') == 'de' %}Schülerpreis:{% else %}Pupil Price:{% endif %}
-                                            </p>
-                                            <p class="font-medium">€{{ data.pupilPrice }}</p>
-                                        </div>
-                                        <div class="mt-2">
-                                            <p class="text-sm font-medium text-gray-600">
-                                                {% if session.get('language') == 'de' %}Studentenpreis:{% else %}Student Price:{% endif %}
-                                            </p>
-                                            <p class="font-medium">€{{ data.studentPrice }}</p>
-                                        </div>
-                                        <div class="mt-2">
-                                            <p class="text-sm font-medium text-gray-600">
-                                                {% if session.get('language') == 'de' %}Gästepreis:{% else %}Guest Price:{% endif %}
-                                            </p>
-                                            <p class="font-medium">€{{ data.guestPrice }}</p>
-                                        </div>
-                                        <div class="mt-2">
-                                            <p class="text-sm font-medium text-gray-600">
-                                                {% if session.get('language') == 'de' %}Durchschnittspreis:{% else %}Average Price:{% endif %}
-                                            </p>
-                                            <p class="font-medium">€{{ "%.2f"|format(data.avg_price) }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
                 </div>
-            </div>                
-
-            
                 </div>
             </div>
         </div>

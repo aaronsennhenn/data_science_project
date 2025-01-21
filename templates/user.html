@@ -134,10 +134,9 @@
                     {% for dish in rated_dishes %}
                         <div class="dish-rating mb-2 p-2 bg-white border border-gray-300 rounded relative">
                             <!-- Cross button -->
-                            <button class="remove-dish-button absolute top-2 right-2 text-gray-600" data-id="{{ dish.menu_id }}">
+                            <button class="remove-dish-button absolute top-2 right-2 text-gray-600" data-id="{{ dish.menu_id }}" title="{% if session.get('language') == 'de' %}Löschen{% else %}Delete{% endif %}">
                                 ×
                             </button>
-                            
                             <p>
                                 {% if session.get('language') == 'de' %}Gericht:{% else %}Dish:{% endif %} {{ dish.menu }}
                             </p>

@@ -9,6 +9,7 @@
     <link href="{{ url_for('static', filename='css/rating.css') }}" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="{{ url_for('static', filename='js/rating.js') }}" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
@@ -102,83 +103,87 @@
         <!-- Rate More Dishes Section -->
         {% if username %}
             <div class="rate-dishes-section">
-                <div class="content">
+                <div class="content bg-white rounded-xl shadow-sm p-4 border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Left Column -->
+                    <div class="col-span-2">
+                        <p id="random-dish-name" class="card-title menu-name text-xl">{{ random_dish[1] }}</p>
+                        <br>
+                        <div class="text-lg font-medium text-gray-700">
+                            {% if session.get('language') == 'de' %}
+                                Studentenpreis:
+                            {% else %}
+                                Student Price:
+                            {% endif %}
+                            {{random_dish.studentPrice}} € 
+                            <br>
+                            {% if session.get('language') == 'de' %}
+                                Gästepreis:
+                            {% else %}
+                                Guest Price:
+                            {% endif %}
+                            {{random_dish.guestPrice}} €
+                        </div>
+                        
+                        <!-- Ratings -->
+                        <div class="rating mt-4"> 
+                            <input type="radio" id="star5_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="5" />
+                            <label for="star5_{{ random_dish[0] }}">&#9733;</label>
+                            <input type="radio" id="star4_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="4" />
+                            <label for="star4_{{ random_dish[0] }}">&#9733;</label>
+                            <input type="radio" id="star3_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="3" />
+                            <label for="star3_{{ random_dish[0] }}">&#9733;</label>
+                            <input type="radio" id="star2_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="2" />
+                            <label for="star2_{{ random_dish[0] }}">&#9733;</label>
+                            <input type="radio" id="star1_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="1" />
+                            <label for="star1_{{ random_dish[0] }}">&#9733;</label>
+                        </div>
 
-                    <p id="random-dish-name">{{ random_dish[1] }}</p>
-                    {% if session.get('language') == 'de' %}
-                        Studentenpreis:
-                    {% else %}
-                        Student Price:
-                    {% endif %}
-                    {{random_dish.studentPrice}} € 
-                    <br>
-                    {% if session.get('language') == 'de' %}
-                        Gästepreis:
-                    {% else %}
-                        Guest Price:
-                    {% endif %}
-                    {{random_dish.guestPrice}} €
+                        <button class="submit-rating mt-2" data-id="{{ random_dish[0] }}">
+                            {% if session.get('language') == 'de' %}
+                                Bewertung senden
+                            {% else %}
+                                Submit Rating
+                            {% endif %}
+                        </button>
+                        <br>
+                        <div class="rating-count-container mt-4">    
+                            {% if session.get('language') == 'de' %}
+                                <span class="rating-count {{ 'red' if rating_count < 5 else 'green' }}">
+                                    Anzahl Bewertungen: {{ rating_count }}
+                                </span>
+                                {% if rating_count < 5 %}
+                                    <p class="rate-more">Bewerten Sie weitere Gerichte</p>
+                                {% endif %}
+                            {% else %}
+                                <span class="rating-count {{ 'red' if rating_count < 5 else 'green' }}">
+                                    Rating Count: {{ rating_count }}
+                                </span>
+                                {% if rating_count < 5 %}
+                                    <p class="rate-more">Rate more dishes</p>
+                                {% endif %}
+                            {% endif %}
+                        </div>
 
-                    <!-- Ratings -->
-                    <div class="rating mt-4">
-                        <input type="radio" id="star5_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="5" />
-                        <label for="star5_{{ random_dish[0] }}">&#9733;</label>
-                        <input type="radio" id="star4_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="4" />
-                        <label for="star4_{{ random_dish[0] }}">&#9733;</label>
-                        <input type="radio" id="star3_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="3" />
-                        <label for="star3_{{ random_dish[0] }}">&#9733;</label>
-                        <input type="radio" id="star2_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="2" />
-                        <label for="star2_{{ random_dish[0] }}">&#9733;</label>
-                        <input type="radio" id="star1_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="1" />
-                        <label for="star1_{{ random_dish[0] }}">&#9733;</label>
+                        <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
+                            {% if session.get('language') == 'de' %}
+                                Bewertung erhalten!
+                            {% else %}
+                                Rating received!
+                            {% endif %}
+                        </p>
                     </div>
 
-                    <button class="submit-rating mt-2" data-id="{{ random_dish[0] }}">
-                        {% if session.get('language') == 'de' %}
-                            Bewertung senden
-                        {% else %}
-                            Submit Rating
-                        {% endif %}
-                    </button>
-
-                    <button class="submit-rating mt-2" onclick="location.href='/rating';">
-                        {% if session.get('language') == 'de' %}
-                            Nächstes Gericht
-                        {% else %}
-                            Next Dish
-                        {% endif %}
-                    </button>
-                    <div>
-                        {% if session.get('language') == 'de' %}
-                            <span class="rating-count {{ 'red' if rating_count < 5 else 'green' }}">
-                                Anzahl Bewertungen: {{ rating_count }}
-                            </span>
-                            {% if rating_count < 5 %}
-                                <p class="rate-more">Bewerten Sie weitere Gerichte</p>
-                            {% endif %}
-                        {% else %}
-                            <span class="rating-count {{ 'red' if rating_count < 5 else 'green' }}">
-                                Rating Count: {{ rating_count }}
-                            </span>
-                            {% if rating_count < 5 %}
-                                <p class="rate-more">Rate more dishes</p>
-                            {% endif %}
-                        {% endif %}
+                    <!-- Right Column -->
+                    <div class="flex items-center justify-center">
+                        <button class="submit-rating" onclick="location.href='/rating';" title="{% if session.get('language') == 'de' %}Weiter{% else %}Next{% endif %}">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
-
-                    <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
-                        {% if session.get('language') == 'de' %}
-                            Bewertung erhalten!
-                        {% else %}
-                            Rating received!
-                        {% endif %}
-                    </p>
                 </div>
             </div>
         {% endif %}
+    </main>
 
-
-</main>
 <!-- Footer -->
 <footer class="bg-white border-t border-gray-200 py-8">
     <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
