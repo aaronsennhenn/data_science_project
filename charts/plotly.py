@@ -146,7 +146,7 @@ def create_past_6_month_spending_chart(df, user_type):
     
     # Highlight the last item (current month) in yellow
     colors = ['#6366F1'] * len(spending)
-    colors[-1] = '#FBBF24'
+    colors[-1] = '#6366F1'
     
     # Create the bar plot
     fig = go.Figure()

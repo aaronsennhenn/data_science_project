@@ -36,3 +36,35 @@
 .remove-dish-button:hover {
     font-weight: bold;
 }
+
+.rated-dishes-container {
+    background: #ffffff; /* White background for clarity */
+    color: #000000; /* Black text for readability */
+    font-size: 1rem; /* Base font size for all text inside */
+    line-height: 1.5; /* Improve readability with generous line spacing */
+    padding: 10px; /* Ensure comfortable padding inside the container */
+    border-radius: 10px; /* Rounded corners for aesthetics */
+    max-height: 300px; /* Set a fixed height for the container */
+    overflow-y: auto; /* Enable vertical scrolling */
+    text-align: left; /* Align text to the left by default */
+}
+
+.dropdown-style {
+    background-color: white;
+    color: #1a202c;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.dropdown-style:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-style:focus {
+    border-color: black;
+    box-shadow: 0 0 0 1px black;
+}

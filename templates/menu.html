@@ -19,9 +19,7 @@
     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
         <nav>
             <div class="nav-container flex justify-between items-center">
-                <a href="{{ url_for('index') }}" class="text-2xl font-bold text-indigo-600">
-                    MENSA APP.
-                </a>
+                <div class="text-2xl font-bold text-indigo-600">MENSA APP.</div>
                 
                 <!-- Language Buttons - Centered -->
                 <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
@@ -291,7 +289,7 @@
             </h2>
             {% if dishes.get('Hauptspeise') or dishes.get('Main Dish') %}
             {% for dish in dishes.get('Hauptspeise', []) or dishes.get('Main Dish', []) %}
-            <div class="card w-full"  style="position: relative;">
+            <div class="card w-full">
                 <div class="grid items-start w-full p-6">
                     <div class="col-span-1 space-y-4">
                         <!-- Dish recommendation -->
@@ -365,9 +363,9 @@
                                     Student Price:
                                 {% endif %}
                                 {% if dish.studentPrice != -1.00 %} 
-                                    {{dish.studentPrice_formatted}} € 
+                                    {{dish.studentPrice}} € 
                                 {% else %}
-                                    {{ dish.studentPrice_imputed_formatted }} € 
+                                    {{ dish.studentPrice_imputed }} € 
                                     <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                 {% endif %}
                             </div>
@@ -380,9 +378,9 @@
                                     Guest Price:
                                 {% endif %}
                                 {% if dish.guestPrice != -1 %} 
-                                    {{dish.guestPrice_formatted}} € 
+                                    {{dish.guestPrice}} € 
                                 {% else %}
-                                    {{ dish.guestPrice_imputed_formatted }} € 
+                                    {{ dish.guestPrice_imputed }} € 
                                     <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                 {% endif %}
                             </div>
@@ -534,69 +532,101 @@
                         
 
                         <div class="flex gap-4 mb-2">
-                        <!-- Description Button -->
-                        <button class="description-btn" onclick="toggleDescriptionPopup({{ dish.id }})">
-                            {% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}
-                        </button>
-                        <div class="popup" id="description-popup-{{ dish.id }}">
-                            <div class="overlay" onclick="toggleDescriptionPopup({{ dish.id }})"></div>
+                            <!-- Description Button -->
+                            <button class="description-btn" onclick="toggleDescriptionPopup({{ dish.id }})">
+                                {% if session.get('language') == 'de' %}Beschreibung{% else %}Description{% endif %}
+                            </button>
+                            <div class="popup" id="description-popup-{{ dish.id }}">
+                                <div class="overlay"></div>
                                 <div class="content">
-                                <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
-                                {% if session.get('language') == 'de' %}
-                                    {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
-                                {% else %}
-                                    {{ dish.description_en if dish.description_en else 'No description available' }}
-                                {% endif %}
+                                    <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
+                                    {% if session.get('language') == 'de' %}
+                                        {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
+                                    {% else %}
+                                        {{ dish.description_en if dish.description_en else 'No description available' }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        
+                            <!-- Recipe Button -->
+                            <button class="recipe-btn" onclick="toggleRecipePopup({{ dish.id }})">
+                                {% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}
+                            </button>
+                            <div class="popup" id="recipe-popup-{{ dish.id }}">
+                                <div class="overlay"></div>
+                                <div class="content">
+                                    <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
+                                    {% if session.get('language') == 'de' and dish.recipe_de %}
+                                        {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
+                                        {% if recipe_parts|length > 1 %}
+                                            <div class="space-y-6">
+                                                <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                                {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
+                                                {% if ingredients_instructions|length > 1 %}
+                                                    <div class="mt-4">
+                                                        <h5 class="font-medium mb-2">Zutaten:</h5>
+                                                        <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                            {% for line in ingredients_instructions[0].split('\n') %}
+                                                                {% if line.strip().startswith('-') %}
+                                                                    <li>{{ line.strip('- ') }}</li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    <div class="mt-4">
+                                                        <h5 class="font-medium mb-2">Anleitung:</h5>
+                                                        <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                            {% for line in ingredients_instructions[1].split('\n') %}
+                                                                {% if line.strip() and line.strip()[0].isdigit() %}
+                                                                    <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </ol>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <p class="text-gray-600">Kein Rezept verfügbar</p>
+                                        {% endif %}
+                                    {% elif dish.recipe_en %}
+                                        {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
+                                        {% if recipe_parts|length > 1 %}
+                                            <div class="space-y-6">
+                                                <div class="text-gray-800 font-medium mb-2">{{ recipe_parts[0] }}</div>
+                                                {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
+                                                {% if ingredients_instructions|length > 1 %}
+                                                    <div class="mt-4">
+                                                        <h5 class="font-medium mb-2">Ingredients:</h5>
+                                                        <ul class="list-disc pl-5 text-gray-800 font-medium mb-2">
+                                                            {% for line in ingredients_instructions[0].split('\n') %}
+                                                                {% if line.strip().startswith('-') %}
+                                                                    <li>{{ line.strip('- ') }}</li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                    <div class="mt-4">
+                                                        <h5 class="font-medium mb-2">Instructions:</h5>
+                                                        <ol class="list-decimal pl-5 text-gray-800 font-medium mb-2">
+                                                            {% for line in ingredients_instructions[1].split('\n') %}
+                                                                {% if line.strip() and line.strip()[0].isdigit() %}
+                                                                    <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </ol>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <p class="text-gray-800">No recipe available</p>
+                                        {% endif %}
+                                    {% else %}
+                                        <p class="text-gray-800">{% if session.get('language') == 'de' %}Kein Rezept verfügbar{% else %}No recipe available{% endif %}</p>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
-
-                        <!-- Recipe Button -->
-                        <button class="recipe-btn" onclick="toggleRecipePopup({{ dish.id }})">
-                            {% if session.get('language') == 'de' %}Rezept{% else %}Recipe{% endif %}
-                        </button>
-                        <div class="popup" id="recipe-popup-{{ dish.id }}">
-                            <div class="overlay" onclick="toggleRecipePopup({{ dish.id }})"></div>
-                                <div class="content">
-                                <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
-                                {% if session.get('language') == 'de' %}
-                                <p>KI-Generiertes Rezept zum Nachkochen.</p>
-                                <p>Entspricht <strong>NICHT</strong> den eigentlichen Zutaten.</p>
-                                <br>
-                                <strong>Zutaten:</strong>
-                                <ul>
-                                {% for line in dish.recipe_de.split('\n') if line.startswith('-') %}
-                                    <li>{{ line | safe }}</li>
-                                {% endfor %}
-                                </ul>
-                                <br>
-                                <strong>Anleitung:</strong>
-                                <ol>
-                                {% for line in dish.recipe_de.split('\n') if line.startswith('1.') or line.startswith('2.') or line.startswith('3.') %}
-                                    <li>{{ line | safe }}</li>
-                                {% endfor %}
-                                </ol>
-                                
-                                {% else %}
-                                <p>AI generated recipe for home cooks.</p>
-                                <p>Does <strong>NOT</strong> represent actual ingredients.</p>
-                                <br>
-                                <strong>Ingredients:</strong>
-                                <ul>
-                                {% for line in dish.recipe_en.split('\n') if line.startswith('-') %}
-                                    <li>{{ line[1:] | safe }}</li>
-                                {% endfor %}
-                                </ul>
-                                <br>
-                                <strong>Instructions:</strong>
-                                <ol>
-                                {% for line in dish.recipe_en.split('\n') if line.startswith('1.') or line.startswith('2.') or line.startswith('4.') or line.startswith('5.') or line.startswith('6.') or line.startswith('7.')%}
-                                    <li>{{ line | safe }}</li>
-                                {% endfor %}
-                                </ol>
-                                {% endif %}
-                            </div>
-                        </div>
-                        </div>                       
+                        
                     </div>
                 </div>
             </div>
@@ -692,9 +722,9 @@
                                     Student Price:
                                 {% endif %}
                                 {% if dish.studentPrice != -1.00 %} 
-                                    {{dish.studentPrice_formatted}} € 
+                                    {{dish.studentPrice}} € 
                                 {% else %}
-                                    {{ dish.studentPrice_imputed_formatted }} € 
+                                    {{ dish.studentPrice_imputed }} € 
                                     <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                 {% endif %}
                             </div>
@@ -707,9 +737,9 @@
                                     Guest Price:
                                 {% endif %}
                                 {% if dish.guestPrice != -1 %} 
-                                    {{dish.guestPrice_formatted}} € 
+                                    {{dish.guestPrice}} € 
                                 {% else %}
-                                    {{ dish.guestPrice_imputed_formatted }} € 
+                                    {{ dish.guestPrice_imputed }} € 
                                     <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                 {% endif %}
                             </div>
@@ -945,9 +975,9 @@
                                             Student Price:
                                         {% endif %}
                                         {% if dish.studentPrice != -1.00 %} 
-                                            {{dish.studentPrice_formatted}} € 
+                                            {{dish.studentPrice}} € 
                                         {% else %}
-                                            {{ dish.studentPrice_imputed_formatted }} € 
+                                            {{ dish.studentPrice_imputed }} € 
                                             <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                         {% endif %}
                                     </div>
@@ -960,9 +990,9 @@
                                             Guest Price:
                                         {% endif %}
                                         {% if dish.guestPrice != -1 %} 
-                                            {{dish.guestPrice_formatted}} € 
+                                            {{dish.guestPrice}} € 
                                         {% else %}
-                                            {{ dish.guestPrice_imputed_formatted }} € 
+                                            {{ dish.guestPrice_imputed }} € 
                                             <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                         {% endif %}
                                     </div>
@@ -1134,18 +1164,6 @@
     closeMenu.addEventListener('click', () => {
         sidebar.classList.add('translate-x-full');
     });
-</script>
-
-<script>
-    function toggleDescriptionPopup(dishId) {
-        var popup = document.getElementById('description-popup-' + dishId);
-        popup.classList.toggle('show');
-    }
-
-    function toggleRecipePopup(dishId) {
-        var popup = document.getElementById('recipe-popup-' + dishId);
-        popup.classList.toggle('show');
-    }
 </script>
 
 </body>
