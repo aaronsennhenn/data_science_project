@@ -391,95 +391,95 @@ input:checked + .slider:before {
 .rate-more-dishes-button:hover {
   background-color: #3F42C8;
 }
-.popup {
-  position: absolute; /* Position the popup absolutely within its container */
-  display: none; /* Hide the popup by default */
-  z-index: 2; /* Ensure it appears above other content */
-}
 
-.popup .overlay {
-  position: fixed;
+/* General Popup Styling */
+.popup {
+  position: absolute; /* Ensure the popup is positioned relative to the viewport */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: none; /* Hide the overlay by default */
+  display: none; /* Hide the popup by default */
+  z-index: 9999; /* Ensure it appears above other content */
 }
 
+/* Overlay Styling */
+.popup .overlay {
+  position: absolute; /* Cover the entire parent container */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9); /* Dark semi-transparent background */
+  display: none;
+  border-radius: 8px;
+  z-index: -1; /* Hide the overlay by default */
+}
+
+/* Popup Content Styling */
 .popup .content {
-  position: relative; /* Position the content relative to the popup */
-  background: white;
-  width: 450px;
-  max-height: 80vh; /* Set a maximum height to ensure it doesn't overflow the viewport */
-  overflow-y: auto; /* Enable vertical scrolling if content exceeds max-height */
-  text-align: left;
-  padding: 20px;
-  box-sizing: border-box;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: #ffffff; /* White background for clarity */
+  color: #000000; /* Black text for readability */
+  font-size: 1.25rem; /* Larger base font size for all text inside */
+  line-height: 1.8; /* Improve readability with generous line spacing */
+  padding: 20px; /* Ensure comfortable padding inside the popup */
+  border-radius: 10px; /* Rounded corners for aesthetics */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  width: auto;
+  max-width: 70%; /* Ensure the content width stays manageable */
+  max-height: 90%;
+  overflow-y: auto; /* Enable scrolling for overflow content */
+  text-align: left; /* Align text to the left by default */
 }
 
+/* Close Button */
 .popup .close-btn {
   cursor: pointer;
   position: absolute;
   top: 10px;
   right: 10px;
   width: 30px;
+  height: 30px;
   background: #222;
   color: #fff;
-  font-size: 25px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 30px;
   text-align: center;
   border-radius: 50%;
-}
-
-.popup.active {
-  display: block; /* Show the popup when active */
-}
-
-.popup.active .overlay {
-  display: block; /* Show the overlay when active */
-}
-
-.popup.active .content {
-  transition: all 300ms ease-in-out;
-}
-
-/* Description Button */
-.description-btn {
-  display: block;
-  padding: 12px 24px;
-  background-color: #1B1EAF;
-  color: white;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  width: 200px;
 }
 
-.description-btn:hover {
-  background-color: #161894;
-}
-
-/* Recipe Button */
+/* Button Styles */
+.description-btn,
 .recipe-btn {
-  display: block;
+  display: inline-block;
   padding: 12px 24px;
-  background-color:  #1B1EAF;
+  background-color: #1b1eaf;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
   width: 200px;
+  margin: 5px 0;
 }
 
+.description-btn:hover,
 .recipe-btn:hover {
   background-color: #161894;
 }
 
+/* Active State */
+.popup.active {
+  display: flex; /* Show popup */
+  justify-content: center;
+  align-items: center;
+}
+
+.popup.active .overlay {
+  display: block; /* Show overlay */
+}
 
  /* Submit rating button styling */
  /*.submit-rating {
