@@ -221,7 +221,7 @@ def user_page():
         else:
             selected_user_type = 'student'
                 
-        if selected_user_type in ['student', 'pupil', 'guest']:
+        if selected_user_type in ['student', 'guest']:
             past_6_month_speding_chart = create_past_6_month_spending_chart(past_6_month_spending, selected_user_type)
             current_spending = current_month_spending[selected_user_type].iloc[0]
             current_spending_formatted = format_price(current_spending)
