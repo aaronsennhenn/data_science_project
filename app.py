@@ -9,6 +9,7 @@ import plotly
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
+from plotly.colors import sequential
 from plotly.subplots import make_subplots
 import json
 from db.utils import compute_cosine_similarity, format_price
@@ -513,7 +514,7 @@ def analysis():
 
         # Define professional color scheme
         lang = session.get('language', 'en')
-        PLOT_COLORS = ['#4F46E5', '#6366F1', '#455d7a']
+        PLOT_COLORS = sequential.Plotly3
 
         fig = make_subplots(
             rows=len(price_development), 

@@ -86,3 +86,23 @@ header, footer {
 .close-menu:hover {
     cursor: pointer;
 }
+
+.dropdown-style {
+    background-color: white;
+    color: #1a202c;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.dropdown-style:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-style:focus {
+    border-color: black;
+    box-shadow: 0 0 0 1px black;
+}

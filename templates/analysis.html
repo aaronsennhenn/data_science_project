@@ -52,7 +52,7 @@
                 </svg>
             </button>
             {% if username %}
-            <div class="flex items-center space-x-3 mb-6">
+            <div class="flex items-center space-x-3 mb-2">
                 <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-700">
                 </div>
                 <div>
@@ -61,7 +61,7 @@
                 </div>
             </div>
             {% else %}
-            <p class="text-center text-gray-700 font-medium mb-6">You are not logged in.</p>
+            <p class="text-center text-gray-700 font-medium mb-2">You are not logged in.</p>
             {% endif %}
             <nav class="mt-8">
                 <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
@@ -90,15 +90,15 @@
     </div>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center px-4 py-4">
+    <main class="flex-grow flex flex-col items-center px-4 py-2">
         <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
-            <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}</h1>
+            <h1 class="text-5xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}</h1>
             <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Kennzahlen, Preiseinblicke und Trends in Tübinger Mensen und Cafeterien{% else %}Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias{% endif %}</p>
         </div>
 
         <!-- Key Metrics Section -->
         <section class="mb-12 w-full">
-            <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Wichtige Kennzahlen{% else %}Key Metrics{% endif %}</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Wichtige Kennzahlen{% else %}Key Metrics{% endif %}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                     <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Datenerhebung{% else %}Data Inception{% endif %}</h3>
@@ -125,77 +125,41 @@
             </div>
         </section>
 
+        <!-- Rating Insights -->
         <section class="mb-12 w-full">
-            <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Wöchentliche Analyse{% else %}Weekly Analytics{% endif %}</h2>
-            <!-- Menu Details -->
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
-                    {% if session.get('language') == 'de' %}Menüoptionen{% else %}Menu Options{% endif %}
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {% for mensa in names_available_mensas %}
-                    <div class="p-4 bg-gray-50 rounded-lg">
-                        <div class="flex flex-col items-center">
-                            <div class="w-full mb-4">
-                                <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
-                                <p class="text-sm font-medium text-gray-600">
-                                    {% if session.get('language') == 'de' %}
-                                        Anzahl Menüs: {{ dish_count_per_mensa[mensa] }}
-                                    {% else %}
-                                        Menus Count: {{ dish_count_per_mensa[mensa] }}
-                                    {% endif %}
-                                </p>
-                                <p class="text-sm font-medium text-gray-600">
-                                    {% if session.get('language') == 'de' %}
-                                        Menükategorienverteilung:
-                                    {% else %}
-                                        Menu Line Distribution:
-                                    {% endif %}
-                                </p>
-                            </div>
-                            <div id="pie-chart-{{ loop.index }}" class="shadow-sm rounded-lg" style="width: 200px; height: 200px;"></div>
-                        </div>
-                    </div>
-                    {% endfor %}
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Bewertungseinblicke{% else %}Rating Insights{% endif %}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <!-- Top Mensas -->
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Top Mensen{% else %}Top Mensas{% endif %}</h3>
+                    <div id="top-mensas-chart" style="width: 100%; height: 300px;"></div>
                 </div>
-            </div>
+                <!-- Top Dishes -->
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Top Menüs{% else %}Top Dishes{% endif %}</h3>
+                    <div id="top-dishes-chart" style="width: 100%; height: 300px;"></div>
+                </div>  
+            </div>       
+        </section>
 
-            <!-- Rating Details -->
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
-                    {% if session.get('language') == 'de' %}Bewertungseinblicke{% else %}Rating Insights{% endif %}
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-gray-50 rounded-lg w-full">
-                        <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Top Mensen{% else %}Top Mensas{% endif %}</h4>
-                        <div id="top-mensas-chart" style="width: 100%; height: 300px;"></div>
-                    </div>
-                    <div class="p-4 bg-gray-50 rounded-lg w-full">
-                        <h4 class="text-lg font-semibold text-gray-900 mb-2">{% if session.get('language') == 'de' %}Top Menüs{% else %}Top Dishes{% endif %}</h4>
-                        <div id="top-dishes-chart" style="width: 100%; height: 300px;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Price development over time -->
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6 max-w-full">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
-                    {% if session.get('language') == 'de' %}Preisentwicklung{% else %}Price Development{% endif %}
-                </h3>
+        <!-- Price Development -->
+        <section class="mb-12 w-full">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Preisentwicklung{% else %}Price Development{% endif %}</h2>
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-2 max-w-full">
                 <div class="grid grid-cols-1 md:grid-cols-10 gap-4">
                     <!-- Plot Area -->
-                    <div class="p-4 bg-gray-50 rounded-lg col-span-7">
+                    <div class="p-4 rounded-lg col-span-7">
                         <div id="plot">
                             {{ price_plot|safe }}
                         </div>
                     </div>
                 
                     <!-- Controls Section -->
-                    <div class="p-4 bg-gray-50 rounded-lg col-span-3 flex flex-col space-y-4">
+                    <div class="p-4 rounded-lg col-span-3 flex flex-col space-y-4">
                         <!-- Dropdown for selecting the category -->
                         <div>
                             <label for="category" class="block font-medium text-gray-700">Select Category:</label>
-                            <select id="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            <select id="category" class="dropdown-style mt-1 block w-full">
                                 {% for category in categories %}
                                     <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
                                         {{ category }}
@@ -207,9 +171,9 @@
                         <!-- Dropdown for selecting price type -->
                         <div>
                             <label for="priceType" class="block font-medium text-gray-700">Price Type:</label>
-                            <select id="priceType" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="studentPrice">Student Price</option>
-                                <option value="guestPrice">Guest Price</option>
+                            <select id="priceType" class="dropdown-style mt-1 block w-full">
+                                <option value="studentPrice">{% if session.get('language') == 'de' %}Studentenpreis{% else %}Student Price{% endif %}</option>
+                                <option value="guestPrice">{% if session.get('language') == 'de' %}Gästepreis{% else %}Guest Price{% endif %}</option>
                             </select>
                         </div>
                 
@@ -228,12 +192,8 @@
                         </div>
                     </div>
                 </div>
-                </div>
-                </div>
-                </div>
-            </div>
-        </div>
-    </section>
+            </div>      
+        </section>
 </main>
     
     <!-- Footer -->
@@ -309,3 +269,37 @@
     </script>
 </body>
 </html>
+
+<!-- Menu Details 
+<div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
+    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
+        {% if session.get('language') == 'de' %}Menüoptionen{% else %}Menu Options{% endif %}
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for mensa in names_available_mensas %}
+        <div class="p-4 bg-gray-50 rounded-lg">
+            <div class="flex flex-col items-center">
+                <div class="w-full mb-4">
+                    <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
+                    <p class="text-sm font-medium text-gray-600">
+                        {% if session.get('language') == 'de' %}
+                            Anzahl Menüs: {{ dish_count_per_mensa[mensa] }}
+                        {% else %}
+                            Menus Count: {{ dish_count_per_mensa[mensa] }}
+                        {% endif %}
+                    </p>
+                    <p class="text-sm font-medium text-gray-600">
+                        {% if session.get('language') == 'de' %}
+                            Menükategorienverteilung:
+                        {% else %}
+                            Menu Line Distribution:
+                        {% endif %}
+                    </p>
+                </div>
+                <div id="pie-chart-{{ loop.index }}" class="shadow-sm rounded-lg" style="width: 200px; height: 200px;"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+-->

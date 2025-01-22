@@ -1,6 +1,7 @@
 from flask import request
 import plotly.graph_objects as go
 import plotly.io as pio
+from plotly.colors import sequential
 from db.db_read import get_combined_dishes
 
 # Define the colors
@@ -17,6 +18,9 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     # Filter the DataFrame
     filtered_df = df[df['menuLine'] == selected_category]
 
+    # Define the colors
+    PLOT_COLORS = sequential.dense
+
     # Create the Plotly figure
     fig = go.Figure()
 
@@ -30,7 +34,7 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
                 y=icon_data[selected_price_type],
                 mode='markers',
                 name=f'{icon}',
-                marker=dict(color=colors[i % len(colors)])
+                marker=dict(color=PLOT_COLORS[i % len(PLOT_COLORS)])
             )
     else:
         fig.add_scatter(
