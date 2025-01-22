@@ -191,7 +191,15 @@ def impute_missing_prices(df,price_column):
 
 #Price formatting to 
 def format_price(price):
-    return f"{price:,.2f}".replace('.', ',')
+    
+    if isinstance(price, float):
+        return f"{price:,.2f}".replace('.', ',')
+    
+    if isinstance(price, str):
+        return price.replace('.', ',')
+    
+    # If the input is neither a string nor a float, return it unchanged
+    return price
 
 
 #Formatting month numbers to names

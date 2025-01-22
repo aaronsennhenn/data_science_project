@@ -398,6 +398,8 @@ def menu():
                         'menuLine': dish[0].menuLine,
                         'studentPrice': dish[0].studentPrice,
                         'guestPrice': dish[0].guestPrice,
+                        'studentPrice_formatted': format_price(dish[0].studentPrice),
+                        'guestPrice_formatted': format_price(dish[0].guestPrice),
                         'allergens': dish[0].allergens,
                         'additives': dish[0].additives,
                         'location': dish[0].location,
@@ -416,7 +418,9 @@ def menu():
                         'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
                         'is_top_recommendation_in_course': False,  # Initialize to False
                         "studentPrice_imputed":dish[13],
-                        "guestPrice_imputed":dish[14]
+                        "guestPrice_imputed":dish[14],
+                        "studentPrice_imputed_formatted":format_price(dish[13]),
+                        "guestPrice_imputed_formatted":format_price(dish[14])
                         })
         
 
