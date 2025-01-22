@@ -402,7 +402,7 @@ def menu():
                         'additives': dish[0].additives,
                         'location': dish[0].location,
                         'icons':dish[1],
-                        'receipe_de':dish[2],
+                        'recipe_de':dish[2],
                         'description_de':dish[3],
                         'course':dish[4],
                         'menuLineEng':dish[5],
