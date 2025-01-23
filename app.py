@@ -58,11 +58,11 @@ def index():
     session.permanent = True
     user_name = session.get('username')
     mensa_coordinates = {
-        "Mensa Morgenstelle": {"top": 20, "left": 30, "text_offset": 0},
-        "Cafeteria Morgenstelle": {"top": 20, "left": 30, "text_offset": 30},
-        "Mensa Wilhelmstraße": {"top": 50, "left": 70, "text_offset": 0},
-        "Cafeteria Wilhelmstraße": {"top": 50, "left": 70, "text_offset": 30},
-        "Cafeteria und Mensa Prinz Karl": {"top": 35, "left": 50, "text_offset": 0}
+        "Mensa Morgenstelle": {"top": 30, "left": 16, "text_offset": 0},
+        "Cafeteria Morgenstelle": {"top": 30, "left": 16, "text_offset": 30},
+        "Mensa Wilhelmstraße": {"top": 47, "left": 49, "text_offset": 0},
+        "Cafeteria Wilhelmstraße": {"top": 47, "left": 49, "text_offset": 30},
+        "Cafeteria und Mensa Prinz Karl": {"top": 59, "left": 39, "text_offset": 0}
     }
     return render_template('index.html', username=user_name, mensa_coordinates=mensa_coordinates)
 
