@@ -89,16 +89,16 @@
     </div>
 
  <!-- Main Content -->
-<div class="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
+<div class="flex-grow flex items-center justify-center px-4 py-8 relative z-10">
     <div class="content-wrapper max-w-6xl w-full p-8 bg-white rounded-xl shadow-sm border border-gray-100">
-        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">
             {% if session.get('language') == 'de' %}
                 Ihr digitaler Mensa-Guide
             {% else %}
                 Your Digital Mensa Guide
             {% endif %}
         </h1>
-        <p class="text-xl text-gray-600 mb-12 text-center leading-relaxed">
+        <p class="text-xl text-gray-600 mb-6 text-center leading-relaxed">
             {% if session.get('language') == 'de' %}
                 Entdecken Sie die vielfältigen kulinarischen Angebote in den Cafeterien und Mensen Tübingens.
                 Erkunden Sie die Mensa-Szene Tübingens und gewinnen Sie Einblicke in Menümuster, Preise und aktuelle Trends.
@@ -109,8 +109,8 @@
         </p>        
         
         <!-- Locations Section -->
-        <div class="mt-12 relative">
-            <h2 class="text-3xl font-semibold text-gray-800 mb-6 text-center">
+        <div class="mt-6 relative">
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">
                 {% if session.get('language') == 'de' %}
                     Standorte
                 {% else %}
@@ -118,7 +118,7 @@
                 {% endif %}
             </h2>
                 <!-- Container for the image -->
-                <div class="relative max-w-4xl mx-auto">
+                <div class="relative max-w-2xl mx-auto">
                     <!-- The map image -->
                     <img src="{{ url_for('static', filename='images/map.jpg') }}" 
                          alt="Map with Dining Facilities" 

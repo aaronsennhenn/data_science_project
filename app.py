@@ -43,7 +43,16 @@ google = oauth.register(
 
 # Function to format x-axis labels with line breaks
 def format_labels(labels):
-    return [label.replace(' ', '<br>') for label in labels]
+    def insert_br_every_n_words(label, n=2):
+        words = label.split()
+        return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
+    return [insert_br_every_n_words(label) for label in labels]
+
+def format_labels_dishes(labels):
+    def insert_br_every_n_words(label, n=3):
+        words = label.split()
+        return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
+    return [insert_br_every_n_words(label) for label in labels]
 
 @app.route('/set_language/<lang>')
 def set_language(lang):
@@ -195,7 +204,7 @@ def user_page():
 
         # Create top mensas chart
         mensa_trace = {
-            'x': format_labels([mensa[0] for mensa in favorite_mensas]),
+            'x': format_labels_dishes([mensa[0] for mensa in favorite_mensas]),
             'y': [mensa[1] for mensa in favorite_mensas],
             'type': 'bar',
             'marker': {
@@ -206,10 +215,10 @@ def user_page():
             'xaxis': {
                 'title': {
                     'text': 'Mensa',
-                    'standoff': 20  # Adjust the value to increase/decrease the space
+                    'standoff': 20  
                 },
                 'tickangle': 0,
-                'automargin': True  # Ensure margins are automatically adjusted
+                'automargin': True  
             },
             'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
         }
@@ -655,7 +664,7 @@ def analysis():
 
         # Create top dishes chart
         dish_trace = {
-            'x': format_labels([item['dish_name'] for item in top_three_dishes]),
+            'x': format_labels_dishes([item['dish_name'] for item in top_three_dishes]),
             'y': [item['avg_rating'] for item in top_three_dishes],
             'type': 'bar',
             'marker': {
@@ -663,12 +672,19 @@ def analysis():
             }
         }
         dish_layout = {
-            #'title': 'Top 3' if lang == 'de' else 'Top 3',
-            'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 0},
-            'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
+            'xaxis': {
+                'title': {
+                    'text': 'Menü' if lang == 'de' else 'Dish',
+                    'standoff': 20  # Add standoff of 20
+                },
+                'tickangle': 0,
+                'automargin': True  # Ensure margins are automatically adjusted
+            },
+            'yaxis': {
+                'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'
+            }
         }
         dish_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
-
 
         ### Price Chart ###
 

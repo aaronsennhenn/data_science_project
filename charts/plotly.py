@@ -8,7 +8,10 @@ from db.db_read import get_combined_dishes
 colors = ['#4F46E5', '#6366F1', '#818CF8']
 
 def format_labels(labels):
-    return [label.replace(' ', '<br>') for label in labels]
+    def insert_br_every_n_words(label, n=2):
+        words = label.split()
+        return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
+    return [insert_br_every_n_words(label) for label in labels]
 
 def generate_price_chart(db_session, selected_category, selected_price_type, show_icons):
     ### Get Data ###
@@ -52,10 +55,11 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
         xaxis_title='Date',
         yaxis_title=selected_price_type.capitalize(),
         legend=dict(
-            x=-0.2,  # Position legend to the left of the plot
-            y=0.5,   # Center the legend vertically
-            xanchor="left",  # Anchor the legend box to the left
-            yanchor="middle",  # Anchor the legend box to the middle
+            orientation='h',  
+            yanchor='top',   
+            y=-0.2,           
+            xanchor='center',
+            x=0.5   
         )
     )
 
