@@ -43,7 +43,7 @@ google = oauth.register(
 
 # Function to format x-axis labels with line breaks
 def format_labels(labels):
-    return [label.replace(', ', '<br>') for label in labels]
+    return [label.replace(' ', '<br>') for label in labels]
 
 @app.route('/set_language/<lang>')
 def set_language(lang):
@@ -203,7 +203,14 @@ def user_page():
             }
         }
         mensa_layout = {
-            'xaxis': {'title': 'Mensa', 'tickangle': 0},
+            'xaxis': {
+                'title': {
+                    'text': 'Mensa',
+                    'standoff': 20  # Adjust the value to increase/decrease the space
+                },
+                'tickangle': 0,
+                'automargin': True  # Ensure margins are automatically adjusted
+            },
             'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
         }
         mensa_user_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
