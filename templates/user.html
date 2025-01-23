@@ -178,7 +178,7 @@
 
                 <!-- Dropdown Menu -->
                 <form method="POST" action="{{ url_for('user_page') }}">
-                    <div class="mb-4">
+                    <div class="mb-4" style="width: 16rem;">
                         <label for="user-type" class="block text-sm font-medium text-gray-500 mb-2">
                             {% if session.get('language') == 'de' %}Bitte auswählen{% else %}Please select{% endif %}
                         </label>
@@ -188,7 +188,7 @@
                         </select>
                     </div>
                     <button type="submit" style="background-color: #6366F1; color: white; width: 16rem; padding: 0.5rem; border-radius: 0.375rem;">
-                        {% if session.get('language') == 'de' %}Absenden{% else %}Submit{% endif %}
+                        {% if session.get('language') == 'de' %}Auswählen{% else %}Select{% endif %}
                     </button>
                 </form>
             </div>
