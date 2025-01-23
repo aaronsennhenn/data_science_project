@@ -12,7 +12,7 @@ import plotly.io as pio
 from plotly.colors import sequential
 from plotly.subplots import make_subplots
 import json
-from db.utils import compute_cosine_similarity, format_price
+from db.utils import compute_cosine_similarity, format_price, format_price_column
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
@@ -232,6 +232,10 @@ def user_page():
 
         # get dishes for the week and compute user vector with user_name
         df = get_week_recommended_dishes(db_session, get_weekday_dates(), user_name, lang)
+        
+        #Format prices
+        df = format_price_column(df, 'studentPrice', 'studentPrice_imputed')
+        df = format_price_column(df, 'guestPrice', 'guestPrice_imputed')
 
         # add day of week to dataframe
         day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
