@@ -307,6 +307,8 @@ def rating():
             # write rating to rating table if user submitted rating
             if rating:
                 write_to_rating(menu_id, rating, user_name, on_rating_page, engine, Session)
+                if user_name:
+                    update_user_vector(user_name, engine, Session)
 
         # get random dish that user has not rated before and that is not contained in todays selected
         random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(), lang, user_name, db_session)
