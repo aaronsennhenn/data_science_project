@@ -19,7 +19,7 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     filtered_df = df[df['menuLine'] == selected_category]
 
     # Define the colors
-    PLOT_COLORS = sequential.dense
+    PLOT_COLORS = sequential.ice
 
     # Create the Plotly figure
     fig = go.Figure()
@@ -46,7 +46,6 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
 
     # Update layout
     fig.update_layout(
-        title=f'{selected_price_type.capitalize()} Over Time for Category {selected_category}',
         xaxis_title='Date',
         yaxis_title=selected_price_type.capitalize(),
         legend=dict(

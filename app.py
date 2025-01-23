@@ -661,11 +661,11 @@ def analysis():
 
         # get 
         initial_category = "initial"
-        initial_price_type = 'guestPrice'
+        initial_price_type = 'studentPrice'
         show_icons_initial = True
 
         plot_html,categories = generate_price_chart(db_session,initial_category,initial_price_type,show_icons_initial)
-
+        
 
         # Add pie_charts to the template context
         return render_template('analysis.html',
