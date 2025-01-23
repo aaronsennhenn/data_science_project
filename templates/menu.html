@@ -513,7 +513,7 @@
                             </div>
                         
                             <!-- Submit Rating Button -->
-                            <button class="submit-rating" data-id="{{ dish.id }}">
+                            <button class="submit-rating" id="submit-rating-{{ dish.id }}" data-id="{{ dish.id }}">
                                 {% if session.get('language') == 'de' %}
                                 Bewertung senden
                                 {% else %}
@@ -522,7 +522,7 @@
                             </button>
 
                             <!-- Success Message (Initially hidden) -->
-                            <p id="rating-feedback" class="text-sm text-green-600 hidden">
+                            <p id="rating-feedback-{{ dish.id }}" class="text-sm text-green-600 hidden">
                                 {% if session.get('language') == 'de' %}
                                     Bewertung erhalten, danke!
                                 {% else %}
@@ -572,7 +572,7 @@
                                 <strong>Anleitung:</strong>
                                 <ol>
                                 {% for line in dish.recipe_de.split('\n') if line.startswith('1.') or line.startswith('2.') or line.startswith('3.') %}
-                                    <li>{{ line | safe }}</li>
+                                    <li>•{{ line[1:] | safe }}</li>
                                 {% endfor %}
                                 </ol>
                                 
@@ -583,7 +583,7 @@
                                 <strong>Ingredients:</strong>
                                 <ul>
                                 {% for line in dish.recipe_en.split('\n') if line.startswith('-') %}
-                                    <li>{{ line[1:] | safe }}</li>
+                                    <li>•{{ line[1:] | safe }}</li>
                                 {% endfor %}
                                 </ul>
                                 <br>
@@ -839,13 +839,22 @@
                             </div>
                         
                             <!-- Submit Rating Button -->
-                            <button class="submit-rating" data-id="{{ dish.id }}">
+                            <button class="submit-rating" id="submit-rating-{{ dish.id }}" data-id="{{ dish.id }}">
                                 {% if session.get('language') == 'de' %}
                                 Bewertung senden
                                 {% else %}
                                 Submit Rating
                                 {% endif %}
                             </button>
+
+                            <!-- Success Message (Initially hidden) -->
+                            <p id="rating-feedback-{{ dish.id }}" class="text-sm text-green-600 hidden">
+                                {% if session.get('language') == 'de' %}
+                                    Bewertung erhalten, danke!
+                                {% else %}
+                                    Rating received, thank you!
+                                {% endif %}
+                            </p>
 
                         </div>
                     </div>
@@ -1094,13 +1103,22 @@
                                     </div>
                                 
                                     <!-- Submit Rating Button -->
-                                    <button class="submit-rating" data-id="{{ dish.id }}">
+                                    <button class="submit-rating" id="submit-rating-{{ dish.id }}" data-id="{{ dish.id }}">
                                         {% if session.get('language') == 'de' %}
                                         Bewertung senden
                                         {% else %}
                                         Submit Rating
                                         {% endif %}
                                     </button>
+
+                                    <!-- Success Message (Initially hidden) -->
+                                    <p id="rating-feedback-{{ dish.id }}" class="text-sm text-green-600 hidden">
+                                        {% if session.get('language') == 'de' %}
+                                            Bewertung erhalten, danke!
+                                        {% else %}
+                                            Rating received, thank you!
+                                        {% endif %}
+                                    </p>
         
                                 </div>
                             </div>       
@@ -1146,6 +1164,27 @@
         var popup = document.getElementById('recipe-popup-' + dishId);
         popup.classList.toggle('show');
     }
+</script>
+
+<script>
+document.querySelectorAll('.submit-rating').forEach(button => {
+    button.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevents the default form submission (if using form)
+        
+        var dishId = this.getAttribute('data-id');
+        var feedbackMessage = document.getElementById('rating-feedback-' + dishId);
+        var submitButton = document.getElementById('submit-rating-' + dishId);
+
+        // Hide the submit button after the rating is submitted
+        submitButton.style.display = 'none';
+
+        // Show the feedback message for the corresponding dish
+        feedbackMessage.classList.remove('hidden');
+
+        // Optional: If you're using a form, you can submit it using JavaScript
+        // document.querySelector(`#rating-form-${dishId}`).submit();
+    });
+});
 </script>
 
 </body>
