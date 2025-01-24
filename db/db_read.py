@@ -717,9 +717,19 @@ def get_embedding_cluster(db_session):
         )
     return df
 
-def get_dish_vector(db_session, menu_id):
-    query = db_session.query(Embedding.embedding).filter(Embedding.menu_id == menu_id).first()
-    return np.array(eval(query[0]))
+def get_dish_vector_for_week(db_session, week_dates):
+    query = db_session.query(
+        Dish.id,
+        Embedding.embedding
+        ).filter(
+        Dish.menuDate.in_(week_dates),Course.course == "Hauptspeise"
+        ).join(Embedding, Dish.id == Embedding.menu_id
+        ).join(Course, Dish.id == Course.menu_id).all()
+
+    df = pd.DataFrame(query, columns=["menu_id", "embedding"])
+    df['embedding'] = df['embedding'].apply(lambda x: np.array(eval(x)) if isinstance(x, str) else np.array(x))
+    
+    return df
 
 def get_cluster_similarity(db_session,user_name):
     
@@ -901,3 +911,38 @@ def get_past_6_month_spending(session: Session, user_name, lang='en'):
 
     return df
     
+def get_cluster_similarity_for_week(db_session, week_dates):
+    # Get centroid df
+    centroid_df = get_embedding_cluster(db_session)
+    centroid_df = centroid_df[~centroid_df["cluster_name"].isin(["german"])]
+
+    # Get centroids
+    centroids = np.vstack(centroid_df['centroid'])
+
+    # Get embedding matrices for the selected dates
+    df = get_dish_vector_for_week(db_session, week_dates)
+
+    # Initialize a list to store results
+    cluster_names = []
+
+    # Iterate over each row in df and compute cosine similarity
+    for _, row in df.iterrows():
+        # Get the embedding for the current row
+        dish_vector = row['embedding']
+
+        # Compute cosine similarity
+        similarity_scores = cosine_similarity([dish_vector], centroids)[0]
+        centroid_df['cosine_similarity'] = similarity_scores
+
+        # Get the cluster_name with the highest similarity
+        cluster_name = centroid_df.loc[centroid_df['cosine_similarity'].idxmax(), 'cluster_name']
+        cluster_names.append(cluster_name)
+
+    # Add the cluster names to the DataFrame
+    df['cluster_name'] = cluster_names
+
+    # get number of meals per cluster
+    cluster_counts = df.groupby('cluster_name').size().reset_index(name='count')
+
+
+    return cluster_counts

@@ -2,7 +2,7 @@ from flask import request
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.colors import sequential
-from db.db_read import get_combined_dishes,get_ratings_of_the_week,get_top_three_mensas,get_top_three_dishes,get_dishes_and_rating_by_week
+from db.db_read import get_combined_dishes,get_ratings_of_the_week,get_top_three_mensas,get_top_three_dishes,get_dishes_and_rating_by_week,get_cluster_similarity_for_week
 import pandas as pd
 from datetime import datetime
 import json
@@ -287,7 +287,7 @@ def create_weekly_top_mensa_chart(db_session,lang,week_dates):
     formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
     formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
 
-    title = f'Top 3 Mensas for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Mensen für die Woche von {formatted_start_date} bis {formatted_end_date}'
+    title = f'Top 3 Mensas for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Mensen für {formatted_start_date} bis {formatted_end_date}'
 
     # Define the layout
     mensa_layout = go.Layout(
@@ -323,7 +323,7 @@ def create_weekly_top_dishes_chart(db_session,lang,week_dates):
     formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
     formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
 
-    title = f'Top 3 Dishes for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Gerichte für die Woche von {formatted_start_date} bis {formatted_end_date}'
+    title = f'Top 3 Dishes for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Gerichte von {formatted_start_date} bis {formatted_end_date}'
 
     # Define the layout
     dish_layout = go.Layout(
@@ -377,3 +377,44 @@ def plot_rating_histogram(db_session, dates, dish):
     plot_html = pio.to_html(fig, full_html=False)
 
     return plot_html,unique_menus
+
+
+def plot_donut_chart(db_session, week_dates,lang):
+
+    cluster_counts_df = get_cluster_similarity_for_week(db_session, week_dates)
+
+    # Extract cluster names and their counts
+    labels = cluster_counts_df['cluster_name']
+    values = cluster_counts_df['count']
+
+    # Create the donut chart
+    fig = go.Figure(
+        data=[go.Pie(
+            labels=labels, 
+            values=values, 
+            hole=0.5,  
+            hoverinfo='label+percent+value' 
+        )]
+    )
+    # Format the dates to "DD.MM.YYYY"
+    formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
+    formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
+
+    title = f'Taste Cluster Distribution for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Geschmackscluster Verteilung für {formatted_start_date} bis {formatted_end_date}'
+
+    # Update layout for styling
+    fig.update_layout(
+        title_text=title,
+        annotations=[dict(
+            text="", 
+            x=0.5, y=0.5, 
+            font_size=20, 
+            showarrow=False
+        )],
+        showlegend=True
+    )
+
+    # Display the figure
+    plot_html = pio.to_html(fig, full_html=False)
+
+    return plot_html

@@ -133,11 +133,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <!-- Top Mensas -->
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Top Mensen{% else %}Top Mensas{% endif %}</h3>
                     <div id="mensa-plot" class="p-4 rounded-lg col-span-7">
                         {{ mensa_plot|safe }}
                     </div>
-                
                 </div>
                 <!-- Top Dishes -->
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
@@ -147,15 +145,17 @@
                 </div>  
             </div>
             <!-- Average ratings plot -->
-            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-2 max-w-full">         
-                <div class="grid grid-cols-1 md:grid-cols-10 gap-4">
-                    <div class="p-4 rounded-lg col-span-7">
-                        <div id="ratings-plot">
-                            {{ ratings_of_the_week_plot|safe }}
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">         
+                    <div id="ratings-plot" class="p-4 rounded-lg col-span-7">
+                        {{ ratings_of_the_week_plot|safe }}
                     </div>
                 </div>
-
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">         
+                    <div id="donut-plot" class="p-4 rounded-lg col-span-7">
+                        {{ donut_plot|safe }}
+                    </div>
+                </div>
                 <!-- Buttons to switch dates-->
                 <div class="flex items-start col-span-3 space-x-2"> 
                     <button id="prev-date-button" class="location-link">
@@ -206,19 +206,11 @@
                         <!-- Checkbox for showing icons -->
                         <div>
                             <label for="showIcons" class="inline-flex items-center">
-                                <input
-                                    type="checkbox"
-                                    id="showIcons"
-                                    value="true"
-                                    checked
-                                    class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                                >
+                                <input type="checkbox" id="showIcons" value="true" checked class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
                                 <span class="ml-2 text-gray-700">Show Icons</span>
                             </label>
                         </div>
                     </div>
-                    
-
                 </div>
             </div>      
         </section>
@@ -298,11 +290,12 @@
                 $('#ratings-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
                 $('#mensa-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
                 $('#dish-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
-
+                $('#donut-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
             } else {
                 $('#ratings-plot').html(response.ratings_plot); // Update the ratings plot
                 $('#mensa-plot').html(response.mensa_plot); // Update the mensa plot
                 $('#dish-plot').html(response.dish_plot); // Update the dish plot
+                $('#donut-plot').html(response.donut_plot); // Update the donut plot
             }
 
             week_dates = response.week_dates; // Update the global week_dates variable
