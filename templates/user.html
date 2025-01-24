@@ -93,22 +93,22 @@
     <!-- Main Content -->
 <main class="flex-grow flex flex-col items-center px-4 py-4">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
-        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Account Analyse{% else %}Account Analysis{% endif %}</h1>
-        <h2 class="text-xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Willkommen {% else %}Welcome {% endif %}{{ username }}!</h2> 
-        <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Deine persönliche Mensa-Statistik{% else %}Your personal mensa statistics{% endif %}</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Account Analyse{% else %}Account Analysis{% endif %}</h1>
+        <!--<h2 class="text-xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Willkommen {{ username }} auf Ihrer persöhnlichen Mensa Statistik{% else %}Welcome to your personal mensa statistic {{ username }}{% endif %}!</h2> -->
+        <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Ihre persönliche Mensa-Statistik{% else %}Your personal mensa statistics{% endif %}</p>
     </div>
 
 	
     <!-- Key Metrics -->
-    <section class="mb-12 w-full">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Zentralen Kennzahlen{% else %}Your Key Metrics{% endif %}</h2>
+    <section class="mb-6 w-full">
+        <h2 class="text-lg font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Kennzahlen{% else %}Your Key Metrics{% endif %}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Benutzerkontoerstellung{% else %}Account Start{% endif %}</h3>
                 <p class="text-2xl font-bold text-gray-900">{{ first_rating_date }}</p>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Bewertungsanzahl{% else %}Total Ratings{% endif %}</h3>
+                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtzahl abgegebener Bewertungen{% else %}Total Number of submitted Ratings{% endif %}</h3>
                 <p class="text-2xl font-bold text-gray-900">{{ total_ratings }}</p>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
@@ -121,8 +121,8 @@
     </section>
 
     <!-- Favorites -->
-    <section class="mb-12 w-full">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Deine Favoriten{% else %}Your Favorites{% endif %}</h2>
+    <section class="mb-6 w-full">
+        <h2 class="text-lg font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Ihre Favoriten{% else %}Your Favorites{% endif %}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Favorite Mensas -->
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
@@ -138,10 +138,10 @@
                             <button class="remove-dish-button absolute top-2 right-2 text-gray-600" data-id="{{ dish.menu_id }}" title="{% if session.get('language') == 'de' %}Löschen{% else %}Delete{% endif %}">
                                 ×
                             </button>
-                            <p class="text-base sm:text-sm text-gray-800">
+                            <p class="text-base-style">
                                 {% if session.get('language') == 'de' %}Gericht:{% else %}Dish:{% endif %} {{ dish.menu }}
                             </p>
-                            <p class="text-base sm:text-sm text-gray-800">
+                            <p class="text-base-style">
                                 {% if session.get('language') == 'de' %}Bewertung:{% else %}Rating:{% endif %} {{ dish.rating }}
                             </p>
                         </div>
@@ -152,34 +152,31 @@
     </section>
     
 <!-- Budget -->
-<section class="mb-12 w-full">
-    <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre Ausgaben{% else %}Your Budget{% endif %}</h2>
+<section class="mb-6 w-full">
+    <h2 class="text-lg font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihre Ausgaben{% else %}Your Budget{% endif %}</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-            <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In den letzten Monaten{% else %}In the past months{% endif %}</h3>
-            <div>{{ past_6_month_speding_chart | safe }}</div>
-        </div>
         <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col">
             <div>
+                <!-- Current Month -->
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In diesem Monat{% else %}This month{% endif %}</h3>
-                <!-- Bold Text Container -->
+                <!-- Month -->
                 <div class="mb-2">
-                    <p class="text-gray-900 font-bold text-5xl">
+                    <p class="text-2xl font-bold text-gray-900">
                         {{ current_month }}
                     </p>
                 </div>
 
-                <!-- Smaller Font Text Container -->
-                <div class="mb-10">
-                    <p class="text-gray-600 text-4xl">
+                <!-- Amount  -->
+                <div class="mb-10 mt-6">
+                    <p class="text-2xl text-gray-900 mb-2">
                         {{ current_spending_formatted }} €
                     </p>
                 </div>
 
-                <!-- Dropdown Menu -->
+                <!-- Dropdown -->
                 <form method="POST" action="{{ url_for('user_page') }}">
-                    <div class="mb-4">
-                        <label for="user-type" class="block text-sm font-medium text-gray-500 mb-2">
+                    <div class="mb-2" style="width: 16rem;">
+                        <label for="user-type" class="block text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
                             {% if session.get('language') == 'de' %}Bitte auswählen{% else %}Please select{% endif %}
                         </label>
                         <select id="user-type" name="user_type" onchange="this.form.submit()" class="dropdown-style mt-1 block w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
@@ -188,24 +185,28 @@
                         </select>
                     </div>
                     <button type="submit" style="background-color: #6366F1; color: white; width: 16rem; padding: 0.5rem; border-radius: 0.375rem;">
-                        {% if session.get('language') == 'de' %}Absenden{% else %}Submit{% endif %}
+                        {% if session.get('language') == 'de' %}Auswählen{% else %}Select{% endif %}
                     </button>
                 </form>
             </div>
 
             <!-- Small message at the bottom -->
             <div class="mt-auto">
-                <p class="mt-4 text-sm text-gray-600">
+                <p class="mt-2 text-sm text-gray-600" style="font-size: 1.0em;">
                     {% if session.get('language') == 'de' %}Diese Zahlen basieren auf den Gerichten die Sie auf der Menu Seite bewertet haben.{% else %}These numbers are based on the dishes you have rated on the menu page.{% endif %}
                 </p>
-            </div>  
-        </div>       
+            </div> 
+        </div>    
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+            <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In den letzten Monaten{% else %}In the past months{% endif %}</h3>
+            <div>{{ past_6_month_speding_chart | safe }}</div>
+        </div>   
     </div>
 </section>
 
     <!-- Taste Profile -->
-    <section class="mb-12 w-full">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Dein Geschmacksprofil{% else %}Your Taste-Profile{% endif %}</h2>
+    <section class="mb-6 w-full">
+        <h2 class="text-lg font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Ihr Geschmacksprofil{% else %}Your Taste-Profile{% endif %}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;"> {% if session.get('language') == 'de' %}Geschmacksvorlieben nach Küche{% else %}Taste Preferences by Cuisine{% endif %}</h3>
@@ -223,13 +224,13 @@
     </section>
 
     <!-- Weekly Schedule -->
-    <section class="mb-12 w-full">
+    <section class="mb-6 w-full">
         <h2 class="text-xl font-semibold text-gray-800 mb-6">{% if session.get('language') == 'de' %}Ihr wöchentlicher Speiseplan{% else %}Your Weekly Dining Schedule{% endif %}</h2>
         <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
             <div class="grid-container" id="schedule">
                 <!-- Headers for days -->
                 <div class="grid-row">
-                    <div class="header"></div> <!-- Empty header for the first column -->
+                    <div class="header"></div> 
                     {% for day in dishes.keys() %}
                         <div class="header">{{ day }}</div>
                     {% endfor %}
@@ -248,7 +249,7 @@
                                 <div class="dish-box">
                                     {% for dish in course_dishes %}
                                         {% if dish.course == course %}
-                                            {{dish.location}} <br> {{ dish.menu }} <br> Studentenpreis: {{ dish.studentPrice }} € <br> Menu Score: {{ dish.cosine_similarity }}
+                                            <strong>{{dish.location}}</strong> <br> {{ dish.menu }} <br> Studentenpreis: <br> {{ dish.studentPrice }} € <br> Menu Score: <br> {{ dish.cosine_similarity }}
                                         {% endif %}
                                     {% endfor %}
                                 </div>
@@ -267,7 +268,7 @@
                                 <div class="dish-box">
                                     {% for dish in course_dishes %}
                                         {% if dish.course_eng == course %}
-                                            {{dish.location}} <br> {{ dish.menuEng }} <br> Student Price: {{ dish.studentPrice }} € <br> Menu Score: {{ dish.cosine_similarity }}
+                                            <strong>{{ dish.location }}</strong> <br> {{ dish.menuEng }} <br> Student Price: <br> {{ dish.studentPrice }} € <br> Menu Score: <br> {{ dish.cosine_similarity }}
                                         {% endif %}
                                     {% endfor %}
                                 </div>

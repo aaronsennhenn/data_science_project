@@ -189,7 +189,6 @@ def impute_missing_prices(df,price_column):
     return pd.concat([regress_df,majvot_df])
 
 
-#Price formatting to 
 def format_price(price):
     
     if isinstance(price, float):
@@ -198,8 +197,34 @@ def format_price(price):
     if isinstance(price, str):
         return price.replace('.', ',')
     
-    # If the input is neither a string nor a float, return it unchanged
     return price
+
+
+def format_price_column(df, price_column, price_imputed_column):
+    formatted_prices = []    
+    
+    # Check if its -1
+    for price, imputed_price in zip(df[price_column], df[price_imputed_column]):
+        if price == -1 or (isinstance(price, str) and price.strip() == '-1'):
+            price = imputed_price
+        
+        #Format the price   
+        if isinstance(price, float):
+            formatted_price = f"{price:,.2f}".replace('.', ',')  # Format float to 0,00 style
+        elif isinstance(price, str):
+            try:
+                formatted_price = price.replace('.', ',')
+            except ValueError:
+                formatted_price = price
+        else:
+            formatted_price = price
+        
+        formatted_prices.append(formatted_price)
+        
+    #Append and switch  
+    df[price_column] = formatted_prices
+            
+    return df
 
 
 #Formatting month numbers to names

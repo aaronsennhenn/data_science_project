@@ -94,12 +94,12 @@
     <!-- Main Content -->
     <main class="flex-grow flex flex-col items-center px-4 py-2">
         <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
-            <h1 class="text-5xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}</h1>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}</h1>
             <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Kennzahlen, Preiseinblicke und Trends in Tübinger Mensen und Cafeterien{% else %}Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias{% endif %}</p>
         </div>
 
         <!-- Key Metrics Section -->
-        <section class="mb-12 w-full">
+        <section class="mb-6 w-full">
             <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Wichtige Kennzahlen{% else %}Key Metrics{% endif %}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
@@ -128,7 +128,7 @@
         </section>
 
         <!-- Rating Insights -->
-        <section class="mb-12 w-full">
+        <section class="mb-6 w-full">
             <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Bewertungseinblicke{% else %}Rating Insights{% endif %}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <!-- Top Mensas -->
@@ -150,7 +150,7 @@
         </section>
 
         <!-- Price Development -->
-        <section class="mb-12 w-full">
+        <section class="mb-6 w-full">
             <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Preisentwicklung{% else %}Price Development{% endif %}</h2>
             <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-2 max-w-full">
                 <div class="grid grid-cols-1 md:grid-cols-10 gap-4">
@@ -198,6 +198,14 @@
                             </label>
                         </div>
                     </div>
+                    
+                    <!-- Plot Area -->
+                    <div class="p-2 rounded-lg col-span-7">
+                        <div id="plot">
+                            {{ price_plot|safe }}
+                        </div>
+                    </div>
+
                 </div>
             </div>      
         </section>

@@ -53,7 +53,7 @@ h1 {
 .btn-primary {
     background-color: #4A5568; /* Dark gray background */
     color: white; /* White text color */
-    padding: 0.5rem 1rem; /* Padding around button text */
+    padding: 0.24rem 0.25rem; /* Padding around button text */
     border-radius: 0.25rem; /* Rounded button corners */
     transition: background-color 0.3s ease; /* Smooth transition for hover effect */
 }

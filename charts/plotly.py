@@ -11,9 +11,12 @@ import json
 # Define the colors
 colors = ['#4F46E5', '#6366F1', '#818CF8']
 
-# Function to format x-axis labels with line breaks
 def format_labels(labels):
-    return [label.replace(', ', '<br>') for label in labels]
+    def insert_br_every_n_words(label, n=2):
+        words = label.split()
+        return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
+    return [insert_br_every_n_words(label) for label in labels]
+
 
 def generate_price_chart(db_session, selected_category, selected_price_type, show_icons):
     # Get data
@@ -57,10 +60,11 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
         xaxis_title='Date',
         yaxis_title=selected_price_type.capitalize(),
         legend=dict(
-            x=-0.2,  # Position legend to the left of the plot
-            y=0.5,   # Center the legend vertically
-            xanchor="left",  # Anchor the legend box to the left
-            yanchor="middle",  # Anchor the legend box to the middle
+            orientation='h',  
+            yanchor='top',   
+            y=-0.2,           
+            xanchor='center',
+            x=0.5   
         )
     )
 
@@ -98,8 +102,8 @@ def create_taste_radarchart(df, taste_label, similarity):
             )
         ),
         showlegend=False,
-        height = 560,
-        width = 560
+        height = 500,
+        width = 500
     )
 
     # Convert figure to html format
@@ -119,11 +123,13 @@ def plot_average_ratings(user_ratings, all_ratings):
     user_values = [user_ratings.get(category, 0) for category in categories]
     all_values = [all_ratings.get(category, 0) for category in categories]
 
+    formatted_categories = format_labels(categories)
+
     fig = go.Figure()
 
     # Add user ratings to the bar chart
     fig.add_trace(go.Bar(
-        x=categories,
+        x=formatted_categories,
         y=user_values,
         name="Your Ratings",
         marker=dict(color=colors[1])
@@ -131,7 +137,7 @@ def plot_average_ratings(user_ratings, all_ratings):
 
     # Add all users' ratings to the bar chart with transparency
     fig.add_trace(go.Bar(
-        x=categories,
+        x=formatted_categories,
         y=all_values,
         name="Other Users' Ratings",
         marker=dict(color=colors[2]),
@@ -140,10 +146,28 @@ def plot_average_ratings(user_ratings, all_ratings):
 
     # Update layout for better visualization
     fig.update_layout(
-        xaxis_title="Categories",
-        yaxis_title="Average Rating",
+        xaxis={
+        'title': {
+            'text': 'Categories',
+            'standoff': 20  
+        },
+        'tickangle': -45,
+        'automargin': True  
+        },
+        yaxis={
+            'title': 'Average Rating'
+        },
         barmode="group",
-        xaxis_tickangle=-45
+        xaxis_tickangle=-45,
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.2,
+            xanchor="center",
+            x=0.5
+        ),
+        height = 400,
+        width = 550
     )
 
     fig_html = pio.to_html(fig, full_html=False)
