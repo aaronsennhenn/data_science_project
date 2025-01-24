@@ -2,13 +2,21 @@ from flask import request
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.colors import sequential
-from db.db_read import get_combined_dishes
+from db.db_read import get_combined_dishes,get_ratings_of_the_week,get_top_three_mensas,get_top_three_dishes,get_dishes_and_rating_by_week
+import pandas as pd
+from datetime import datetime
+import json
+
 
 # Define the colors
 colors = ['#4F46E5', '#6366F1', '#818CF8']
 
+# Function to format x-axis labels with line breaks
+def format_labels(labels):
+    return [label.replace(', ', '<br>') for label in labels]
+
 def generate_price_chart(db_session, selected_category, selected_price_type, show_icons):
-    ### Get Data ###
+    # Get data
     df = get_combined_dishes(db_session)
 
     # Default initial values
@@ -19,7 +27,7 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     filtered_df = df[df['menuLine'] == selected_category]
 
     # Define the colors
-    PLOT_COLORS = sequential.ice
+    PLOT_COLORS = sequential.Jet
 
     # Create the Plotly figure
     fig = go.Figure()
@@ -176,3 +184,172 @@ def create_past_6_month_spending_chart(df, user_type):
     fig_html = pio.to_html(fig, full_html=False)
 
     return fig_html
+
+
+def create_weekly_rating_plot(db_session,dates):
+
+    ratings = get_ratings_of_the_week(db_session, dates)
+    # If no ratings are found, return None
+
+    if ratings.empty:
+        return None
+    
+    ratings['day_of_week'] = pd.to_datetime(ratings['menuDate']).dt.day_name()
+    day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    
+
+    ratings['day_of_week'] = pd.Categorical(
+        ratings['day_of_week'],
+        categories=day_order,
+        ordered=True
+    )
+    ratings.sort_values(["day_of_week"], inplace=True)
+        
+    # Create a scatter plot using go
+    fig = go.Figure()
+
+    ratings['hover_text'] = (
+    "Menu: " + ratings['menu'] + "<br>" +
+    "Location: " + ratings['location']
+)
+    # Add scatter trace
+    fig.add_trace(go.Scatter(
+        x=ratings['day_of_week'],        
+        y=ratings['avg_rating'],          
+        mode='markers',                 
+        marker=dict(size=10, color='blue'),  
+        text=ratings['hover_text'],             
+        hovertemplate='<b>Day of Week:</b> %{x}<br>' +
+                    '<b>Average Rating:</b> %{y}<br>' +
+                    '%{text}<extra></extra>'  
+    ))
+
+    # Format the dates to "DD.MM.YYYY"
+    formatted_start_date = datetime.strptime(dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
+    formatted_end_date = datetime.strptime(dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
+
+
+    # Set plot title and axis labels
+    fig.update_layout(
+        title=f'Weekly Average Ratings for {formatted_start_date} to {formatted_end_date}',
+        xaxis_title='Day of Week',
+        yaxis_title='Average Rating',
+        template='plotly'
+    )
+
+
+    # Show the figure
+    plot_html = pio.to_html(fig, full_html=False)
+    return plot_html
+        
+
+def create_weekly_top_mensa_chart(db_session,lang):
+            
+    top_three_mensas = get_top_three_mensas(db_session)
+
+    # Extract data for the chart
+    locations = format_labels([item['location'] for item in top_three_mensas])
+    avg_ratings = [item['avg_rating'] for item in top_three_mensas]
+
+    # Create the bar trace
+    mensa_trace = go.Bar(
+        x=locations,
+        y=avg_ratings,
+        marker=dict(color=colors),
+        text=[f"{rating:.1f}" for rating in avg_ratings],  
+        textposition='auto'  
+    )
+
+    # Define the layout
+    mensa_layout = go.Layout(
+        xaxis=dict(
+            title='Mensa',
+            tickangle=0
+        ),
+        yaxis=dict(
+            title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'
+        ),
+        template='plotly' 
+    )
+
+    # Create the figure
+    fig = go.Figure(data=[mensa_trace], layout=mensa_layout)
+
+    # Convert the figure to HTML
+    plot_html = pio.to_html(fig, full_html=False)
+
+    return plot_html
+
+def create_weekly_top_dishes_chart(db_session,lang):
+
+    top_three_dishes = get_top_three_dishes(db_session,lang)
+    # Extract data for the chart
+    dish_names = format_labels([item['dish_name'] for item in top_three_dishes])
+    avg_ratings = [item['avg_rating'] for item in top_three_dishes]
+
+    # Create the bar trace
+    dish_trace = go.Bar(
+        x=dish_names,
+        y=avg_ratings,
+        marker=dict(color=colors),
+        text=[f"{rating:.1f}" for rating in avg_ratings],  
+        textposition='auto'  
+    )
+
+    # Define the layout
+    dish_layout = go.Layout(
+        xaxis=dict(
+            title='Dish' if lang == 'en' else 'Menü',
+            tickangle=0
+        ),
+        yaxis=dict(
+            title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'
+        ),
+        template='plotly'  
+    )
+
+    # Create the figure
+    fig = go.Figure(data=[dish_trace], layout=dish_layout)
+
+    # Convert the figure to HTML
+    plot_html = pio.to_html(fig, full_html=False)
+
+    return plot_html
+
+
+def plot_rating_histogram(db_session, dates, dish):
+
+    # Get the data and filter it by the specified dish
+    dishes_df = get_dishes_and_rating_by_week(db_session, dates)
+    unique_menus = dishes_df['menu'].unique().tolist()
+
+    if dish is not None:
+        df = dishes_df[dishes_df['menu'] == dish]
+    else:
+        df = dishes_df[dishes_df['menu'] == unique_menus[0]]
+
+    count = df['rating'].value_counts().reindex(range(1, 6), fill_value=0)
+
+    # Create the Plotly graph
+    fig = go.Figure(data=[
+        go.Bar(
+            x=count.index,  
+            y=count.values, 
+            text=count.values, 
+            textposition='auto'
+        )
+    ])
+
+    # Customize layout
+    fig.update_layout(
+        title="Unique Count of Ratings",
+        xaxis_title="Ratings",
+        yaxis_title="Count",
+        xaxis=dict(tickmode='array', tickvals=[1, 2, 3, 4, 5]),
+        template="plotly_white"
+    )
+
+    # Convert the plot to an HTML string
+    plot_html = pio.to_html(fig, full_html=False)
+
+    return plot_html,unique_menus

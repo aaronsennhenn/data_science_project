@@ -485,67 +485,113 @@ def get_recipes(db_session):
         }
     return recipes
 
-#Get top three dishes of the week - on y-axis the rating average and on x-axis the dish name (menu)
-def get_top_three_dishes(session: Session):
-    today = datetime.now().date()
-    week_end = today + timedelta(days=7)
 
-    # Query to get top three dishes
-    top_dishes = session.query(
-        Dish.menu,
+def get_ratings_of_the_week(session: Session, week_dates: List[str]) -> List[Rating]:
+    query = session.query(
         func.avg(Rating.rating).label('avg_rating'),
-        func.count(Rating.id).label('rating_count')
-    ).join(Rating, Dish.id == Rating.menu_id
-    ).filter(
-        Dish.menuDate >= today,
-        Dish.menuDate < week_end
-    ).group_by(
-        Dish.id
-    ).order_by(
-        func.avg(Rating.rating).desc()
-    ).limit(3).all()
+        func.count(Rating.id).label('rating_count'),
+        Dish.location,
+        Dish.menu,
+        Dish.menuDate
+        ).join(Dish, Rating.menu_id == Dish.id
+        ).filter(Dish.menuDate.in_(week_dates)
+        ).group_by(Dish.id,Dish.location,Dish.menuDate).all()
 
-    # Format result
     result = [
         {
-            'dish_name': dish.menu,
+            'location': rating.location,
+            'menu': rating.menu,
+            'menuDate': rating.menuDate,
+            'avg_rating': round(rating.avg_rating, 2),
+            'rating_count': rating.rating_count
+        } for rating in query
+    ]
+    return pd.DataFrame(result)
+
+def get_top_three_dishes(session: Session, lang):
+    
+    week_dates = get_weekday_dates()
+
+    # get dishes for the week
+    top_dishes = session.query(
+        Dish.menu,
+        DishEng.menuEng,
+        func.avg(Rating.rating).label('avg_rating'),
+        func.count(Rating.id).label('rating_count')
+        ).filter(
+        Dish.menuDate.in_(week_dates),
+        Dish.menu != "NA",
+        Course.course == "Hauptspeise"
+        ).join(Rating, Dish.id == Rating.menu_id
+        ).join(Course, Dish.id == Course.menu_id
+        ).join(DishEng, Dish.id == DishEng.menu_id
+        ).group_by(Dish.id,Dish.menu,DishEng.menuEng
+        ).order_by(func.avg(Rating.rating).desc()
+        ).limit(3).all()
+    
+        # Format result
+    result = [
+        {
+            'dish_name': dish.menu if lang == 'de' else dish.menuEng,
             'avg_rating': round(dish.avg_rating, 2),
             'rating_count': dish.rating_count
         } for dish in top_dishes
     ]
+
     return result
 
 #Get top three mensas of the week (ranked best first) - on y-axis the rating average and on x-axis the location (mensa)
 def get_top_three_mensas(session: Session):
-    today = datetime.now().date()
-    week_end = today + timedelta(days=7)
 
-    # Query to get top three mensas
-    top_mensas = session.query(
+    week_dates = get_weekday_dates()
+
+    # get dishes for the week
+    top_dishes = session.query(
         Dish.location,
         func.avg(Rating.rating).label('avg_rating'),
         func.count(Rating.id).label('rating_count')
-    ).join(Rating, Dish.id == Rating.menu_id
-    ).filter(
-        Dish.menuDate >= today,
-        Dish.menuDate < week_end
-    ).group_by(
-        Dish.location
-    ).order_by(
-        func.avg(Rating.rating).desc()
-    ).limit(3).all()
-
-    # Format result
+        ).filter(
+        Dish.menuDate.in_(week_dates),
+        Dish.menu != "NA",
+        Course.course == "Hauptspeise"
+        ).join(Rating, Dish.id == Rating.menu_id
+        ).join(Course, Dish.id == Course.menu_id
+        ).group_by(Dish.location
+        ).order_by(func.avg(Rating.rating).desc()
+        ).limit(3).all()
+    
+        # Format result
     result = [
         {
-            'location': mensa.location,
-            'avg_rating': round(mensa.avg_rating, 2),
-            'rating_count': mensa.rating_count
-        } for mensa in top_mensas
+            'location': dish.location,
+            'avg_rating': round(dish.avg_rating, 2),
+            'rating_count': dish.rating_count
+        } for dish in top_dishes
     ]
+
     return result
 
-# Account Analysis
+
+def get_dishes_and_rating_by_week(db_session: Session, week_dates: List[str]):
+    query = db_session.query(
+        Dish.menu,
+        Dish.id,
+        Rating.rating,
+        Dish.location
+        ).join(Rating, Dish.id == Rating.menu_id
+        ).filter(Dish.menuDate.in_(week_dates), Dish.menu != "NA",Rating.rating != None
+        ).all()
+    
+    result = [
+        {
+            'menu_id': dish.id,
+            'menu': dish.menu,
+            'rating': dish.rating,
+            'location': dish.location
+        } for dish in query
+    ]
+    return pd.DataFrame(result)
+
 # Get total number of ratings a user submitted
 def get_total_ratings_by_user(session: Session, username: str) -> int:
     return session.query(func.count(Rating.id)).filter(Rating.user_name == username).scalar()
@@ -675,6 +721,9 @@ def get_embedding_cluster(db_session):
         )
     return df
 
+def get_dish_vector(db_session, menu_id):
+    query = db_session.query(Embedding.embedding).filter(Embedding.menu_id == menu_id).first()
+    return np.array(eval(query[0]))
 
 def get_cluster_similarity(db_session,user_name):
     
@@ -747,6 +796,33 @@ def get_week_recommended_dishes(db_session, week_dates, user_name, selected_lang
 
     return df
 
+def get_prevornext_weekday_dates(start_date: str, direction: str) -> list:
+    """
+    Get the week dates (Monday to Friday) for the previous or next week.
+
+    Args:
+    - start_date (str): The date of a Monday in "YYYY-MM-DD" format.
+    - direction (str): "back" for the previous week, "next" for the next week.
+
+    Returns:
+    - list: List of week dates (Monday to Friday) as strings in "YYYY-MM-DD" format.
+    """
+    # Parse the input date
+    current_monday = datetime.strptime(start_date, "%Y-%m-%d")
+    
+    # Determine the offset based on the direction
+    if direction == "back":
+        offset = -7  # Previous week
+    else:
+        offset = 7  # Next week
+    
+    # Calculate the Monday of the target week
+    target_monday = current_monday + timedelta(days=offset)
+    
+    # Generate the week dates (Monday to Friday)
+    week_dates = [(target_monday + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]
+    
+    return week_dates
 
 def get_weekday_dates():
     today = datetime.today()

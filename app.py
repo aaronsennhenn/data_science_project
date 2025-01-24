@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import os
 from secret import *
 from db.db_write import remove_rating,update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user
-from db.db_read import get_average_ratings, get_dishes_of_user,get_weekday_dates,get_week_recommended_dishes,get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_mensas_of_user,get_unique_mensas, get_past_6_month_spending, get_current_month_spending
+from db.db_read import get_prevornext_weekday_dates,get_average_ratings, get_dishes_of_user,get_weekday_dates,get_week_recommended_dishes,get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_mensas_of_user,get_unique_mensas, get_past_6_month_spending, get_current_month_spending
 from scraper.data_transform import collect_unique_meats
 from datetime import datetime, timedelta
 import plotly
@@ -16,7 +16,7 @@ from db.utils import compute_cosine_similarity, format_price
 from functools import wraps
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
-from charts.plotly import generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart, plot_average_ratings
+from charts.plotly import create_weekly_top_dishes_chart,generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart, plot_average_ratings, create_weekly_rating_plot,create_weekly_top_mensa_chart,plot_rating_histogram
 import pandas as pd
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -41,9 +41,7 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope':'openid profile email'})
 
-# Function to format x-axis labels with line breaks
-def format_labels(labels):
-    return [label.replace(', ', '<br>') for label in labels]
+
 
 @app.route('/set_language/<lang>')
 def set_language(lang):
@@ -213,7 +211,6 @@ def user_page():
         #Create tasteprofile radarchart
         cluster_df = get_cluster_similarity(db_session, user_name)
         country_chart = create_taste_radarchart(cluster_df.iloc[:-3], 'cluster_name', 'scaled')
-        regional_chart = create_taste_radarchart(cluster_df.iloc[-3:], 'cluster_name', 'scaled')
 
 
         #Budget feature
@@ -494,221 +491,76 @@ def analysis():
     lang = session.get('language', 'en')
     session['language'] = lang
     session.permanent = True
-    username = session.get('username')  # Get the username from the session
+    username = session.get('username')  
+
     with Session() as db_session:
         total_mensas = get_total_mensas(db_session)
         total_ratings = get_total_ratings(db_session)
         total_menus = get_total_menus(db_session)
-        names_available_mensas = get_available_mensas(db_session)
         first_updated_date = get_first_updated_date(db_session)
-        dish_count_per_mensa = get_dish_count_per_mensa(db_session)
-        average_prices = get_average_prices_per_menuline_per_mensa(db_session)  
-        lowest_prices = get_lowest_prices_per_menuline(db_session)    
-        price_development = get_price_development(db_session)
-        menu_line_distribution = get_menu_line_distribution(db_session)
-        mensa_average_prices = get_average_prices_per_menuline_per_mensa(db_session)
-        mensa_lowest_prices = get_lowest_prices_per_menuline_per_mensa(db_session)
-        top_three_mensas = get_top_three_mensas(db_session)
-        top_three_dishes = get_top_three_dishes(db_session)
-        menus_with_lowest_price = get_menu_with_lowest_price(db_session)
-
-        # Define professional color scheme
-        lang = session.get('language', 'en')
-        PLOT_COLORS = sequential.Plotly3
-
-        fig = make_subplots(
-            rows=len(price_development), 
-            cols=1,
-            subplot_titles=list(price_development.keys()),
-            vertical_spacing=0.05
-        )
-
-        today = datetime.now().date()
-
-        row = 1
-        for menu_line, data in price_development.items():
-            for (name, color), price_data in zip(
-                [('Pupil Price', PLOT_COLORS[0]), 
-                ('Student Price', PLOT_COLORS[1]), 
-                ('Guest Price', PLOT_COLORS[2])],
-                [data['pupil_prices'], data['student_prices'], data['guest_prices']]
-            ):
-                fig.add_trace(
-                    go.Scatter(
-                        x=data['dates'],
-                        y=price_data,
-                        name=name,
-                        line=dict(color=color, width=2),
-                        showlegend=(row == 1)
-                    ),
-                    row=row, col=1
-                )
-            
-            # Add vertical line for today
-            fig.add_vline(
-                x=today,
-                line_width=1,
-                line_dash="dash",
-                line_color="gray",
-                row=row,
-                col=1
-            )
-            row += 1
-
-        fig.update_layout(
-        height=400*len(price_development),  # Increased from 300 to 400
-        plot_bgcolor='rgb(249, 250, 251)',  # gray-50
-        paper_bgcolor='rgba(0,0,0,0)',
-        font_family="Inter",
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        ),
-        margin=dict(t=50, b=50, l=50, r=50)
-        )
-
-        fig.update_xaxes(
-        gridcolor='rgba(0,0,0,0.1)',
-        showline=True,
-        linewidth=1,
-        linecolor='rgba(0,0,0,0.2)',
-        title_text="Date",
-        tickformat="%Y-%m-%d",  # Show full date for each tick
-        tickangle=0,  # Angle the dates for better readability
-        tickmode="auto"
-        )
-
-        fig.update_yaxes(
-            gridcolor='rgba(0,0,0,0.1)',
-            showline=True,
-            linewidth=1,
-            linecolor='rgba(0,0,0,0.2)',
-            dtick=0.5,  # Price increments of 0.50€
-            title_text="Price (€)"
-        )
-
-        # Create plot_json before using it
-        plot_json = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
-        # Create pie charts for each mensa
-        VIOLET_COLORS = ['#4F46E5', '#6366F1', '#818CF8', '#A5B4FC', '#233142', '#455d7a', '#e3e3e3', '#f0f0f0']
-
-        pie_charts = {}
-        for mensa, distribution in menu_line_distribution.items():
-            labels = list(distribution.keys())
-            values = list(distribution.values())
-            
-            fig = go.Figure(data=[go.Pie(
-                labels=labels,
-                values=values,
-                hole=0,
-                marker=dict(colors=VIOLET_COLORS),
-                textinfo='label+percent',
-                textposition='inside',
-                insidetextorientation='horizontal',
-                textfont=dict(size=10, color='white', family='Inter'),
-                hovertemplate="%{value} dishes<extra></extra>"
-            )])
-            
-            fig.update_layout(
-                showlegend=False,
-                margin=dict(t=0, b=0, l=0, r=0),
-                height=200,  # Reduced size
-                width=200,   # Reduced size
-                paper_bgcolor='rgba(0,0,0,0)',
-                font_family='Inter'
-            )
-            
-            pie_charts[mensa] = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
         
-        # Create top mensas chart
-        mensa_trace = {
-            'x': format_labels([item['location'] for item in top_three_mensas]),
-            'y': [item['avg_rating'] for item in top_three_mensas],
-            'type': 'bar',
-            'marker': {
-                'color': ['#4F46E5', '#6366F1', '#818CF8']
-            }
-        }
-        mensa_layout = {
-            #'title': 'Top 3' if lang == 'de' else 'Top 3',
-            'xaxis': {'title': 'Mensa', 'tickangle': 0},
-            'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
-        }
-        mensa_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+        # Create chart to plot avg rating per mensa of the current week
+        mensa_chart = create_weekly_top_mensa_chart(db_session, lang)
 
-        # Create top dishes chart
-        dish_trace = {
-            'x': format_labels([item['dish_name'] for item in top_three_dishes]),
-            'y': [item['avg_rating'] for item in top_three_dishes],
-            'type': 'bar',
-            'marker': {
-                'color': ['#4F46E5', '#6366F1', '#818CF8']
-            }
-        }
-        dish_layout = {
-            #'title': 'Top 3' if lang == 'de' else 'Top 3',
-            'xaxis': {'title': 'Menü' if lang == 'de' else 'Dish', 'tickangle': 0},
-            'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
-        }
-        dish_chart = json.dumps({'data': [dish_trace], 'layout': dish_layout}, cls=plotly.utils.PlotlyJSONEncoder)
+        # Create chart to plot top dishes of the current week
+        dish_chart = create_weekly_top_dishes_chart(db_session, lang)
 
-
-        ### Price Chart ###
-
-        # get 
+        # Create price plot over the whole timeline
         initial_category = "initial"
         initial_price_type = 'studentPrice'
         show_icons_initial = True
-
         plot_html,categories = generate_price_chart(db_session,initial_category,initial_price_type,show_icons_initial)
         
+        # Create average rating plot per week
+        week_dates = get_weekday_dates()
+        ratings_of_the_week_plot = create_weekly_rating_plot(db_session,week_dates)
 
-        # Add pie_charts to the template context
+
         return render_template('analysis.html',
                              total_mensas=total_mensas,
                              total_ratings = total_ratings,
                              total_menus = total_menus,
-                             names_available_mensas=names_available_mensas,
                              first_updated_date=first_updated_date,
-                             dish_count_per_mensa=dish_count_per_mensa,
-                             mensa_average_prices=mensa_average_prices,
-                             mensa_lowest_prices=mensa_lowest_prices,
-                             average_prices=average_prices,           
-                             lowest_prices=lowest_prices,   
-                             plot_json=plot_json,
-                             pie_charts=pie_charts,
-                             top_three_mensas=top_three_mensas,
-                             top_three_dishes=top_three_dishes,
                              mensa_chart=mensa_chart,
                              dish_chart=dish_chart,
-                             menus_with_lowest_price=menus_with_lowest_price,
                              username=username,
                              price_plot=plot_html,
                              categories=categories,
-                             selected_category=initial_category)
+                             selected_category=initial_category,
+                             ratings_of_the_week_plot=ratings_of_the_week_plot,
+                             week_dates=week_dates)
     
-# Route to update the plot dynamically
-@app.route('/update_plot', methods=['POST'])
-def update_plot():
-
+@app.route('/update_price_plot', methods=['POST'])
+def update_price_plot():
+    """
+    This function updates the price plot based on the selected category, price type and icon selection.
+    """
     selected_category = request.json.get('category')
     selected_price = request.json.get('price')
     selected_icon = request.json.get('icon')
 
     selected_icon = {"true": True, "false": False}.get(selected_icon.lower())
 
-
-    print(selected_category, selected_price, selected_icon)
-
     with Session() as db_session:
         plot_html,_ = generate_price_chart(db_session,selected_category,selected_price,selected_icon)
 
-
     return jsonify({'plot': plot_html})
+
+
+@app.route('/update_ratings_plot', methods=['POST'])
+def update_ratings_plot():
+    """
+    This function updates the ratings plot based on the selected week dates.
+    """
+    direction = request.json.get('direction')
+    week_dates = request.json.get('week_dates')
+    changed_dates = get_prevornext_weekday_dates(week_dates[0], direction)
+
+    with Session() as db_session:
+        ratings_plot = create_weekly_rating_plot(db_session,changed_dates)
+
+
+    return jsonify({'ratings_plot':ratings_plot,'week_dates':changed_dates})
 
 
 if __name__ == "__main__":

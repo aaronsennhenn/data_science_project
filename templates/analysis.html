@@ -9,6 +9,8 @@
     <link href="{{ url_for('static', filename='css/analysis.css') }}" rel="stylesheet">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
 
 </head>
 
@@ -132,12 +134,17 @@
                 <!-- Top Mensas -->
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                     <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Top Mensen{% else %}Top Mensas{% endif %}</h3>
-                    <div id="top-mensas-chart" style="width: 100%; height: 300px;"></div>
+                    <div class="p-4 rounded-lg col-span-7">
+                        {{ mensa_chart|safe }}
+                    </div>
+                
                 </div>
                 <!-- Top Dishes -->
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                     <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Top Menüs{% else %}Top Dishes{% endif %}</h3>
-                    <div id="top-dishes-chart" style="width: 100%; height: 300px;"></div>
+                    <div class="p-4 rounded-lg col-span-7">
+                        {{ dish_chart|safe }}
+                    </div>
                 </div>  
             </div>       
         </section>
@@ -149,7 +156,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-10 gap-4">
                     <!-- Plot Area -->
                     <div class="p-4 rounded-lg col-span-7">
-                        <div id="plot">
+                        <div id="price_plot">
                             {{ price_plot|safe }}
                         </div>
                     </div>
@@ -194,112 +201,128 @@
                 </div>
             </div>      
         </section>
+
+        <!-- Weekly Ratings -->
+        <section class="mb-12 w-full">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">
+                {% if session.get('language') == 'de' %}Wöchentliche Bewertungen{% else %}Weekly Ratings{% endif %}
+            </h2>
+
+            <!-- Plot Area -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-2 max-w-full">         
+                <div class="grid grid-cols-1 md:grid-cols-10 gap-4">
+                    <div class="p-4 rounded-lg col-span-7">
+                        <div id="ratings-plot">
+                            {{ ratings_of_the_week_plot|safe }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons to switch dates-->
+                <div class="flex items-start col-span-3 space-x-2"> 
+                    <button id="prev-date-button" class="location-link">
+                        {% if session.get('language') == 'de' %}Zurück{% else %}Back{% endif %}
+                    </button>
+                    <button id="next-date-button" class="location-link">
+                        {% if session.get('language') == 'de' %}Weiter{% else %}Next{% endif %}
+                    </button>
+                </div>
+            </div>    
+        </section>
+
+
 </main>
     
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-8">
-        <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
-            &copy; 2024 MENSA APP. All rights reserved.
-        </div>
-    </footer>
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 py-8">
+    <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+        &copy; 2024 MENSA APP. All rights reserved.
+    </div>
+</footer>
+<!-- Scripts -->
+<script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const closeMenu = document.getElementById('close-menu');
+    const sidebar = document.getElementById('sidebar');
 
-    <!-- Scripts -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script>
-        var graphs = {{ plot_json | safe }};
-        Plotly.newPlot('price-development-plots', graphs.data, graphs.layout);
-    </script>
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('translate-x-full');
+    });
 
-    <script>
-    {% for mensa in names_available_mensas %}
-        var pieData = {{ pie_charts[mensa] | safe }};
-        Plotly.newPlot('pie-chart-{{ loop.index }}', pieData.data, pieData.layout);
-    {% endfor %}
-    </script>  
-    <script>
-    Plotly.newPlot('top-mensas-chart', {{ mensa_chart | safe }}.data, {{ mensa_chart | safe }}.layout);
-    Plotly.newPlot('top-dishes-chart', {{ dish_chart | safe }}.data, {{ dish_chart | safe }}.layout);
-    </script>
-    <script>
-        const menuToggle = document.getElementById('menu-toggle');
-        const closeMenu = document.getElementById('close-menu');
-        const sidebar = document.getElementById('sidebar');
+    closeMenu.addEventListener('click', () => {
+        sidebar.classList.add('translate-x-full');
+    });
 
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('translate-x-full');
+    // Function to update the plot via AJAX
+    function updatePricePlot(selectedCategory,selectedPrice,selectedIcon) {
+        $.ajax({
+            url: '/update_price_plot',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ category: selectedCategory,
+                                    price: selectedPrice,
+                                    icon: selectedIcon}),
+            success: function(response) {
+                $('#price_plot').html(response.plot); // Update the plot area with the new plot
+            },
+            error: function(error) {
+                console.error('Error updating plot:', error);
+            }
         });
+    }
 
-        closeMenu.addEventListener('click', () => {
-            sidebar.classList.add('translate-x-full');
-        });
-    </script>
-    <script>
-        // Function to update the plot via AJAX
-        function updatePlot(selectedCategory,selectedPrice,selectedIcon) {
-            $.ajax({
-                url: '/update_plot',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({ category: selectedCategory,
-                                        price: selectedPrice,
-                                        icon: selectedIcon}),
-                success: function(response) {
-                    $('#plot').html(response.plot); // Update the plot area with the new plot
-                },
-                error: function(error) {
-                    console.error('Error updating plot:', error);
-                }
-            });
+    // Update the value of the checkbox and send updated data when it changes
+    $('#showIcons').on('change', function () {
+        // Set the checkbox value to "true" or "false" based on its state
+        $(this).val(this.checked ? "true" : "false");
+    });
+
+
+    // Update the plot when the dropdown value changes
+    $('#category, #priceType, #showIcons').on('change', function() {
+        const selectedCategory = $('#category').val();
+        const selectedPrice = $('#priceType').val();
+        const selectedIcon = $('#showIcons').val()
+        updatePricePlot(selectedCategory, selectedPrice, selectedIcon);
+    });
+
+    // Define week_dates as a global JavaScript variable
+    let week_dates = {{ week_dates | tojson }};
+
+    // Function to update the Ratings plot via AJAX
+    function updateRatingsPlot(selectedWeekDates,selectedDirection) {
+        $.ajax({
+            url: '/update_ratings_plot',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ 
+                direction: selectedDirection,
+                week_dates: selectedWeekDates}),
+    
+            success: function(response) {
+            // If the plot is None, display a "No data" message
+            if (!response.ratings_plot) {
+                $('#ratings-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
+            } else {
+                $('#ratings-plot').html(response.ratings_plot); // Update the ratings plot
+            }
+
+            week_dates = response.week_dates; // Update the global week_dates variable
+        },
+        error: function(error) {
+            console.error('Error updating plot:', error);
         }
-
-        // Update the value of the checkbox and send updated data when it changes
-        $('#showIcons').on('change', function () {
-            // Set the checkbox value to "true" or "false" based on its state
-            $(this).val(this.checked ? "true" : "false");
         });
+    }
 
+    $('#prev-date-button').on('click', function() {
+        updateRatingsPlot(week_dates, 'back');
+    });
+    $('#next-date-button').on('click', function() {
+        updateRatingsPlot(week_dates, 'next');
+    });
 
-        // Update the plot when the dropdown value changes
-        $('#category, #priceType, #showIcons').on('change', function() {
-            const selectedCategory = $('#category').val();
-            const selectedPrice = $('#priceType').val();
-            const selectedIcon = $('#showIcons').val()
-            updatePlot(selectedCategory, selectedPrice, selectedIcon);
-        });
-    </script>
+</script>
 </body>
 </html>
 
-<!-- Menu Details 
-<div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-6">
-    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
-        {% if session.get('language') == 'de' %}Menüoptionen{% else %}Menu Options{% endif %}
-    </h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {% for mensa in names_available_mensas %}
-        <div class="p-4 bg-gray-50 rounded-lg">
-            <div class="flex flex-col items-center">
-                <div class="w-full mb-4">
-                    <p class="text-lg font-semibold text-gray-900">{{ mensa }}</p>
-                    <p class="text-sm font-medium text-gray-600">
-                        {% if session.get('language') == 'de' %}
-                            Anzahl Menüs: {{ dish_count_per_mensa[mensa] }}
-                        {% else %}
-                            Menus Count: {{ dish_count_per_mensa[mensa] }}
-                        {% endif %}
-                    </p>
-                    <p class="text-sm font-medium text-gray-600">
-                        {% if session.get('language') == 'de' %}
-                            Menükategorienverteilung:
-                        {% else %}
-                            Menu Line Distribution:
-                        {% endif %}
-                    </p>
-                </div>
-                <div id="pie-chart-{{ loop.index }}" class="shadow-sm rounded-lg" style="width: 200px; height: 200px;"></div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
--->

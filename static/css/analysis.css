@@ -106,3 +106,19 @@ header, footer {
     border-color: black;
     box-shadow: 0 0 0 1px black;
 }
+
+
+
+.submit-dates-button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #4F46E5;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.submit-dates-button:hover {
+    background-color: #6366F1;
+}
