@@ -10,6 +10,8 @@ from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
 from charts.plotly import plot_donut_chart,create_weekly_top_dishes_chart,generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart, plot_average_ratings, create_weekly_rating_plot,create_weekly_top_mensa_chart,plot_rating_histogram
 import pandas as pd
+import plotly
+import plotly.io as pio
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -33,7 +35,11 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope':'openid profile email'})
 
-
+def format_labels_mensas(labels):
+    def insert_br_every_n_words(label, n=3):
+        words = label.split()
+        return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
+    return [insert_br_every_n_words(label) for label in labels]
 
 @app.route('/set_language/<lang>')
 def set_language(lang):
@@ -185,7 +191,7 @@ def user_page():
 
         # Create top mensas chart
         mensa_trace = {
-            'x': format_labels_dishes([mensa[0] for mensa in favorite_mensas]),
+            'x': format_labels_mensas([mensa[0] for mensa in favorite_mensas]),
             'y': [mensa[1] for mensa in favorite_mensas],
             'type': 'bar',
             'marker': {
@@ -198,7 +204,7 @@ def user_page():
                     'text': 'Mensa',
                     'standoff': 20  
                 },
-                'tickangle': 0,
+                'tickangle': -45,
                 'automargin': True  
             },
             'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
@@ -574,7 +580,6 @@ def update_ratings_plot():
         donut_plot = plot_donut_chart(db_session, changed_dates,lang)
 
     return jsonify({'ratings_plot':ratings_plot,'week_dates':changed_dates,'mensa_plot':mensa_plot,'dish_plot':dish_plot,'donut_plot':donut_plot})
-
 
 if __name__ == "__main__":
     with app.app_context():

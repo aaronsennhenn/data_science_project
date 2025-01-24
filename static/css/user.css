@@ -1,7 +1,8 @@
 .grid-container {
     display: grid;
     grid-template-columns: repeat(6, 1fr); /* 6 equal-width columns */
-    gap: 10px;
+    gap: 0; /* Remove space between fields */
+    border-collapse: collapse; /* Ensure no gaps between cells */
 }
 
 .grid-row {
@@ -10,7 +11,9 @@
 
 .header, .dish-box {
     text-align: center;
-    background-color: #f9f9f9;
+    background-color: #f3f4f6; /* Light gray background */
+    border: 1px solid #e5e7eb; /* Light gray border */
+    padding: 10px;
 }
 
 .dish-box {
@@ -18,9 +21,27 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+
+.dish-box strong {
+    color: #6366F1; /* Purple text for location */
+}
+
+@media (max-width: 768px) {
+    .header, .dish-box {
+        font-size: 0.8rem; /* Smaller font size for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .header, .dish-box {
+        font-size: 0.6rem; /* Even smaller font size for very small screens */
+    }
+}
+
 .header {
     font-weight: bold;
-    background-color: #e0e0e0;
+    background-color: #6366F1; 
+    color: #ffffff; 
 }
 
 .remove-dish-button {
