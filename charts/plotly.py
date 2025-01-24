@@ -12,11 +12,10 @@ import json
 colors = ['#4F46E5', '#6366F1', '#818CF8']
 
 def format_labels(labels):
-    def insert_br_every_n_words(label, n=2):
+    def insert_br_every_n_words(label, n=3):
         words = label.split()
         return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
     return [insert_br_every_n_words(label) for label in labels]
-
 
 def generate_price_chart(db_session, selected_category, selected_price_type, show_icons):
     # Get data
@@ -160,14 +159,14 @@ def plot_average_ratings(user_ratings, all_ratings):
         barmode="group",
         xaxis_tickangle=-45,
         legend=dict(
-            orientation="h",
-            yanchor="top",
-            y=-0.2,
+            orientation="h",  # Set the orientation to horizontal
+            yanchor="bottom",
+            y=1.02,  # Position the legend above the plot
             xanchor="center",
             x=0.5
         ),
         height = 400,
-        width = 550
+        width = 500
     )
 
     fig_html = pio.to_html(fig, full_html=False)
@@ -197,8 +196,12 @@ def create_past_6_month_spending_chart(df, user_type):
     # Add title and labels
     fig.update_layout(
         showlegend=False,
+        height=300,
         plot_bgcolor='white',  
         paper_bgcolor='white',
+        xaxis=dict(
+            tickangle=-45  
+        ),
         yaxis=dict(
             showgrid=True,  # Enable grid lines on the x-axis
             gridcolor='lightgray',  # Set grid line color
@@ -255,6 +258,7 @@ def create_weekly_rating_plot(db_session,dates,lang):
     title = f'Weekly Average Ratings for {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Wöchentliche Durchschnittsbewertungen für {formatted_start_date} bis {formatted_end_date}'
     # Set plot title and axis labels
     fig.update_layout(
+        height=300,
         title=title,
         xaxis_title='Day of Week' if lang == 'en' else 'Wochentag',
         yaxis_title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung',
