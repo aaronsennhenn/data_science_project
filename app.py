@@ -179,7 +179,6 @@ def user_page():
         favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)        
         current_month_spending = get_current_month_spending(db_session, user_name , lang)
         past_6_month_spending = get_past_6_month_spending(db_session, user_name, lang)
-        favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)
         avg_rating_all = get_average_ratings(Session())
         avg_rating_user = get_average_ratings(Session(), user_name)
 
