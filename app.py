@@ -511,12 +511,13 @@ def analysis():
         total_ratings = get_total_ratings(db_session)
         total_menus = get_total_menus(db_session)
         first_updated_date = get_first_updated_date(db_session)
-        
+        week_dates = get_weekday_dates()
+
         # Create chart to plot avg rating per mensa of the current week
-        mensa_chart = create_weekly_top_mensa_chart(db_session, lang)
+        mensa_plot = create_weekly_top_mensa_chart(db_session, lang, week_dates)
 
         # Create chart to plot top dishes of the current week
-        dish_chart = create_weekly_top_dishes_chart(db_session, lang)
+        dish_plot = create_weekly_top_dishes_chart(db_session, lang, week_dates)
 
         # Create price plot over the whole timeline
         initial_category = "initial"
@@ -526,7 +527,7 @@ def analysis():
         
         # Create average rating plot per week
         week_dates = get_weekday_dates()
-        ratings_of_the_week_plot = create_weekly_rating_plot(db_session,week_dates)
+        ratings_of_the_week_plot = create_weekly_rating_plot(db_session,week_dates,lang)
 
 
         return render_template('analysis.html',
@@ -534,8 +535,8 @@ def analysis():
                              total_ratings = total_ratings,
                              total_menus = total_menus,
                              first_updated_date=first_updated_date,
-                             mensa_chart=mensa_chart,
-                             dish_chart=dish_chart,
+                             mensa_plot=mensa_plot,
+                             dish_plot=dish_plot,
                              username=username,
                              price_plot=plot_html,
                              categories=categories,
@@ -565,15 +566,17 @@ def update_ratings_plot():
     """
     This function updates the ratings plot based on the selected week dates.
     """
+    lang = session.get('language', 'en')
     direction = request.json.get('direction')
     week_dates = request.json.get('week_dates')
     changed_dates = get_prevornext_weekday_dates(week_dates[0], direction)
 
     with Session() as db_session:
-        ratings_plot = create_weekly_rating_plot(db_session,changed_dates)
+        ratings_plot = create_weekly_rating_plot(db_session,changed_dates,lang)
+        mensa_plot = create_weekly_top_mensa_chart(db_session,lang, changed_dates)
+        dish_plot = create_weekly_top_dishes_chart(db_session,lang, changed_dates)
 
-
-    return jsonify({'ratings_plot':ratings_plot,'week_dates':changed_dates})
+    return jsonify({'ratings_plot':ratings_plot,'week_dates':changed_dates,'mensa_plot':mensa_plot,'dish_plot':dish_plot})
 
 
 if __name__ == "__main__":

@@ -508,10 +508,8 @@ def get_ratings_of_the_week(session: Session, week_dates: List[str]) -> List[Rat
     ]
     return pd.DataFrame(result)
 
-def get_top_three_dishes(session: Session, lang):
+def get_top_three_dishes(session: Session, lang, week_dates: List[str]) -> List[Tuple[str, float]]:
     
-    week_dates = get_weekday_dates()
-
     # get dishes for the week
     top_dishes = session.query(
         Dish.menu,
@@ -541,12 +539,10 @@ def get_top_three_dishes(session: Session, lang):
     return result
 
 #Get top three mensas of the week (ranked best first) - on y-axis the rating average and on x-axis the location (mensa)
-def get_top_three_mensas(session: Session):
-
-    week_dates = get_weekday_dates()
+def get_top_three_mensas(db_session: Session,week_dates: List[str]) -> List[Tuple[str, float]]:
 
     # get dishes for the week
-    top_dishes = session.query(
+    top_dishes = db_session.query(
         Dish.location,
         func.avg(Rating.rating).label('avg_rating'),
         func.count(Rating.id).label('rating_count')

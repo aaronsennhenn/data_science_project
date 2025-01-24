@@ -210,7 +210,7 @@ def create_past_6_month_spending_chart(df, user_type):
     return fig_html
 
 
-def create_weekly_rating_plot(db_session,dates):
+def create_weekly_rating_plot(db_session,dates,lang):
 
     ratings = get_ratings_of_the_week(db_session, dates)
     # If no ratings are found, return None
@@ -252,12 +252,12 @@ def create_weekly_rating_plot(db_session,dates):
     formatted_start_date = datetime.strptime(dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
     formatted_end_date = datetime.strptime(dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
 
-
+    title = f'Weekly Average Ratings for {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Wöchentliche Durchschnittsbewertungen für {formatted_start_date} bis {formatted_end_date}'
     # Set plot title and axis labels
     fig.update_layout(
-        title=f'Weekly Average Ratings for {formatted_start_date} to {formatted_end_date}',
-        xaxis_title='Day of Week',
-        yaxis_title='Average Rating',
+        title=title,
+        xaxis_title='Day of Week' if lang == 'en' else 'Wochentag',
+        yaxis_title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung',
         template='plotly'
     )
 
@@ -267,9 +267,9 @@ def create_weekly_rating_plot(db_session,dates):
     return plot_html
         
 
-def create_weekly_top_mensa_chart(db_session,lang):
+def create_weekly_top_mensa_chart(db_session,lang,week_dates):
             
-    top_three_mensas = get_top_three_mensas(db_session)
+    top_three_mensas = get_top_three_mensas(db_session,week_dates)
 
     # Extract data for the chart
     locations = format_labels([item['location'] for item in top_three_mensas])
@@ -283,18 +283,18 @@ def create_weekly_top_mensa_chart(db_session,lang):
         text=[f"{rating:.1f}" for rating in avg_ratings],  
         textposition='auto'  
     )
+    # Format the dates to "DD.MM.YYYY"
+    formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
+    formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
+
+    title = f'Top 3 Mensas for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Mensen für die Woche von {formatted_start_date} bis {formatted_end_date}'
 
     # Define the layout
     mensa_layout = go.Layout(
-        xaxis=dict(
-            title='Mensa',
-            tickangle=0
-        ),
-        yaxis=dict(
-            title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'
-        ),
-        template='plotly' 
-    )
+        title=dict(text=title),
+        xaxis=dict(title='Mensa',tickangle=0),
+        yaxis=dict(title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'),
+        template='plotly')
 
     # Create the figure
     fig = go.Figure(data=[mensa_trace], layout=mensa_layout)
@@ -304,9 +304,9 @@ def create_weekly_top_mensa_chart(db_session,lang):
 
     return plot_html
 
-def create_weekly_top_dishes_chart(db_session,lang):
+def create_weekly_top_dishes_chart(db_session,lang,week_dates):
 
-    top_three_dishes = get_top_three_dishes(db_session,lang)
+    top_three_dishes = get_top_three_dishes(db_session,lang,week_dates)
     # Extract data for the chart
     dish_names = format_labels([item['dish_name'] for item in top_three_dishes])
     avg_ratings = [item['avg_rating'] for item in top_three_dishes]
@@ -319,18 +319,18 @@ def create_weekly_top_dishes_chart(db_session,lang):
         text=[f"{rating:.1f}" for rating in avg_ratings],  
         textposition='auto'  
     )
+    # Format the dates to "DD.MM.YYYY"
+    formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
+    formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
+
+    title = f'Top 3 Dishes for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Gerichte für die Woche von {formatted_start_date} bis {formatted_end_date}'
 
     # Define the layout
     dish_layout = go.Layout(
-        xaxis=dict(
-            title='Dish' if lang == 'en' else 'Menü',
-            tickangle=0
-        ),
-        yaxis=dict(
-            title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'
-        ),
-        template='plotly'  
-    )
+        title=dict(text=title),
+        xaxis=dict(title='Dish' if lang == 'en' else 'Menü',tickangle=0),
+        yaxis=dict(title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'),
+        template='plotly')
 
     # Create the figure
     fig = go.Figure(data=[dish_trace], layout=dish_layout)
