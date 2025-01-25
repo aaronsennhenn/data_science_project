@@ -100,11 +100,11 @@
                 Menu
             {% endif %}
         </h1>
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">
             {% if session.get('language') == 'de' %}
                 Wählen Sie Ihr Menü nach Ihren Vorlieben!
             {% else %}
-                <!-- Choose your menu based on your preferences! -->
+                Choose your menu based on your preferences! 
             {% endif %}
         </h2>
         <form action="{{ url_for('menu') }}" method="POST" class="flex flex-wrap gap-4" id="filter-form">
@@ -273,7 +273,7 @@
 <!-- Results section -->
 <div class="container mt-8 w-full">
     {% if no_results %}
-    <div class="text-2xl font-bold text-center" style="font-size: 2.2rem;">
+    <div class="text-xl font-semibold text-gray-800 mb-2 text-center">
         {% if session.get('language') == 'de' %}
             Es wurden keine Daten für die ausgewählten Optionen gefunden!
         {% else %}
@@ -284,7 +284,7 @@
     <div class="grid grid-cols-3 gap-6">
         <!-- Main dish -->
         <div>
-            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4 mb-2">
                 {% if session.get('language') == 'de' %}Hauptspeisen{% else %}Main Dishes{% endif %}
             </h2>
             {% if dishes.get('Hauptspeise') or dishes.get('Main Dish') %}
@@ -509,16 +509,7 @@
                                 <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
                                 <label for="star1_{{ dish.id }}">&#9733;</label>
                             </div>
-                        
-                            <!-- Submit Rating Button -->
-                            <button class="submit-rating" data-id="{{ dish.id }}">
-                                {% if session.get('language') == 'de' %}
-                                Bewertung senden
-                                {% else %}
-                                Submit Rating
-                                {% endif %}
-                            </button>
-
+                    
                             <!-- Success Message (Initially hidden) -->
                             <p id="rating-feedback" class="text-sm text-green-600 hidden">
                                 {% if session.get('language') == 'de' %}
@@ -527,9 +518,18 @@
                                     Rating received, thank you!
                                 {% endif %}
                             </p>
-
                         </div>
-                        
+
+                        <div class="flex gap-4 mb-2">
+                            <!-- Submit Rating Button -->
+                            <button class="submit-rating" data-id="{{ dish.id }}">
+                                {% if session.get('language') == 'de' %}
+                                Bewertung senden
+                                {% else %}
+                                Submit Rating
+                                {% endif %}
+                            </button>
+                        </div>
 
                         <div class="flex gap-4 mb-2">
                             <!-- Description Button -->
@@ -643,7 +643,7 @@
         </div>
         <!-- Side Dish -->
         <div>
-            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4 mb-2">
                 {% if session.get('language') == 'de' %}Beilagen{% else %}Side Dishes{% endif %}
             </h2>
             {% if dishes.get('Beilage') or dishes.get('Side Dish') %}
@@ -867,7 +867,9 @@
                                 <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
                                 <label for="star1_{{ dish.id }}">&#9733;</label>
                             </div>
+                        </div>
                         
+                        <div class="flex gap-4 mb-2">
                             <!-- Submit Rating Button -->
                             <button class="submit-rating" data-id="{{ dish.id }}">
                                 {% if session.get('language') == 'de' %}
@@ -876,7 +878,6 @@
                                 Submit Rating
                                 {% endif %}
                             </button>
-
                         </div>
                     </div>
                 </div>
@@ -895,7 +896,7 @@
 
         <!-- Dessert -->
         <div>
-            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4 mb-2">
                 {% if session.get('language') == 'de' %}Nachspeisen{% else %}Desserts{% endif %}
             </h2>
             {% if dishes.get('Dessert') or dishes.get('Nachspeise') %}
@@ -1122,7 +1123,9 @@
                                         <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
                                         <label for="star1_{{ dish.id }}">&#9733;</label>
                                     </div>
+                                </div>
                                 
+                                <div class="flex gap-4 mb-2">
                                     <!-- Submit Rating Button -->
                                     <button class="submit-rating" data-id="{{ dish.id }}">
                                         {% if session.get('language') == 'de' %}
@@ -1131,7 +1134,6 @@
                                         Submit Rating
                                         {% endif %}
                                     </button>
-        
                                 </div>
                             </div>       
                         </div>
