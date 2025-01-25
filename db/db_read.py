@@ -697,10 +697,7 @@ def get_combined_dishes(db_session: Session):
     df.loc[df['menuLine'] == 'Auswahlgericht veget. 2', 'menuLine'] = 'Auswahlgericht veget.'
     df.loc[df['menuLine'] == 'Auswahlgericht 2', 'menuLine'] = 'Auswahlgericht'
     df.loc[df['menuLine'] == 'mensaVital vegan 2', 'menuLine'] = 'mensaVital vegan'
-
-    # remove dishes with negative prices.
-    df = df[(df['studentPrice'] >= 0) | (df['guestPrice'] >= 0)]
-
+    
     # remove Pizza menuLine. Is this this was a mistake
     df = df[df['menuLine'] != "Pizza"]
 
