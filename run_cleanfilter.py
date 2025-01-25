@@ -147,10 +147,15 @@ def update_ingredients():
 
 def update_cleanprices():
 
-    dish = get_combined_dishes(Session())
-    impute_studentPrice = impute_missing_prices(dish,"studentPrice")
-    impute_guestPrice = impute_missing_prices(impute_studentPrice,"guestPrice")
+
     with Session() as db_session:
+        dish = get_combined_dishes(db_session)
+
+        if dish.empty:
+            return
+        
+        impute_studentPrice = impute_missing_prices(dish,"studentPrice")
+        impute_guestPrice = impute_missing_prices(impute_studentPrice,"guestPrice")
         write_imputed_price_to_filtersclean(impute_studentPrice,db_session,"studentPrice",engine)
         write_imputed_price_to_filtersclean(impute_guestPrice,db_session,"guestPrice",engine)
     print("Prices are updated")
