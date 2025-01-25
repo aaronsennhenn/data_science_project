@@ -16,31 +16,34 @@
 
 <body class="min-h-screen flex flex-col bg-gray-50">
     <!-- Header -->
-    <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
-        <nav>
+    <header class="w-full bg-white shadow-md py-6 px-8 relative z-10">
+        <nav class="relative">
+            <!-- App title -->
             <div class="nav-container flex justify-between items-center">
-                <div class="text-2xl font-bold text-indigo-600">MENSA APP.</div>
+                <a href="{{ url_for('index') }}" class="text-xl font-bold text-indigo-600 absolute left-1">
+                    MENSA APP.
+                </a>
                 
                 <!-- Language Buttons - Centered -->
                 <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
                     <a href="{{ url_for('set_language', lang='en') }}" 
-                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                         EN
                     </a>
                     <a href="{{ url_for('set_language', lang='de') }}"
-                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                         DE
                     </a>
                 </div>
-
+    
                 <!-- Menu Toggle -->
-                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none absolute right-1">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
             </div>
-        </nav>
+          </nav>
     </header>
     
     <!-- Sidebar Navigation -->
@@ -102,11 +105,11 @@
                 Menu
             {% endif %}
         </h1>
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-2">
             {% if session.get('language') == 'de' %}
                 Wählen Sie Ihr Menü nach Ihren Vorlieben!
             {% else %}
-                <!-- Choose your menu based on your preferences! -->
+                Choose your menu based on your preferences! 
             {% endif %}
         </h2>
         <form action="{{ url_for('menu') }}" method="POST" class="flex flex-wrap gap-4" id="filter-form">
@@ -275,7 +278,7 @@
 <!-- Results section -->
 <div class="container mt-8 w-full">
     {% if no_results %}
-    <div class="text-2xl font-bold text-center" style="font-size: 2.2rem;">
+    <div class="text-xl font-semibold text-gray-800 mb-2 text-center">
         {% if session.get('language') == 'de' %}
             Es wurden keine Daten für die ausgewählten Optionen gefunden!
         {% else %}
@@ -286,7 +289,7 @@
     <div class="grid grid-cols-3 gap-6">
         <!-- Main dish -->
         <div>
-            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4 mb-2">
                 {% if session.get('language') == 'de' %}Hauptspeisen{% else %}Main Dishes{% endif %}
             </h2>
             {% if dishes.get('Hauptspeise') or dishes.get('Main Dish') %}
@@ -511,16 +514,7 @@
                                 <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
                                 <label for="star1_{{ dish.id }}">&#9733;</label>
                             </div>
-                        
-                            <!-- Submit Rating Button -->
-                            <button class="submit-rating" data-id="{{ dish.id }}">
-                                {% if session.get('language') == 'de' %}
-                                Bewertung senden
-                                {% else %}
-                                Submit Rating
-                                {% endif %}
-                            </button>
-
+                    
                             <!-- Success Message (Initially hidden) -->
                             <p id="rating-feedback" class="text-sm text-green-600 hidden">
                                 {% if session.get('language') == 'de' %}
@@ -529,9 +523,18 @@
                                     Rating received, thank you!
                                 {% endif %}
                             </p>
-
                         </div>
-                        
+
+                        <div class="flex gap-4 mb-2">
+                            <!-- Submit Rating Button -->
+                            <button class="submit-rating" data-id="{{ dish.id }}">
+                                {% if session.get('language') == 'de' %}
+                                Bewertung senden
+                                {% else %}
+                                Submit Rating
+                                {% endif %}
+                            </button>
+                        </div>
 
                         <div class="flex gap-4 mb-2">
                             <!-- Description Button -->
@@ -645,7 +648,7 @@
         </div>
         <!-- Side Dish -->
         <div>
-            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4 mb-2">
                 {% if session.get('language') == 'de' %}Beilagen{% else %}Side Dishes{% endif %}
             </h2>
             {% if dishes.get('Beilage') or dishes.get('Side Dish') %}
@@ -869,7 +872,9 @@
                                 <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
                                 <label for="star1_{{ dish.id }}">&#9733;</label>
                             </div>
+                        </div>
                         
+                        <div class="flex gap-4 mb-2">
                             <!-- Submit Rating Button -->
                             <button class="submit-rating" data-id="{{ dish.id }}">
                                 {% if session.get('language') == 'de' %}
@@ -878,7 +883,6 @@
                                 Submit Rating
                                 {% endif %}
                             </button>
-
                         </div>
                     </div>
                 </div>
@@ -897,7 +901,7 @@
 
         <!-- Dessert -->
         <div>
-            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4">
+            <h2 class="text-2xl font-bold text-[#6366F1] text-center mt-4 mb-2">
                 {% if session.get('language') == 'de' %}Nachspeisen{% else %}Desserts{% endif %}
             </h2>
             {% if dishes.get('Dessert') or dishes.get('Nachspeise') %}
@@ -1124,7 +1128,9 @@
                                         <input type="radio" id="star1_{{ dish.id }}" name="rating_{{ dish.id }}" value="1" />
                                         <label for="star1_{{ dish.id }}">&#9733;</label>
                                     </div>
+                                </div>
                                 
+                                <div class="flex gap-4 mb-2">
                                     <!-- Submit Rating Button -->
                                     <button class="submit-rating" data-id="{{ dish.id }}">
                                         {% if session.get('language') == 'de' %}
@@ -1133,7 +1139,6 @@
                                         Submit Rating
                                         {% endif %}
                                     </button>
-        
                                 </div>
                             </div>       
                         </div>

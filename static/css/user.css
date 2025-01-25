@@ -1,3 +1,14 @@
+.word-wrap {
+    word-wrap: break-word; /* Ensure words break and wrap */
+    white-space: normal; /* Allow text to wrap */
+    word-break: break-word; 
+}
+
+.location {
+    word-break: break-all; /* Break words at any character */
+    hyphens: auto; /* Enable hyphenation */
+}
+
 .grid-container {
     display: grid;
     grid-template-columns: repeat(6, 1fr); /* 6 equal-width columns */
@@ -21,20 +32,33 @@
     box-shadow: none;
 }
 
-
 .dish-box strong {
     color: #6366F1; /* Purple text for location */
 }
 
 @media (max-width: 768px) {
     .header, .dish-box {
-        font-size: 0.8rem; /* Smaller font size for smaller screens */
+        font-size: 0.7rem; /* Smaller font size for smaller screens */
     }
 }
 
 @media (max-width: 480px) {
+    .grid-container {
+        grid-template-columns: 1fr; /* Stack columns vertically */
+    }
+
     .header, .dish-box {
-        font-size: 0.6rem; /* Even smaller font size for very small screens */
+        font-size: 0.7rem; /* Keep font size larger */
+        padding: 5px; /* Keep padding larger */
+    }
+
+    .header {
+        display: none; /* Hide headers on very small screens */
+    }
+
+    .grid-row {
+        display: grid; /* Display rows as grid */
+        grid-template-columns: 1fr; /* Single column layout */
     }
 }
 

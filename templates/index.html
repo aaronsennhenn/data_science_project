@@ -13,10 +13,11 @@
     <!-- Background Image with Overlay -->
     <div class="bg-image fixed inset-0 z-0"></div>
     <!-- Header -->
-    <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
-        <nav>
+    <header class="w-full bg-white shadow-md py-6 px-8 relative z-10">
+        <nav class="relative">
+            <!-- App title -->
             <div class="nav-container flex justify-between items-center">
-                <a href="{{ url_for('index') }}" class="text-2xl font-bold text-indigo-600">
+                <a href="{{ url_for('index') }}" class="text-xl font-bold text-indigo-600 absolute left-1">
                     MENSA APP.
                 </a>
                 
@@ -31,15 +32,15 @@
                         DE
                     </a>
                 </div>
-
+    
                 <!-- Menu Toggle -->
-                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none absolute right-1">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
             </div>
-        </nav>
+          </nav>
     </header>
 
     <!-- Sidebar Navigation -->
@@ -78,10 +79,8 @@
                 <a href="/navigation" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Navigation{% else %}Navigation{% endif %}
                 </a>
-                <a href="/user" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">
-                    {% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}
-                </a> 
                 {% if username %}
+                <a href="/user" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">{% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}</a> 
                 <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
                 {% else %}
                     <a href="{{ url_for('login') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
