@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import os
 from secret import *
 from db.db_write import remove_rating,update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user
-from db.db_read import get_prevornext_weekday_dates,get_average_ratings, get_dishes_of_user,get_weekday_dates,get_week_recommended_dishes,get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_mensas_of_user,get_unique_mensas, get_past_6_month_spending, get_current_month_spending
+from db.db_read import get_weekly_recommendation_dict,get_prevornext_weekday_dates,get_average_ratings, get_dishes_of_user,get_weekday_dates,get_week_recommended_dishes,get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_mensas_of_user,get_unique_mensas, get_past_6_month_spending, get_current_month_spending
 from datetime import datetime, timedelta
 import json
 from db.utils import compute_cosine_similarity, format_price, format_price_column
@@ -154,97 +154,58 @@ def user_page():
     session['language'] = lang
     session.permanent = True
     user_name = session.get('username')
+    selected_user_type = 'student'
+
 
     # if user is not logged in, redirect to login page
     if not user_name:
         return redirect(url_for('login'))
     
+    with Session() as db_session:
 
-    # if user has not rated dishes yet, redirect to rating page
-    db_session = Session()
-    user_vector = get_user_vector(user_name, db_session)
-    if not user_vector:
-        return redirect(url_for('rating'))
-    
-    # if user removes a rating, delete the rating from the database
-    if request.method == 'POST':
-        menu_id = request.form.get('menu_id')
-        remove_rating(menu_id, user_name, engine, Session)
+        # if user is logged in but has not rated dishes yet, redirect to rating page
+        user_vector = get_user_vector(user_name, db_session)
+        if not user_vector:
+            return redirect(url_for('rating'))
+        
+        if request.method == 'POST':
+            menu_id = request.form.get('menu_id')       # if user removes a rating, delete the rating from the database
+            selected_user_type = request.form.get('user_type') if request.form.get('user_type') else 'student'  # get student or guest
+            remove_rating(menu_id, user_name, engine, Session) if menu_id else None # remove selected rating from Rating Table
+            update_user_vector(user_name, engine, db_session) if menu_id else None  # update user vector after rating is removed
 
-
-    try:
+            # again check if user_vector exists after rating is removed
+            if not user_vector:
+                return redirect(url_for('rating'))
+        
+        # load tables when the page is initialized
         total_ratings = get_total_ratings_by_user(db_session, user_name)
         first_rating_date = get_first_rating_date_of_user(db_session, user_name)
         rated_dishes = get_dishes_of_user(db_session, user_name)
         current_month_spending = get_current_month_spending(db_session, user_name , lang)
-        past_6_month_spending = get_past_6_month_spending(db_session, user_name, lang)
-        avg_rating_all = get_average_ratings(Session())
-        avg_rating_user = get_average_ratings(Session(), user_name)
+        avg_rating_all = get_average_ratings(db_session)
+        avg_rating_user = get_average_ratings(db_session, user_name)
 
         # generate chart to display top mensas for the user
         mensa_user_chart = top_mensa_for_user_chart(db_session, user_name, lang)
-       
+
+        # budget stuff
+        past_6_month_spending_chart = create_past_6_month_spending_chart(db_session,user_name, selected_user_type,lang)
+        current_spending = current_month_spending[selected_user_type].iloc[0]
+        current_spending_formatted = format_price(current_spending)
+        current_month = current_month_spending['month_name'].iloc[0]
+
         #Create tasteprofile radarchart
         cluster_df = get_cluster_similarity(db_session, user_name)
         country_chart = create_taste_radarchart(cluster_df.iloc[:-3], 'cluster_name', 'scaled')
 
-        #Budget feature
-        if request.method == 'POST':
-            selected_user_type = request.form['user_type']
-        else:
-            selected_user_type = 'student'
-                
-        if selected_user_type in ['student', 'guest']:
-            past_6_month_speding_chart = create_past_6_month_spending_chart(past_6_month_spending, selected_user_type)
-            current_spending = current_month_spending[selected_user_type].iloc[0]
-            current_spending_formatted = format_price(current_spending)
-            current_month = current_month_spending['month_name'].iloc[0]
-            
-        # get dishes for the week and compute user vector with user_name
-        df = get_week_recommended_dishes(db_session, get_weekday_dates(), user_name, lang)
-        
-        #Format prices
-        df = format_price_column(df, 'studentPrice', 'studentPrice_imputed')
-        df = format_price_column(df, 'guestPrice', 'guestPrice_imputed')
+        # create data to display weekly dish recommendation
+        grouped_menu_data = get_weekly_recommendation_dict(db_session, user_name, lang)
 
-        # add day of week to dataframe
-        day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-        course_order = ['Hauptspeise', 'Beilage', 'Nachspeise']
-
-        df['day_of_week'] = pd.Categorical(
-            pd.to_datetime(df['Dish'].apply(lambda x: x.menuDate)).dt.day_name(),
-            categories=day_order,
-            ordered=True
-        )
-        df['course'] = pd.Categorical(
-            df['course'],
-            categories=course_order,
-            ordered=True
-        )
-
-        df.drop(columns=["Dish"], inplace=True)
-
-
-        # Get top dish for each day and course
-        top_dishes = (
-            df.sort_values('cosine_similarity', ascending=False)  # Sort by similarity first
-            .groupby(["day_of_week", "course"], group_keys=False)  # Group without adding levels
-            .head(1)  # Take top dish per group
-        )
-
-        # Organize the final result into a dictionary by day
-        top_dishes.sort_values(["day_of_week", "course"], inplace=True)
-        grouped_menu_data = {
-                        day: top_dishes[top_dishes["day_of_week"] == day]
-                        .to_dict(orient="records")
-                        for day in top_dishes["day_of_week"].unique()
-                    }
-
+        # Create plot for average ratings of all users and user
         average_ratings_plot = plot_average_ratings(avg_rating_user, avg_rating_all)
 
-    finally:
-        db_session.close()
-
+        
     return render_template('user.html', 
                            username=user_name, 
                            total_ratings=total_ratings,
@@ -252,9 +213,9 @@ def user_page():
                            rated_dishes=rated_dishes,
                            mensa_user_chart=mensa_user_chart,
                            country_chart = country_chart,
-                           regional_chart=average_ratings_plot,
+                           average_ratings_plot=average_ratings_plot,
                            dishes=grouped_menu_data,
-                           past_6_month_speding_chart = past_6_month_speding_chart,
+                           past_6_month_spending_chart = past_6_month_spending_chart,
                            current_spending_formatted = current_spending_formatted,
                            current_month = current_month,
                            user_type = selected_user_type)
@@ -282,7 +243,7 @@ def rating():
             if rating:
                 write_to_rating(menu_id, rating, user_name, on_rating_page, engine, Session)
                 if user_name:
-                    update_user_vector(user_name, engine, Session)
+                    update_user_vector(user_name, engine, db_session)
 
         # get random dish that user has not rated before and that is not contained in todays selected
         random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(), lang, user_name, db_session)
@@ -326,6 +287,7 @@ def menu():
         # if user has not rated dishes yet, redirect to rating page
         #if not user_vector:
         #    return redirect(url_for('rating'))
+        print("Before POST check:", recommendation_switch)
 
         # When user filters, get filtered values
         if request.method == 'POST':
@@ -334,6 +296,7 @@ def menu():
             selected_diet_meat = request.form.getlist('selected_diet_meat')
             selected_price_temp = request.form.get('selected_price')
             recommendation_switch = request.form.get('recommendation_switch')
+
             price_switch = request.form.get('price_switch')
             rating_switch = request.form.get('rating_switch')
             rating_count_switch = request.form.get('rating_count_switch')
@@ -349,7 +312,7 @@ def menu():
 
                 # update user vector based on new rating if rating is submitted and user is logged in and get new user vector
                 if user_name:
-                    update_user_vector(user_name, engine, Session)
+                    update_user_vector(user_name, engine, db_session)
                     user_vector = get_user_vector(user_name, db_session)
 
             # only update the date variable, if a date is selected
@@ -358,6 +321,7 @@ def menu():
             if selected_price_temp:
                 selected_price = selected_price_temp
 
+        
         if user_name:
             random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(),lang,user_name,db_session) # initialize random dish
         else:
@@ -440,7 +404,7 @@ def menu():
         # Check for no results after filtering
         if not grouped_menu_data:
             no_results = True
-    
+
     return render_template('menu.html', 
                          available_dates=available_dates,
                          available_mensas=available_mensas,

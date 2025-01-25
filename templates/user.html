@@ -207,7 +207,7 @@
             <!-- Second and third columns for the plot -->
             <div class="col-span-3 bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In den letzten Monaten{% else %}In the past months{% endif %}</h3>
-                <div>{{ past_6_month_speding_chart | safe }}</div>
+                <div>{{ past_6_month_spending_chart | safe }}</div>
             </div>   
         </div>
     </section>
@@ -263,7 +263,7 @@
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Ernährungsspezifische Präferenzen{% else %}Dietary Preferences{% endif %}</h3>
                 <div class="flex justify-center items-center">
-                    {{ regional_chart | safe }}
+                    {{ average_ratings_plot | safe }}
                 </div>
             </div>       
         </div>

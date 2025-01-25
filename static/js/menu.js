@@ -21,13 +21,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Handle mensa selection
-    mensaDropdown.addEventListener('change', function() {
-        const form = document.getElementById('filter-form');
-        if (this.value === 'all') {
-            // Submit form to refresh with all mensa results
-            form.submit();
-        }
-    });
+    //mensaDropdown.addEventListener('change', function() {
+    //    const form = document.getElementById('filter-form');
+    //    if (this.value === 'all') {
+    //        // Submit form to refresh with all mensa results
+    //        form.submit();
+    //    }
+    //});
 
     // Handle omnivore checkbox
     const omnivoreCheckbox = document.getElementById('diet_omnivore');

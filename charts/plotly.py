@@ -2,7 +2,7 @@ from flask import request
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.colors import sequential
-from db.db_read import get_combined_dishes,get_ratings_of_the_week,get_top_three_mensas,get_top_three_dishes,get_dishes_and_rating_by_week,get_cluster_similarity_for_week,get_favorite_mensas_of_user
+from db.db_read import get_combined_dishes,get_ratings_of_the_week,get_top_three_mensas,get_top_three_dishes,get_dishes_and_rating_by_week,get_cluster_similarity_for_week,get_favorite_mensas_of_user,get_past_6_month_spending
 import pandas as pd
 from datetime import datetime
 import json
@@ -95,8 +95,7 @@ def create_taste_radarchart(df, taste_label, similarity):
         theta=theta, 
         fill='toself',  
         marker=dict(color=colors[0]),
-        name = None,
-        hoverinfo = 'none'
+        name = None
     ))
 
     #Update layout for better appearance
@@ -181,7 +180,10 @@ def plot_average_ratings(user_ratings, all_ratings):
     return fig_html
 
 
-def create_past_6_month_spending_chart(df, user_type):
+def create_past_6_month_spending_chart(db_session, user_name, user_type, lang):
+
+    df = get_past_6_month_spending(db_session, user_name, lang)
+
     # Get months and spending data from the DataFrame and reverse the order
     months = df['month_name'].tolist()[::-1]  
     spending = df[user_type].tolist()[::-1] 

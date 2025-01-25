@@ -6,7 +6,7 @@ import datetime
 import pandas as pd
 from sqlalchemy import or_,func,select,desc,select, union, and_, not_, extract
 from typing import List, Tuple
-from db.utils import compute_cosine_similarity, get_month_name
+from db.utils import compute_cosine_similarity, get_month_name,format_price_column
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics.pairwise import cosine_similarity
@@ -798,6 +798,50 @@ def get_week_recommended_dishes(db_session, week_dates, user_name, selected_lang
         df["cosine_similarity"] = df["embedding"].apply(lambda x: compute_cosine_similarity(x, user_vector))
 
     return df
+
+def get_weekly_recommendation_dict(db_session, user_name, lang):
+        
+    # get dishes for the week and compute user vector with user_name
+    df = get_week_recommended_dishes(db_session, get_weekday_dates(), user_name, lang)
+
+    #Format prices
+    df = format_price_column(df, 'studentPrice', 'studentPrice_imputed')
+    df = format_price_column(df, 'guestPrice', 'guestPrice_imputed')
+
+    # add day of week to dataframe
+    day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    course_order = ['Hauptspeise', 'Beilage', 'Nachspeise']
+
+    df['day_of_week'] = pd.Categorical(
+        pd.to_datetime(df['Dish'].apply(lambda x: x.menuDate)).dt.day_name(),
+        categories=day_order,
+        ordered=True
+    )
+    df['course'] = pd.Categorical(
+        df['course'],
+        categories=course_order,
+        ordered=True
+    )
+
+    df.drop(columns=["Dish"], inplace=True)
+
+
+    # Get top dish for each day and course
+    top_dishes = (
+        df.sort_values('cosine_similarity', ascending=False)  # Sort by similarity first
+        .groupby(["day_of_week", "course"], group_keys=False)  # Group without adding levels
+        .head(1)  # Take top dish per group
+    )
+
+    # Organize the final result into a dictionary by day
+    top_dishes.sort_values(["day_of_week", "course"], inplace=True)
+    grouped_menu_data = {
+                    day: top_dishes[top_dishes["day_of_week"] == day]
+                    .to_dict(orient="records")
+                    for day in top_dishes["day_of_week"].unique()
+                }
+
+    return grouped_menu_data
 
 def get_prevornext_weekday_dates(start_date: str, direction: str) -> list:
     """

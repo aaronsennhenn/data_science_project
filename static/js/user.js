@@ -10,6 +10,9 @@ removeDishButtons.forEach(button => {
             method: 'POST',
             body: formData,
         })
-        window.location.reload()
+        .then(response => {
+            // After the POST request is complete, reload the page (GET request)
+            window.location.reload();
+        })
     });
 });
