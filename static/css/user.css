@@ -1,0 +1,113 @@
+.word-wrap {
+    word-wrap: break-word; /* Ensure words break and wrap */
+    white-space: normal; /* Allow text to wrap */
+    word-break: break-word; 
+}
+
+.location {
+    word-break: break-all; /* Break words at any character */
+    hyphens: auto; /* Enable hyphenation */
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 6 equal-width columns */
+    gap: 0; /* Remove space between fields */
+    border-collapse: collapse; /* Ensure no gaps between cells */
+}
+
+.grid-row {
+    display: contents; /* Allow rows to span multiple columns */
+}
+
+.header, .dish-box {
+    text-align: center;
+    background-color: #f3f4f6; /* Light gray background */
+    border: 1px solid #e5e7eb; /* Light gray border */
+    padding: 5px;
+}
+
+.dish-box {
+    background-color: #ffffff;
+    box-shadow: none;
+}
+
+.dish-box strong {
+    color: #6366F1; /* Purple text for location */
+}
+
+@media (max-width: 768px) {
+    .header, .dish-box {
+        font-size: 0.7rem; /* Smaller font size for smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .grid-container {
+        grid-template-columns: 1fr; /* Stack columns vertically */
+    }
+
+    .header, .dish-box {
+        font-size: 0.7rem; /* Keep font size larger */
+        padding: 5px; /* Keep padding larger */
+    }
+
+    .header {
+        display: none; /* Hide headers on very small screens */
+    }
+
+    .grid-row {
+        display: grid; /* Display rows as grid */
+        grid-template-columns: 1fr; /* Single column layout */
+    }
+}
+
+.header {
+    font-weight: bold;
+    background-color: #6366F1; 
+    color: #ffffff; 
+}
+
+.remove-dish-button {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+.remove-dish-button:hover {
+    font-weight: bold;
+}
+
+.rated-dishes-container {
+    background: #ffffff; /* White background for clarity */
+    color: #000000; /* Black text for readability */
+    font-size: 1rem; /* Base font size for all text inside */
+    line-height: 1.5; /* Improve readability with generous line spacing */
+    padding: 10px; /* Ensure comfortable padding inside the container */
+    border-radius: 10px; /* Rounded corners for aesthetics */
+    max-height: 400px; /* Set a fixed height for the container */
+    overflow-y: auto; /* Enable vertical scrolling */
+    text-align: left; /* Align text to the left by default */
+}
+
+.dropdown-style {
+    background-color: white;
+    color: #1a202c;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.dropdown-style:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-style:focus {
+    border-color: black;
+    box-shadow: 0 0 0 1px black;
+}

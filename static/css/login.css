@@ -1,0 +1,91 @@
+/* General body styling */
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Font styling for specific elements */
+.font-script {
+    font-family: 'Dancing Script', cursive;
+}
+
+/* Background image styling */
+.bg-image {
+    background-image: url('../images/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* Header and footer styling */
+header, footer {
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+}
+
+nav {
+    width: 100%;
+    padding: 0 1rem;
+    max-width: none !important;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+/* Content wrapper styling */
+.content-wrapper {
+    background-color: rgba(255, 255, 255, 0.85); /* Slightly transparent white */
+    border-radius: 1rem; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+}
+
+/* Form wrapper styling */
+.form-wrapper {
+    border-radius: 1rem; /* Rounded corners */
+}
+
+/* Heading styles */
+h1 {
+    margin-top: 0.5rem; /* Space above the heading */
+}
+
+/* Button styles */
+.btn-primary {
+    background-color: #4A5568; /* Dark gray background */
+    color: white; /* White text color */
+    padding: 0.24rem 0.25rem; /* Padding around button text */
+    border-radius: 0.25rem; /* Rounded button corners */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.btn-primary:hover {
+    background-color: #2D3748; /* Darker gray on hover */
+}
+
+/* Sidebar transition */
+.sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Hamburger menu icon */
+.menu-toggle:hover {
+    cursor: pointer;
+}
+
+/* Change color of mensa-label on hover */
+.mensa-label:hover {
+    color: white; 
+    background-color: #6366F1; 
+}
+
+/* Close button */
+.close-menu:hover {
+    cursor: pointer;
+}

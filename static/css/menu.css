@@ -1,0 +1,482 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #d8cbbb;
+}
+
+.font-script {
+  font-family: 'Dancing Script', cursive;
+}
+
+header, footer {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar {
+  transition: transform 0.3s ease-in-out;
+}
+
+nav {
+  width: 100%;
+  padding: 0 2rem;
+  max-width: none !important;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.menu-toggle:hover, .close-menu:hover {
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  background-color: #6366F1;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+button[type="submit"]:hover {
+  background-color: #3F42C8;
+  transform: translateY(-1px);
+}
+
+select:hover, input[type="date"]:hover {
+  border-color: #cbd5e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+select, input[type="date"] {
+  background-color: white;
+  color: #1a202c;
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  width: 100%;
+  transition: all 0.3s ease;
+}  
+
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+h1 {
+  margin-top: 0.5rem; 
+}
+
+h2 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: #1a202c;
+}
+
+p {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #4a5568;
+}
+
+.flex-1 {
+  flex: 1 1 0;
+  min-width: 200px;
+}
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.radio-group label {
+  background-color: white;
+  color: #4a5568;
+  border: 2px solid #4a5568;
+  padding: 8px 16px;
+  border-radius: 6px;
+  margin: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radio-group input[type="checkbox"]:checked + label {
+  background-color: #6366F1;
+  color: white;
+  border-color: #6366F1;
+}
+
+.radio-group input[type="checkbox"] {
+  display: none;
+}
+
+#filter-form {
+  background-color: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  padding: 30px;
+  margin-top: 20px;
+}
+
+.toggle-switch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.toggle-switch label {
+  background-color: #6366F1;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-switch input[type="radio"]:checked + label {
+  background-color: #6366F1;
+}
+
+.card-text {
+  text-align: left;
+}
+
+.card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  height: auto; /* Set a fixed height */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Distribute space between elements */
+}
+
+.card-content {
+  flex-grow: 1; /* Allow content to grow and take available space */
+}
+
+.card-footer {
+  margin-top: auto; /* Push footer to the bottom */
+}
+
+.card-title.menu-line {
+  font-size: 1.875rem;
+}
+
+.card-title.menu-name {
+  font-size: 1.5rem;
+}
+
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.rating input {
+  display: none;
+}
+
+.rating label {
+  font-size: 32px;
+  color: #ddd;
+  cursor: pointer;
+}
+
+.rating label:hover,
+.rating label:hover ~ label,
+.rating input:checked ~ label {
+  color: #FFD700;
+}
+
+.submit-rating {
+  background-color: #6366F1;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  white-space: nowrap;
+  width: 175px;
+}
+
+.submit-rating:hover {
+  background-color: #3F42C8;
+}
+
+.icon-tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.icon-tooltip img {
+  cursor: help;
+}
+
+.icon-tooltip:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+}
+.description-content,
+.recipe-content {
+    transition: height 0.3s ease-out;
+    overflow: hidden;
+}
+
+.expanded {
+    height: auto !important;
+}
+
+.expand-button {
+    background-color: #f3f4f6;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.expand-button:hover {
+    background-color: #e5e7eb;
+}
+
+ /* The switch - the box around the slider */
+ .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  max-width: 60px; /* Ensures it doesn't stretch */
+  box-sizing: border-box; /* Avoids extra padding issues */
+  margin: 0 10px 10px 0;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-item .text-left {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #4a5568;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+  box-sizing: border-box; /* Ensures dimensions stay consistent */
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #6366F1;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Responsive design adjustments */
+@media (max-width: 768px) {
+  .switch {
+      width: 40px;
+      height: 24px;
+  }
+
+  .slider:before {
+      height: 20px;
+      width: 20px;
+  }
+}
+
+/* Rate Dishes Button */
+.rate-dishes-btn {
+  display: block; /* Ensures it behaves like a block element */
+  padding: 12px 24px; /* Adds padding around the text */
+  background-color: #6366F1; /* Green background color */
+  color: white; /* White text */
+  border: none; /* Removes default border */
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 16px; /* Adjust font size */
+  margin-left: 20px;
+}
+
+
+/* Hover Effect */
+.rate-dishes-btn:hover {
+  background-color: #3F42C8; /* Darker green for hover effect */
+}
+
+
+.rate-more-dishes-button {
+  padding: 12px 6px; /* Adds padding around the text */
+  background-color: #6366F1; 
+  color: white; /* White text */
+  border: none; /* Removes default border */
+  border-radius: 8px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 14px; /* Adjust font size */
+}
+
+.rate-more-dishes-button:hover {
+  background-color: #3F42C8;
+}
+
+/* General Popup Styling */
+.popup {
+  position: absolute; /* Ensure the popup is positioned relative to the viewport */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none; /* Hide the popup by default */
+  z-index: 9999; /* Ensure it appears above other content */
+}
+
+/* Overlay Styling */
+.popup .overlay {
+  position: absolute; /* Cover the entire parent container */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9); /* Dark semi-transparent background */
+  display: none;
+  border-radius: 8px;
+  z-index: -1; /* Hide the overlay by default */
+}
+
+/* Popup Content Styling */
+.popup .content {
+  background: #ffffff; /* White background for clarity */
+  color: #000000; /* Black text for readability */
+  font-size: 1.25rem; /* Larger base font size for all text inside */
+  line-height: 1.8; /* Improve readability with generous line spacing */
+  padding: 20px; /* Ensure comfortable padding inside the popup */
+  border-radius: 10px; /* Rounded corners for aesthetics */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+  width: auto;
+  max-width: 70%; /* Ensure the content width stays manageable */
+  max-height: 90%;
+  overflow-y: auto; /* Enable scrolling for overflow content */
+  text-align: left; /* Align text to the left by default */
+}
+
+/* Close Button */
+.popup .close-btn {
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  background: #222;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 50%;
+  border: none;
+}
+
+/* Button Styles */
+.description-btn,
+.recipe-btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #1b1eaf;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 290px;
+  margin: 5px 0;
+}
+
+.description-btn:hover,
+.recipe-btn:hover {
+  background-color: #161894;
+}
+
+/* Active State */
+.popup.active {
+  display: flex; /* Show popup */
+  justify-content: center;
+  align-items: center;
+}
+
+.popup.active .overlay {
+  display: block; /* Show overlay */
+}

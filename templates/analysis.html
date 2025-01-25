@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/analysis.css') }}" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+
+</head>
+
+<body class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Header -->
+    <header class="w-full bg-white shadow-md py-6 px-8 relative z-10">
+        <nav class="relative">
+            <!-- App title -->
+            <div class="nav-container flex justify-between items-center">
+                <a href="{{ url_for('index') }}" class="text-xl font-bold text-indigo-600 absolute left-1">
+                    MENSA APP.
+                </a>
+                
+                <!-- Language Buttons - Centered -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
+                    <a href="{{ url_for('set_language', lang='en') }}" 
+                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        EN
+                    </a>
+                    <a href="{{ url_for('set_language', lang='de') }}"
+                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        DE
+                    </a>
+                </div>
+    
+                <!-- Menu Toggle -->
+                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none absolute right-1">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+          </nav>
+    </header>
+    
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-20">
+        <div class="p-5">
+            <button id="close-menu" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            {% if username %}
+            <div class="flex items-center space-x-3 mb-2">
+                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-700">
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Logged in as:</p>
+                    <p class="text-lg font-bold text-gray-900">{{ username }}</p>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-center text-gray-700 font-medium mb-2">You are not logged in.</p>
+            {% endif %}
+            <nav class="mt-8">
+                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
+                </a>
+                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
+                </a>
+                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
+                </a>
+                <a href="/rating" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}
+                </a>
+                <a href="/navigation" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Navigation{% else %}Navigation{% endif %}
+                </a>
+                <a href="/user" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}
+                </a> 
+                {% if username %}
+                <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center px-4 py-2">
+        <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}</h1>
+            <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Kennzahlen, Preiseinblicke und Trends in Tübinger Mensen und Cafeterien{% else %}Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias{% endif %}</p>
+        </div>
+
+        <!-- Key Metrics Section -->
+        <section class="mb-6 w-full">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Kennzahlen{% else %}Key Metrics{% endif %}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Start der Datenerhebung{% else %}Start of Data Inception{% endif %}</h3>
+                    <p class="text-2xl font-bold text-gray-900">{{ first_updated_date }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Gerichte{% else %}Total Menus{% endif %}</h3>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_menus }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Mensen{% else %}Total Mensas{% endif %}</h3>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_mensas }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Bewertungen{% else %}Total Ratings{% endif %}</h3>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_ratings }}</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Analysiertes Gebiet{% else %}Covered Area{% endif %}</h3>
+                    <a href="https://www.google.com/maps/place/Tübingen" target="_blank" class="location-link">
+                        Tübingen
+                    </a>
+                </div>           
+            </div>
+        </section>
+
+        <!-- Rating Insights -->
+        <section class="mb-6 w-full">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2"> {% if session.get('language') == 'de' %}Wöchentliche Bewertungen{% else %}Weekly Ratings{% endif %}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Top Mensas -->
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <div id="mensa-plot" class="p-4 rounded-lg">
+                        {{ mensa_plot|safe }}
+                    </div>
+                </div>
+                <!-- Top Dishes -->
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <div id="dish-plot" class="p-4 rounded-lg">
+                        {{ dish_plot|safe }}
+                    </div>
+                </div>  
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Average ratings plot -->
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <div id="ratings-plot" class="p-4 rounded-lg">
+                        {{ ratings_of_the_week_plot|safe }}
+                    </div>
+                </div>
+                <!--Taste cluster distribution -->
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <div id="pie-plot" class="p-4 rounded-lg">
+                        {{ pie_chart|safe }}
+                    </div>
+                </div>  
+            </div>
+            <button id="prev-date-button" class="location-link">
+                {% if session.get('language') == 'de' %}Zurück{% else %}Back{% endif %}
+            </button>
+            <button id="next-date-button" class="location-link">
+                {% if session.get('language') == 'de' %}Weiter{% else %}Next{% endif %}
+            </button>
+        </section>
+
+        <!-- Price Development -->
+        <section class="mb-6 w-full">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Preisentwicklung{% else %}Price Development{% endif %}</h2>
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-2 max-w-full">
+                <div class="grid grid-cols-1 md:grid-cols-10 gap-4">
+                    <!-- Controls Section -->
+                    <div class="p-4 rounded-lg col-span-3 flex flex-col space-y-4">
+                        <!-- Dropdown for selecting the category -->
+                        <div>
+                            <label for="category" class="block font-medium text-gray-700">Select Category:</label>
+                            <select id="category" class="dropdown-style mt-1 block w-full">
+                                {% for category in categories %}
+                                    <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
+                                        {{ category }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                
+                        <!-- Dropdown for selecting price type -->
+                        <div>
+                            <label for="priceType" class="block font-medium text-gray-700">Price Type:</label>
+                            <select id="priceType" class="dropdown-style mt-1 block w-full">
+                                <option value="studentPrice">{% if session.get('language') == 'de' %}Studentenpreis{% else %}Student Price{% endif %}</option>
+                                <option value="guestPrice">{% if session.get('language') == 'de' %}Gästepreis{% else %}Guest Price{% endif %}</option>
+                            </select>
+                        </div>
+                
+                        <!-- Checkbox for showing icons -->
+                        <div>
+                            <label for="showIcons" class="inline-flex items-center">
+                                <input type="checkbox" id="showIcons" value="true" checked class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
+                                <span class="ml-2 text-gray-700">Show Icons</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Plot Area -->
+                    <div class="p-4 rounded-lg col-span-7">
+                        <div id="price-plot">
+                            {{ price_plot|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>      
+        </section>
+
+
+</main>
+    
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 py-2">
+    <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+        &copy; 2024 MENSA APP. All rights reserved.
+    </div>
+</footer>
+<!-- Scripts -->
+<script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const closeMenu = document.getElementById('close-menu');
+    const sidebar = document.getElementById('sidebar');
+
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('translate-x-full');
+    });
+
+    closeMenu.addEventListener('click', () => {
+        sidebar.classList.add('translate-x-full');
+    });
+
+    // Function to update the plot via AJAX
+    function updatePricePlot(selectedCategory,selectedPrice,selectedIcon) {
+        $.ajax({
+            url: '/update_price_plot',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ category: selectedCategory,
+                                    price: selectedPrice,
+                                    icon: selectedIcon}),
+            success: function(response) {
+                $('#price-plot').html(response.plot); // Update the plot area with the new plot
+            },
+            error: function(error) {
+                console.error('Error updating plot:', error);
+            }
+        });
+    }
+
+    // Update the value of the checkbox and send updated data when it changes
+    $('#showIcons').on('change', function () {
+        // Set the checkbox value to "true" or "false" based on its state
+        $(this).val(this.checked ? "true" : "false");
+    });
+
+
+    // Update the plot when the dropdown value changes
+    $('#category, #priceType, #showIcons').on('change', function() {
+        const selectedCategory = $('#category').val();
+        const selectedPrice = $('#priceType').val();
+        const selectedIcon = $('#showIcons').val()
+        updatePricePlot(selectedCategory, selectedPrice, selectedIcon);
+    });
+
+    // Define week_dates as a global JavaScript variable
+    let week_dates = {{ week_dates | tojson }};
+
+    // Function to update the Ratings plot via AJAX
+    function updateRatingsPlot(selectedWeekDates,selectedDirection) {
+        $.ajax({
+            url: '/update_ratings_plot',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ 
+                direction: selectedDirection,
+                week_dates: selectedWeekDates}),
+    
+            success: function(response) {
+            // If the plot is None, display a "No data" message
+            if (!response.ratings_plot) {
+                $('#ratings-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
+                $('#mensa-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
+                $('#dish-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
+                $('#pie-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
+            } else {
+                $('#ratings-plot').html(response.ratings_plot); // Update the ratings plot
+                $('#mensa-plot').html(response.mensa_plot); // Update the mensa plot
+                $('#dish-plot').html(response.dish_plot); // Update the dish plot
+                $('#pie-plot').html(response.pie_chart); // Update the pie plot
+            }
+
+            week_dates = response.week_dates; // Update the global week_dates variable
+        },
+        error: function(error) {
+            console.error('Error updating plot:', error);
+        }
+        });
+    }
+
+    $('#prev-date-button').on('click', function() {
+        updateRatingsPlot(week_dates, 'back');
+    });
+    $('#next-date-button').on('click', function() {
+        updateRatingsPlot(week_dates, 'next');
+    });
+
+</script>
+</body>
+</html>
+

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/navigation.css') }}" rel="stylesheet">
+</head>
+
+<body class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Background Image with Overlay -->
+    <div class="bg-image fixed inset-0 z-0"></div>
+
+    <!-- Header -->
+    <header class="w-full bg-white shadow-md py-6 px-8 relative z-10">
+        <nav class="relative">
+            <!-- App title -->
+            <div class="nav-container flex justify-between items-center">
+                <a href="{{ url_for('index') }}" class="text-xl font-bold text-indigo-600 absolute left-1">
+                    MENSA APP.
+                </a>
+                
+                <!-- Language Buttons - Centered -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
+                    <a href="{{ url_for('set_language', lang='en') }}" 
+                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        EN
+                    </a>
+                    <a href="{{ url_for('set_language', lang='de') }}"
+                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                        DE
+                    </a>
+                </div>
+    
+                <!-- Menu Toggle -->
+                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none absolute right-1">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+          </nav>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <div id="sidebar" class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-20">
+        <div class="p-5">
+            <button id="close-menu" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 focus:outline-none">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            {% if username %}
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-700">
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Logged in as:</p>
+                    <p class="text-lg font-bold text-gray-900">{{ username }}</p>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-center text-gray-700 font-medium mb-6">You are not logged in.</p>
+            {% endif %}
+            <nav class="mt-8">
+                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
+                </a>
+                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
+                </a>
+                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
+                </a>
+                <a href="/rating" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}
+                </a>
+                <a href="/navigation" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Navigation{% else %}Navigation{% endif %}
+                </a>
+                <a href="/user" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">
+                    {% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}
+                </a> 
+                {% if username %}
+                <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+
+<!-- Main Content -->
+<div class="flex-grow flex items-center justify-center px-4 py-2 relative z-10">
+    <div class="content-wrapper max-w-4xl w-full p-2 bg-white rounded-xl shadow-sm border border-gray-100">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">
+            {% if session.get('language') == 'de' %}
+                Willkommen bei Mensa App
+            {% else %}
+                Welcome to Mensa App
+            {% endif %}
+        </h1>
+        <div class="w-full">
+            <p class="text-gray-600 mb-2">
+            {% if session.get('language') == 'de' %}
+                Wir sind eine engagierte Gruppe von Studenten, die eine Leidenschaft für gutes Essen teilen und den Wunsch haben, das Essenserlebnis in Tübingen zu verbessern.
+                Unsere Plattform ermöglicht es, die Speisekarten lokaler Mensen und Cafeterien zu erkunden, komplett mit Analysen und ehrlichen Bewertungen.
+                Unser Ziel ist es, Studenten mit den besten Essensangeboten in Verbindung zu bringen.
+                Erfahren Sie hier, welche Funktionen die einzelnen Seiten unserer App bieten. 
+                Die Sprache kann jederzeit zwischen Deutsch und Englisch umgestellt werden.  
+            {% else %}
+                We're a dedicated group of students who share a passion for good food and a desire to enhance the dining experience in Tübingen.
+                Our platform allows to explore the menus of local mensas and cafeterias, complete with analytics and honest reviews.
+                Our goal is to connect students with the best dining options available.
+                Learn about the features of each page of our app here. 
+                The language can be switched between German and English at any time.  
+            {% endif %}
+            </p>
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center mt-12">{% if session.get('language') == 'de' %}Seitenübersicht{% else %}Page Overview{% endif %}</h2>
+                       
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
+                    <a href="/" class="nav-link home-link">
+                        <img src="{{ url_for('static', filename='images/home.png') }}" alt="Home Icon" class="w-16 h-16">
+                    </a>
+                </div>
+                <div class="col-span-11">
+                    <span class="text-lg font-bold">
+                        {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
+                    </span>
+                    <p class="text-gray-600 mb-2">
+                        {% if session.get('language') == 'de' %}
+                            Diese Seite bietet eine kurze Einführung in den Zweck unserer Applikation. Nutzer können hier die verschiedenen Mensa- und Cafeteria-Standorte einsehen, die in der Mensa-App berücksichtigt werden.
+                        {% else %}
+                            This page provides a brief introduction to the purpose of our application. Users can view the various mensa and cafeteria locations considered in the mensa app.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
+                    <a href="/menu"  class="nav-link menu-link">
+                        <img src="{{ url_for('static', filename='images/menu.png') }}" alt="Home Icon" class="w-16 h-16">
+                    </a>
+                </div>
+                <div class="col-span-11">
+                    <span class="text-lg font-bold">
+                        {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
+                    </span>
+                    <p class="text-gray-600 mb-2">
+                        {% if session.get('language') == 'de' %}
+                            Auf dieser Seite wird das aktuelle Angebot der einbezogenen Mensen und Cafeterien für die jeweilige Woche angezeigt. 
+                            Nutzer haben die Möglichkeit, die Speisekarte nach unterschiedlichen Kategorien zu filtern und/oder zu sortieren. 
+                            Zudem können Gerichte bewertet werden, und basierend auf den Vorlieben der Nutzer werden Empfehlungen angezeigt. 
+                            Zu jedem Hauptgericht gibt es eine Beschreibung sowie Rezeptvorschläge, falls man das Gericht zu Hause nachkochen möchte.
+                        {% else %}
+                            This page displays the current offerings of the included canteens and cafeterias for the respective week. 
+                            Users have the option of filtering and/or sorting the menu according to different categories. 
+                            Dishes can also be rated and recommendations are displayed based on the user's preferences. 
+                            Each main dish is accompanied by a description and recipe suggestions in case you want to cook the dish at home.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
+                    <a href="/analysis"  class="nav-link analysis-link">
+                        <img src="{{ url_for('static', filename='images/analysis.png') }}" alt="Analysis Icon">
+                    </a>
+                </div>
+                <div class="col-span-11">
+                    <span class="text-lg font-bold">
+                        {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
+                    </span>
+                    <p class="text-gray-600 mb-2">
+                        {% if session.get('language') == 'de' %}
+                            Diese Seite bietet Einblicke in Kennzahlen wie die Gesamtanzahl der Gerichte. Zusätzlich gibt es wöchentliche Analysen zu Gerichtsoptionen, Bewertungstrends und Preisentwicklungen.
+                        {% else %}
+                            This page provides insights into key metrics such as the total number of dishes. Additionally, there are weekly analyses of dish options, rating trends, and price developments.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
+                    <a href="/rating"  class="nav-link rating-link">
+                        <img src="{{ url_for('static', filename='images/rating.png') }}" alt="Rating Icon">
+                    </a>
+                </div>
+                <div class="col-span-11">
+                    <span class="text-lg font-bold">
+                        {% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}
+                    </span>
+                    <p class="text-gray-600 mb-2">
+                        {% if session.get('language') == 'de' %}
+                            Hier können Nutzer Bewertungen für zufällig ausgewählte Gerichte abgeben. Dadurch werden nicht nur die Bewertungseinblicke für alle verbessert, sondern auch die persönlichen Empfehlungen der Nutzer optimiert.
+                        {% else %}
+                            Here, users can submit ratings for randomly selected dishes. This not only improves rating insights for everyone but also optimizes users' personal recommendations.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
+                    <a href="/navigation"  class="nav-link navigation-link">
+                        <img src="{{ url_for('static', filename='images/navigation.png') }}" alt="Navigation Icon">
+                    </a>
+                </div>
+                <div class="col-span-11">
+                    <span class="text-lg font-bold">
+                        {% if session.get('language') == 'de' %}Navigation{% else %}Navigation{% endif %}
+                    </span>
+                    <p class="text-gray-600 mb-2">
+                        {% if session.get('language') == 'de' %}
+                            Diese Seite erklärt die Funktionalitäten der Applikation und bietet eine übersichtliche Navigation zu allen wichtigen Seiten.
+                        {% else %}
+                            This page explains the functionalities of the application and provides a clear navigation to all important pages.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
+                    <a href="/login" class="nav-link login-link">
+                        <img src="{{ url_for('static', filename='images/login.png') }}" alt="Login Icon">
+                    </a>
+                </div>
+                <div class="col-span-11">
+                    <span class="text-lg font-bold">
+                        {% if session.get('language') == 'de' %}Login{% else %}Login{% endif %}
+                    </span>
+                    <p class="text-gray-600 mb-2">
+                        {% if session.get('language') == 'de' %}
+                            Diese Seite ermöglicht den Zugang zum Benutzerkonto. Nutzer können sich anmelden (alternativ mit Google Konto) oder ein neues Konto erstellen. 
+                        {% else %}
+                            This page provides access to the user account. Users can log in (alternatively with a Google account) or create a new account. 
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
+                    <a href="{% if username %}/user{% else %}/login{% endif %}" class="nav-link account-link">
+                        <img src="{{ url_for('static', filename='images/account.png') }}" alt="Account Icon">
+                    </a>
+                </div>
+                <div class="col-span-11">
+                    <span class="text-lg font-bold">
+                        {% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}
+                    </span>
+                    <p class="text-gray-600 mb-2">
+                        {% if session.get('language') == 'de' %}
+                            Diese Seite ist auf den individuellen Nutzer zugeschnitten. Nach dem Login wird sie in der Sidebar angezeigt. 
+                            Nutzer können ihre persönliche Mensa-Statistik einsehen. 
+                        {% else %}
+                            This page is tailored to the individual user. After logging in, it is displayed in the sidebar. 
+                            Users can view their personal Mensa statistics. 
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-4 relative z-10">
+        <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+            &copy; 2024 MENSA APP. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeMenu = document.getElementById('close-menu');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('translate-x-full');
+        });
+
+        closeMenu.addEventListener('click', () => {
+            sidebar.classList.add('translate-x-full');
+        });
+    </script>
+</body>
+</html>
