@@ -27,6 +27,8 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     # Get data
     df = get_combined_dishes(db_session)
 
+    df = df[(df["studentPrice"] > 0) & (df["guestPrice"] > 0)]
+
     # Default initial values
     if selected_category == "initial":
         selected_category = df['menuLine'].unique()[0]
