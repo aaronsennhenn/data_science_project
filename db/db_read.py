@@ -852,7 +852,7 @@ def get_weekly_recommendation_dict(db_session, user_name, lang):
         'Thursday': 'Donnerstag',
         'Friday': 'Freitag'
     }
-    
+
     if lang == "de":
         df['day_of_week'] = df['day_of_week'].apply(lambda x: day_translation_dict[x])
 
@@ -988,7 +988,7 @@ def get_past_6_month_spending(session: Session, user_name, lang='en'):
 def get_cluster_similarity_for_week(db_session, week_dates):
     # Get centroid df
     centroid_df = get_embedding_cluster(db_session)
-    centroid_df = centroid_df[~centroid_df["cluster_name"].isin(["german"])]
+    centroid_df = centroid_df[~centroid_df["cluster_name"].isin(["german","other"])]
 
     # Get centroids
     centroids = np.vstack(centroid_df['centroid'])
@@ -998,8 +998,9 @@ def get_cluster_similarity_for_week(db_session, week_dates):
 
     # Initialize a list to store results
     cluster_names = []
+    max_similarities = []
 
-    # Iterate over each row in df and compute cosine similarity
+    # Iterate over each row in df and compute cosine similarity. Safe the cluster with the largest similarity
     for _, row in df.iterrows():
         # Get the embedding for the current row
         dish_vector = row['embedding']
@@ -1009,11 +1010,24 @@ def get_cluster_similarity_for_week(db_session, week_dates):
         centroid_df['cosine_similarity'] = similarity_scores
 
         # Get the cluster_name with the highest similarity
-        cluster_name = centroid_df.loc[centroid_df['cosine_similarity'].idxmax(), 'cluster_name']
+        max_idx = centroid_df['cosine_similarity'].idxmax()
+        # = centroid_df.loc[max_idx, 'cluster_name']
+        max_similarity = centroid_df.loc[max_idx, 'cosine_similarity']
+
+        # If the max similarity is less than 0.75, assign 'other' as the cluster
+        if max_similarity < 0.75:
+            cluster_name = "other"
+        else:
+            cluster_name = centroid_df.loc[max_idx, 'cluster_name']
+
         cluster_names.append(cluster_name)
+        max_similarities.append(max_similarity)
 
     # Add the cluster names to the DataFrame
     df['cluster_name'] = cluster_names
+    df['max_similarity'] = max_similarities
+
+
 
     # get number of meals per cluster
     cluster_counts = df.groupby('cluster_name').size().reset_index(name='count')

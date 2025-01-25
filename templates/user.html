@@ -128,7 +128,9 @@
                                 <div class="dish-box word-wrap">
                                     {% for dish in course_dishes %}
                                         {% if dish.course == course %}
-                                            <strong class="location">{{dish.location}}</strong> <br> {{ dish.menu }} <br> Studentenpreis: <br> {{ dish.studentPrice }} € <br> Menu Score: <br> {{ dish.cosine_similarity }}
+                                            <strong class="location">{{dish.location}}</strong> <br> {{ dish.menu }} <br> 
+                                            {% if user_type == "student" %} Studentenpreis: {{ dish.studentPrice }} € {% else %} Gastpreis: {{ dish.guestPrice }} €  {% endif %} <br>
+                                             Menu Score: <br> {{ dish.cosine_similarity }}
                                         {% endif %}
                                     {% endfor %}
                                 </div>
@@ -190,7 +192,7 @@
                             <label for="user-type" class="block text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
                                 {% if session.get('language') == 'de' %}Bitte auswählen{% else %}Please select{% endif %}
                             </label>
-                            <select id="user-type" name="user_type" onchange="this.form.submit()" class="dropdown-style mt-1 block w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <select id="user-type" name="user_type" class="dropdown-style mt-1 block w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                 <option value="guest" {% if user_type == 'guest' %}selected{% endif %}>{% if session.get('language') == 'de' %}Gast{% else %}Guest{% endif %}</option>
                                 <option value="student" {% if user_type == 'student' %}selected{% endif %}>{% if session.get('language') == 'de' %}Student{% else %}Student{% endif %}</option>
                             </select>
