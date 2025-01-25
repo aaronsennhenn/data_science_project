@@ -183,8 +183,7 @@ def user_page():
         first_rating_date = get_first_rating_date_of_user(db_session, user_name)
         rated_dishes = get_dishes_of_user(db_session, user_name)
         current_month_spending = get_current_month_spending(db_session, user_name , lang)
-        avg_rating_all = get_average_ratings(db_session)
-        avg_rating_user = get_average_ratings(db_session, user_name)
+
 
         # generate chart to display top mensas for the user
         mensa_user_chart = top_mensa_for_user_chart(db_session, user_name, lang)
@@ -195,15 +194,15 @@ def user_page():
         current_spending_formatted = format_price(current_spending)
         current_month = current_month_spending['month_name'].iloc[0]
 
-        #Create tasteprofile radarchart
-        cluster_df = get_cluster_similarity(db_session, user_name)
-        country_chart = create_taste_radarchart(cluster_df.iloc[:-3], 'cluster_name', 'scaled')
+        # Create tasteprofile radarchart
+        cluster_df = get_cluster_similarity(db_session, user_name,lang)
+        radar_chart = create_taste_radarchart(cluster_df.iloc[:-3], 'cluster_name', 'scaled')
 
         # create data to display weekly dish recommendation
         grouped_menu_data = get_weekly_recommendation_dict(db_session, user_name, lang)
 
         # Create plot for average ratings of all users and user
-        average_ratings_plot = plot_average_ratings(avg_rating_user, avg_rating_all)
+        average_ratings_plot = plot_average_ratings(db_session, user_name,lang)
 
         
     return render_template('user.html', 
@@ -212,7 +211,7 @@ def user_page():
                            first_rating_date=first_rating_date,
                            rated_dishes=rated_dishes,
                            mensa_user_chart=mensa_user_chart,
-                           country_chart = country_chart,
+                           radar_chart = radar_chart,
                            average_ratings_plot=average_ratings_plot,
                            dishes=grouped_menu_data,
                            past_6_month_spending_chart = past_6_month_spending_chart,

@@ -728,8 +728,26 @@ def get_dish_vector_for_week(db_session, week_dates):
     
     return df
 
-def get_cluster_similarity(db_session,user_name):
+def get_cluster_similarity(db_session,user_name,lang):
     
+    cluster_translation_dict = {
+    'asian': 'asiatisch',
+    'balkan': 'balkan',
+    'central european': 'mitteleuropäisch',
+    'french': 'französisch',
+    'german': 'deutsch',
+    'greek': 'griechisch',
+    'italian': 'italienisch',
+    'kreolisch': 'kreolisch',
+    'mediteran': 'mediterran',
+    'mexican': 'mexikanisch',
+    'orientalisch': 'orientalisch',
+    'thai': 'thailändisch',
+    'bavarian': 'bayerisch',
+    'other': 'andere',
+    'swabian': 'schwäbisch'
+    }
+
     # get user vector
     query = get_user_by_username(db_session,user_name)
     user_vector = np.array(eval(query.user_vector))
@@ -743,7 +761,9 @@ def get_cluster_similarity(db_session,user_name):
     # Compute cosine similarity
     similarity_scores = cosine_similarity([user_vector], centroids)[0]
     centroid_df['cosine_similarity'] = similarity_scores
-    centroid_df.sort_values('cosine_similarity', ascending=False)
+
+    if lang == "de":
+        centroid_df['cluster_name'] = centroid_df['cluster_name'].apply(lambda x: cluster_translation_dict[x])
 
     # scale cosine similarity
     scaler = MinMaxScaler()
@@ -825,6 +845,16 @@ def get_weekly_recommendation_dict(db_session, user_name, lang):
 
     df.drop(columns=["Dish"], inplace=True)
 
+    day_translation_dict = {
+        'Monday': 'Montag',
+        'Tuesday': 'Dienstag',
+        'Wednesday': 'Mittwoch',
+        'Thursday': 'Donnerstag',
+        'Friday': 'Freitag'
+    }
+    
+    if lang == "de":
+        df['day_of_week'] = df['day_of_week'].apply(lambda x: day_translation_dict[x])
 
     # Get top dish for each day and course
     top_dishes = (
@@ -833,8 +863,11 @@ def get_weekly_recommendation_dict(db_session, user_name, lang):
         .head(1)  # Take top dish per group
     )
 
+
     # Organize the final result into a dictionary by day
     top_dishes.sort_values(["day_of_week", "course"], inplace=True)
+
+
     grouped_menu_data = {
                     day: top_dishes[top_dishes["day_of_week"] == day]
                     .to_dict(orient="records")

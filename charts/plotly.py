@@ -2,7 +2,7 @@ from flask import request
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.colors import sequential
-from db.db_read import get_combined_dishes,get_ratings_of_the_week,get_top_three_mensas,get_top_three_dishes,get_dishes_and_rating_by_week,get_cluster_similarity_for_week,get_favorite_mensas_of_user,get_past_6_month_spending
+from db.db_read import get_combined_dishes,get_ratings_of_the_week,get_top_three_mensas,get_top_three_dishes,get_dishes_and_rating_by_week,get_cluster_similarity_for_week,get_favorite_mensas_of_user,get_past_6_month_spending,get_average_ratings
 import pandas as pd
 from datetime import datetime
 import json
@@ -117,14 +117,40 @@ def create_taste_radarchart(df, taste_label, similarity):
     
     return fig_html
 
-def plot_average_ratings(user_ratings, all_ratings):
+def plot_average_ratings(db_session,user_name,lang):
     """
     Plots the average ratings of a specific user alongside the average ratings of all users using Plotly.
 
-    Parameters:
-        user_ratings (dict): Average ratings for a specific user.
-        all_ratings (dict): Average ratings for all users.
+    
+    user_ratings (dict): Average ratings for a specific user.
+    all_ratings (dict): Average ratings for all users.
     """
+    # translate categores.
+    translation_dict = {
+        'vegan': 'Vegan',
+        'beef': 'Rindfleisch',
+        'pork': 'Schwein',
+        'vegetarian': 'Vegetarisch',
+        'poultry': 'Geflügel',
+        'fish': 'Fisch',
+        'mensaVital': 'MensaVital',
+        'nan': 'Andere'  
+    }
+
+    # get rating data of user and all other users
+    user_ratings = get_average_ratings(db_session,user_name)
+    all_ratings = get_average_ratings(db_session)
+
+    if lang == 'de':
+        user_ratings = {translation_dict.get(key, key): value for key, value in user_ratings.items()}
+        all_ratings = {translation_dict.get(key, key): value for key, value in all_ratings.items()}
+    else:
+        # replace nan icon value with "others"
+        user_ratings = {('others' if key == 'nan' else key): value for key, value in user_ratings.items()}
+        all_ratings = {('others' if key == 'nan' else key): value for key, value in all_ratings.items()}
+
+
+
     categories = sorted(set(user_ratings.keys()).union(all_ratings.keys()))
     user_values = [user_ratings.get(category, 0) for category in categories]
     all_values = [all_ratings.get(category, 0) for category in categories]
@@ -137,7 +163,7 @@ def plot_average_ratings(user_ratings, all_ratings):
     fig.add_trace(go.Bar(
         x=formatted_categories,
         y=user_values,
-        name="Your Ratings",
+        name="Your Ratings" if lang == 'en' else "Deine Bewertungen",
         marker=dict(color=colors[1])
     ))
 
@@ -145,7 +171,7 @@ def plot_average_ratings(user_ratings, all_ratings):
     fig.add_trace(go.Bar(
         x=formatted_categories,
         y=all_values,
-        name="Other Users' Ratings",
+        name="Other Users' Ratings" if lang == 'en' else "Bewertungen anderer Nutzer",
         marker=dict(color=colors[2]),
         opacity=0.5
     ))
@@ -154,14 +180,14 @@ def plot_average_ratings(user_ratings, all_ratings):
     fig.update_layout(
         xaxis={
         'title': {
-            'text': 'Categories',
+            'text': 'Categories' if lang == 'en' else 'Kategorien',
             'standoff': 20  
         },
         'tickangle': -45,
         'automargin': True  
         },
         yaxis={
-            'title': 'Average Rating'
+            'title': 'Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'
         },
         barmode="group",
         xaxis_tickangle=-45,

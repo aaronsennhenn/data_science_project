@@ -258,7 +258,7 @@
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;"> {% if session.get('language') == 'de' %}Geschmacksvorlieben nach Küche{% else %}Taste Preferences by Cuisine{% endif %}</h3>
                 <div class="flex justify-center items-center">
-                {{ country_chart | safe }}
+                {{ radar_chart | safe }}
                 </div>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
