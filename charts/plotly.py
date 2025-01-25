@@ -29,7 +29,7 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     filtered_df = df[df['menuLine'] == selected_category]
 
     # Define the colors
-    PLOT_COLORS = sequential.Jet
+    PLOT_COLORS = sequential.dense
 
     # Create the Plotly figure
     fig = go.Figure()
@@ -383,21 +383,60 @@ def plot_rating_histogram(db_session, dates, dish):
     return plot_html,unique_menus
 
 
-def plot_donut_chart(db_session, week_dates,lang):
+# def plot_donut_chart(db_session, week_dates,lang):
 
+#     cluster_counts_df = get_cluster_similarity_for_week(db_session, week_dates)
+
+#     # Extract cluster names and their counts
+#     labels = cluster_counts_df['cluster_name']
+#     values = cluster_counts_df['count']
+
+#     # Create the donut chart
+#     fig = go.Figure(
+#         data=[go.Pie(
+#             labels=labels, 
+#             values=values, 
+#             hole=0.5,  
+#             hoverinfo='label+percent+value' 
+#         )]
+#     )
+#     # Format the dates to "DD.MM.YYYY"
+#     formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
+#     formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
+
+#     title = f'Taste Cluster Distribution for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Geschmackscluster Verteilung für {formatted_start_date} bis {formatted_end_date}'
+
+#     # Update layout for styling
+#     fig.update_layout(
+#         title_text=title,
+#         annotations=[dict(
+#             text="", 
+#             x=0.5, y=0.5, 
+#             font_size=20, 
+#             showarrow=False
+#         )],
+#         showlegend=True
+#     )
+
+#     # Display the figure
+#     plot_html = pio.to_html(fig, full_html=False)
+
+#     return plot_html
+
+def plot_donut_chart(db_session, week_dates, lang):
     cluster_counts_df = get_cluster_similarity_for_week(db_session, week_dates)
 
     # Extract cluster names and their counts
     labels = cluster_counts_df['cluster_name']
     values = cluster_counts_df['count']
 
-    # Create the donut chart
+    # Create the pie chart
     fig = go.Figure(
         data=[go.Pie(
             labels=labels, 
             values=values, 
-            hole=0.5,  
-            hoverinfo='label+percent+value' 
+            hoverinfo='label+percent+value',
+            marker=dict(colors=sequential.dense)  
         )]
     )
     # Format the dates to "DD.MM.YYYY"

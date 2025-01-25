@@ -91,9 +91,9 @@
 
 
 <!-- Main -->
-<main class="flex-grow flex flex-col px-4 py-4">
+<main class="flex-grow flex flex-col px-4 py-2">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
-        <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">
             {% if session.get('language') == 'de' %}
                 Speisekarte
             {% else %}
@@ -1151,7 +1151,11 @@
     {% endif %}
 </div>               
 </main>
-
+<footer class="bg-white border-t border-gray-200 py-4 relative z-10">
+    <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+        &copy; 2024 MENSA APP. All rights reserved.
+    </div>
+</footer>
 <script>
     const menuToggle = document.getElementById('menu-toggle');
     const closeMenu = document.getElementById('close-menu');
