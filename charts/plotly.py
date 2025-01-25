@@ -27,7 +27,7 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     # Get data
     df = get_combined_dishes(db_session)
 
-    df = df[(df["studentPrice"] > 0) & (df["guestPrice"] > 0)]
+    df = df[(df["studentPrice"] > 0) & (df["guestPrice"] > 0) & (df["icons_clean"] != "nan")]
 
     # Default initial values
     if selected_category == "initial":
@@ -248,6 +248,7 @@ def create_past_6_month_spending_chart(db_session, user_name, user_type, lang):
 
     return fig_html
 
+day_translation_dict = {'Monday': 'Montag','Tuesday': 'Dienstag','Wednesday': 'Mittwoch','Thursday': 'Donnerstag','Friday': 'Freitag'}
 
 def create_weekly_rating_plot(db_session,dates,lang):
 
@@ -267,6 +268,9 @@ def create_weekly_rating_plot(db_session,dates,lang):
         ordered=True
     )
     ratings.sort_values(["day_of_week"], inplace=True)
+
+    if lang == 'de':
+        ratings['day_of_week'] = ratings['day_of_week'].map(day_translation_dict)
         
     # Create a scatter plot using go
     fig = go.Figure()
@@ -431,48 +435,8 @@ def plot_rating_histogram(db_session, dates, dish):
     return plot_html,unique_menus
 
 
-# def plot_pie_chart(db_session, week_dates,lang):
-
-#     cluster_counts_df = get_cluster_similarity_for_week(db_session, week_dates)
-
-#     # Extract cluster names and their counts
-#     labels = cluster_counts_df['cluster_name']
-#     values = cluster_counts_df['count']
-
-#     # Create the pie chart
-#     fig = go.Figure(
-#         data=[go.Pie(
-#             labels=labels, 
-#             values=values, 
-#             hole=0.5,  
-#             hoverinfo='label+percent+value' 
-#         )]
-#     )
-#     # Format the dates to "DD.MM.YYYY"
-#     formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
-#     formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
-
-#     title = f'Taste Cluster Distribution for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Geschmackscluster Verteilung für {formatted_start_date} bis {formatted_end_date}'
-
-#     # Update layout for styling
-#     fig.update_layout(
-#         title_text=title,
-#         annotations=[dict(
-#             text="", 
-#             x=0.5, y=0.5, 
-#             font_size=20, 
-#             showarrow=False
-#         )],
-#         showlegend=True
-#     )
-
-#     # Display the figure
-#     plot_html = pio.to_html(fig, full_html=False)
-
-#     return plot_html
-
 def plot_pie_chart(db_session, week_dates, lang):
-    cluster_counts_df = get_cluster_similarity_for_week(db_session, week_dates)
+    cluster_counts_df = get_cluster_similarity_for_week(db_session, week_dates,lang)
 
     # Extract cluster names and their counts
     labels = cluster_counts_df['cluster_name']

@@ -728,9 +728,7 @@ def get_dish_vector_for_week(db_session, week_dates):
     
     return df
 
-def get_cluster_similarity(db_session,user_name,lang):
-    
-    cluster_translation_dict = {
+cluster_translation_dict = {
     'asian': 'asiatisch',
     'balkan': 'balkan',
     'central european': 'mitteleuropäisch',
@@ -747,6 +745,8 @@ def get_cluster_similarity(db_session,user_name,lang):
     'other': 'andere',
     'swabian': 'schwäbisch'
     }
+
+def get_cluster_similarity(db_session,user_name,lang):
 
     # get user vector
     query = get_user_by_username(db_session,user_name)
@@ -985,10 +985,15 @@ def get_past_6_month_spending(session: Session, user_name, lang='en'):
 
     return df
     
-def get_cluster_similarity_for_week(db_session, week_dates):
+def get_cluster_similarity_for_week(db_session, week_dates,lang):
     # Get centroid df
     centroid_df = get_embedding_cluster(db_session)
-    centroid_df = centroid_df[~centroid_df["cluster_name"].isin(["german","other"])]
+
+    if lang == 'de':
+        centroid_df['cluster_name'] = centroid_df['cluster_name'].apply(lambda x: cluster_translation_dict[x])
+        centroid_df = centroid_df[~centroid_df['cluster_name'].isin(['deutsch','andere'])]
+    else:
+        centroid_df = centroid_df[~centroid_df['cluster_name'].isin(['german','other'])]
 
     # Get centroids
     centroids = np.vstack(centroid_df['centroid'])
@@ -1016,7 +1021,7 @@ def get_cluster_similarity_for_week(db_session, week_dates):
 
         # If the max similarity is less than 0.75, assign 'other' as the cluster
         if max_similarity < 0.75:
-            cluster_name = "other"
+            cluster_name = 'other' if lang == 'en' else 'andere'
         else:
             cluster_name = centroid_df.loc[max_idx, 'cluster_name']
 
