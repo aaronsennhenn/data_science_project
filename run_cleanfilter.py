@@ -149,7 +149,7 @@ def update_cleanprices():
 
 
     with Session() as db_session:
-        dish = get_combined_dishes(Session())
+        dish = get_combined_dishes(db_session)
 
         if dish.empty:
             return
