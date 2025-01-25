@@ -13,12 +13,12 @@
     text-align: center;
     background-color: #f3f4f6; /* Light gray background */
     border: 1px solid #e5e7eb; /* Light gray border */
-    padding: 10px;
+    padding: 5px;
 }
 
 .dish-box {
     background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 
@@ -63,7 +63,7 @@
     line-height: 1.5; /* Improve readability with generous line spacing */
     padding: 10px; /* Ensure comfortable padding inside the container */
     border-radius: 10px; /* Rounded corners for aesthetics */
-    max-height: 300px; /* Set a fixed height for the container */
+    max-height: 400px; /* Set a fixed height for the container */
     overflow-y: auto; /* Enable vertical scrolling */
     text-align: left; /* Align text to the left by default */
 }

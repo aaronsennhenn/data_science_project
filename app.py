@@ -8,7 +8,7 @@ import json
 from db.utils import compute_cosine_similarity, format_price, format_price_column
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
-from charts.plotly import top_mensa_for_user_chart,plot_donut_chart,create_weekly_top_dishes_chart,generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart, plot_average_ratings, create_weekly_rating_plot,create_weekly_top_mensa_chart,plot_rating_histogram
+from charts.plotly import top_mensa_for_user_chart,plot_pie_chart,create_weekly_top_dishes_chart,generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart, plot_average_ratings, create_weekly_rating_plot,create_weekly_top_mensa_chart,plot_rating_histogram
 import pandas as pd
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -494,8 +494,8 @@ def analysis():
         week_dates = get_weekday_dates()
         ratings_of_the_week_plot = create_weekly_rating_plot(db_session,week_dates,lang)
 
-        # create donut chart of clusters
-        donut_plot = plot_donut_chart(db_session, week_dates,lang)
+        # create pie chart of clusters
+        pie_chart = plot_pie_chart(db_session, week_dates,lang)
 
 
         return render_template('analysis.html',
@@ -511,7 +511,7 @@ def analysis():
                              selected_category=initial_category,
                              ratings_of_the_week_plot=ratings_of_the_week_plot,
                              week_dates=week_dates,
-                             donut_plot=donut_plot)
+                             pie_chart=pie_chart)
     
 @app.route('/update_price_plot', methods=['POST'])
 def update_price_plot():
@@ -544,9 +544,9 @@ def update_ratings_plot():
         ratings_plot = create_weekly_rating_plot(db_session,changed_dates,lang)
         mensa_plot = create_weekly_top_mensa_chart(db_session,lang, changed_dates)
         dish_plot = create_weekly_top_dishes_chart(db_session,lang, changed_dates)
-        donut_plot = plot_donut_chart(db_session, changed_dates,lang)
+        pie_chart = plot_pie_chart(db_session, changed_dates,lang)
 
-    return jsonify({'ratings_plot':ratings_plot,'week_dates':changed_dates,'mensa_plot':mensa_plot,'dish_plot':dish_plot,'donut_plot':donut_plot})
+    return jsonify({'ratings_plot':ratings_plot,'week_dates':changed_dates,'mensa_plot':mensa_plot,'dish_plot':dish_plot,'pie_chart':pie_chart})
 
 if __name__ == "__main__":
     with app.app_context():

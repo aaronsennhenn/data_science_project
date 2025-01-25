@@ -389,7 +389,7 @@ def plot_rating_histogram(db_session, dates, dish):
     return plot_html,unique_menus
 
 
-# def plot_donut_chart(db_session, week_dates,lang):
+# def plot_pie_chart(db_session, week_dates,lang):
 
 #     cluster_counts_df = get_cluster_similarity_for_week(db_session, week_dates)
 
@@ -397,7 +397,7 @@ def plot_rating_histogram(db_session, dates, dish):
 #     labels = cluster_counts_df['cluster_name']
 #     values = cluster_counts_df['count']
 
-#     # Create the donut chart
+#     # Create the pie chart
 #     fig = go.Figure(
 #         data=[go.Pie(
 #             labels=labels, 
@@ -429,7 +429,7 @@ def plot_rating_histogram(db_session, dates, dish):
 
 #     return plot_html
 
-def plot_donut_chart(db_session, week_dates, lang):
+def plot_pie_chart(db_session, week_dates, lang):
     cluster_counts_df = get_cluster_similarity_for_week(db_session, week_dates)
 
     # Extract cluster names and their counts

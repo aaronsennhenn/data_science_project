@@ -100,14 +100,14 @@
 
         <!-- Key Metrics Section -->
         <section class="mb-6 w-full">
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Wichtige Kennzahlen{% else %}Key Metrics{% endif %}</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Kennzahlen{% else %}Key Metrics{% endif %}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Datenerhebung{% else %}Data Inception{% endif %}</h3>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Start der Datenerhebung{% else %}Start of Data Inception{% endif %}</h3>
                     <p class="text-2xl font-bold text-gray-900">{{ first_updated_date }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Menus{% else %}Total Menus{% endif %}</h3>
+                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Gerichte{% else %}Total Menus{% endif %}</h3>
                     <p class="text-2xl font-bold text-gray-900">{{ total_menus }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
@@ -130,42 +130,41 @@
         <!-- Rating Insights -->
         <section class="mb-6 w-full">
             <h2 class="text-xl font-semibold text-gray-800 mb-2"> {% if session.get('language') == 'de' %}Wöchentliche Bewertungen{% else %}Weekly Ratings{% endif %}</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <!-- Top Mensas -->
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <div id="mensa-plot" class="p-4 rounded-lg col-span-7">
+                    <div id="mensa-plot" class="p-4 rounded-lg">
                         {{ mensa_plot|safe }}
                     </div>
                 </div>
                 <!-- Top Dishes -->
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <div id="dish-plot" class="p-4 rounded-lg col-span-7">
+                    <div id="dish-plot" class="p-4 rounded-lg">
                         {{ dish_plot|safe }}
                     </div>
                 </div>  
             </div>
-            <!-- Average ratings plot -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">         
-                    <div id="ratings-plot" class="p-4 rounded-lg col-span-7">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Average ratings plot -->
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <div id="ratings-plot" class="p-4 rounded-lg">
                         {{ ratings_of_the_week_plot|safe }}
                     </div>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">         
-                    <div id="donut-plot" class="p-4 rounded-lg col-span-7">
-                        {{ donut_plot|safe }}
+                <!--Taste cluster distribution -->
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                    <div id="pie-plot" class="p-4 rounded-lg">
+                        {{ pie_chart|safe }}
                     </div>
-                </div>
-                <!-- Buttons to switch dates-->
-                <div class="flex items-start col-span-3 space-x-2"> 
-                    <button id="prev-date-button" class="location-link">
-                        {% if session.get('language') == 'de' %}Zurück{% else %}Back{% endif %}
-                    </button>
-                    <button id="next-date-button" class="location-link">
-                        {% if session.get('language') == 'de' %}Weiter{% else %}Next{% endif %}
-                    </button>
-                </div>
-            </div>         
+                </div>  
+            </div>
+            <button id="prev-date-button" class="location-link">
+                {% if session.get('language') == 'de' %}Zurück{% else %}Back{% endif %}
+            </button>
+            <button id="next-date-button" class="location-link">
+                {% if session.get('language') == 'de' %}Weiter{% else %}Next{% endif %}
+            </button>
         </section>
 
         <!-- Price Development -->
@@ -290,12 +289,12 @@
                 $('#ratings-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
                 $('#mensa-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
                 $('#dish-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
-                $('#donut-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
+                $('#pie-plot').html('<p class="text-gray-500 text-center">No data available for the selected week.</p>');
             } else {
                 $('#ratings-plot').html(response.ratings_plot); // Update the ratings plot
                 $('#mensa-plot').html(response.mensa_plot); // Update the mensa plot
                 $('#dish-plot').html(response.dish_plot); // Update the dish plot
-                $('#donut-plot').html(response.donut_plot); // Update the donut plot
+                $('#pie-plot').html(response.pie_chart); // Update the pie plot
             }
 
             week_dates = response.week_dates; // Update the global week_dates variable

@@ -91,7 +91,7 @@
 
 <!-- Main Content -->
 <div class="flex-grow flex items-center justify-center px-4 py-2 relative z-10">
-    <div class="content-wrapper max-w-6xl w-full p-8 bg-white rounded-xl shadow-sm border border-gray-100">
+    <div class="content-wrapper max-w-6xl w-full p-6 bg-white rounded-xl shadow-sm border border-gray-100">
         <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">
             {% if session.get('language') == 'de' %}
                 Willkommen bei Mensa App
@@ -100,40 +100,30 @@
             {% endif %}
         </h1>
         <div class="w-full">
-            <p class="text-lg text-gray-600 mb-2">
+            <p class="text-gray-600 mb-2">
             {% if session.get('language') == 'de' %}
                 Wir sind eine engagierte Gruppe von Studenten, die eine Leidenschaft für gutes Essen teilen und den Wunsch haben, das Essenserlebnis in Tübingen zu verbessern.
-            {% else %}
-                We're a dedicated group of students who share a passion for good food and a desire to enhance the dining experience in Tübingen.
-            {% endif %}
-            </p>
-            <p class="text-lg text-gray-600 mb-4">
-            {% if session.get('language') == 'de' %}
                 Unsere Plattform ermöglicht es, die Speisekarten lokaler Mensen und Cafeterien zu erkunden, komplett mit Analysen und ehrlichen Bewertungen.
                 Unser Ziel ist es, Studenten mit den besten Essensangeboten in Verbindung zu bringen.
-            {% else %}
-                Our platform allows to explore the menus of local mensas and cafeterias, complete with analytics and honest reviews.
-                Our goal is to connect students with the best dining options available.
-            {% endif %}
-            </p>
-            <p class="text-lg text-gray-600 mb-12">
-            {% if session.get('language') == 'de' %}
                 Erfahren Sie hier, welche Funktionen die einzelnen Seiten unserer App bieten. 
                 Die Sprache kann jederzeit zwischen Deutsch und Englisch umgestellt werden.  
             {% else %}
+                We're a dedicated group of students who share a passion for good food and a desire to enhance the dining experience in Tübingen.
+                Our platform allows to explore the menus of local mensas and cafeterias, complete with analytics and honest reviews.
+                Our goal is to connect students with the best dining options available.
                 Learn about the features of each page of our app here. 
                 The language can be switched between German and English at any time.  
             {% endif %}
             </p>
-            <h2 class="text-3xl font-semibold text-gray-800 mb-6 text-center mt-12">{% if session.get('language') == 'de' %}Seitenübersicht{% else %}Page Overview{% endif %}</h2>
+            <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center mt-12">{% if session.get('language') == 'de' %}Seitenübersicht{% else %}Page Overview{% endif %}</h2>
                        
-            <div class="mb-4 grid grid-cols-12 gap-4 items-center">
-                <div class="col-span-2 flex justify-center items-center">
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
                     <a href="/" class="nav-link home-link">
                         <img src="{{ url_for('static', filename='images/home.png') }}" alt="Home Icon" class="w-16 h-16">
                     </a>
                 </div>
-                <div class="col-span-10">
+                <div class="col-span-11">
                     <span class="text-lg font-bold">
                         {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
                     </span>
@@ -147,53 +137,59 @@
                 </div>
             </div>
             
-            <div class="mb-4 grid grid-cols-12 gap-4 items-center">
-                <div class="col-span-2 flex justify-center items-center">
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
                     <a href="/menu"  class="nav-link menu-link">
                         <img src="{{ url_for('static', filename='images/menu.png') }}" alt="Home Icon" class="w-16 h-16">
                     </a>
                 </div>
-                <div class="col-span-10">
+                <div class="col-span-11">
                     <span class="text-lg font-bold">
                         {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
                     </span>
                     <p class="text-gray-600 mb-2">
                         {% if session.get('language') == 'de' %}
-                            Auf dieser Seite wird das aktuelle Angebot der einbezogenen Mensen und Cafeterien für die jeweilige Woche angezeigt. Nutzer können die Speisekarte nach Standort, Datum, Diätpräferenzen und Preisen filtern. Gerichte können nach personalisierten Empfehlungen, Preis, durchschnittlicher Bewertung oder Anzahl der Bewertungen sortiert werden. Zudem können Gerichte bewertet werden, und basierend auf den Vorlieben der Nutzer werden Empfehlungen angezeigt. Zu jedem Gericht gibt es eine Beschreibung sowie Rezeptvorschläge, falls man das Gericht zu Hause nachkochen möchte.
+                            Auf dieser Seite wird das aktuelle Angebot der einbezogenen Mensen und Cafeterien für die jeweilige Woche angezeigt. 
+                            Nutzer haben die Möglichkeit, die Speisekarte nach unterschiedlichen Kategorien zu filtern und/oder zu sortieren. 
+                            Zudem können Gerichte bewertet werden, und basierend auf den Vorlieben der Nutzer werden Empfehlungen angezeigt. 
+                            Zu jedem Hauptgericht gibt es eine Beschreibung sowie Rezeptvorschläge, falls man das Gericht zu Hause nachkochen möchte.
                         {% else %}
-                            This page displays the current offerings of the included mensas and cafeterias for the respective week. Users can filter the menu by location, date, dietary preferences, and prices. Dishes can be sorted by personalized recommendations, price, average rating, or number of reviews. Additionally, dishes can be rated, and recommendations are displayed based on user preferences. Each dish has a description and recipe suggestions if users want to cook the dish at home.
+                            This page displays the current offerings of the included canteens and cafeterias for the respective week. 
+                            Users have the option of filtering and/or sorting the menu according to different categories. 
+                            Dishes can also be rated and recommendations are displayed based on the user's preferences. 
+                            Each main dish is accompanied by a description and recipe suggestions in case you want to cook the dish at home.
                         {% endif %}
                     </p>
                 </div>
             </div>
 
-            <div class="mb-4 grid grid-cols-12 gap-4 items-center">
-                <div class="col-span-2 flex justify-center items-center">
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
                     <a href="/analysis"  class="nav-link analysis-link">
                         <img src="{{ url_for('static', filename='images/analysis.png') }}" alt="Analysis Icon">
                     </a>
                 </div>
-                <div class="col-span-10">
+                <div class="col-span-11">
                     <span class="text-lg font-bold">
                         {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
                     </span>
                     <p class="text-gray-600 mb-2">
                         {% if session.get('language') == 'de' %}
-                            Diese Seite bietet Einblicke in wichtige Kennzahlen wie die Gesamtanzahl der Gerichte, Mensen und Bewertungen. Zusätzlich gibt es wöchentliche Analysen zu Gerichtsoptionen, Bewertungstrends und Preisentwicklungen.
+                            Diese Seite bietet Einblicke in Kennzahlen wie die Gesamtanzahl der Gerichte. Zusätzlich gibt es wöchentliche Analysen zu Gerichtsoptionen, Bewertungstrends und Preisentwicklungen.
                         {% else %}
-                            This page provides insights into key metrics such as the total number of dishes, mensas, and reviews. Additionally, there are weekly analyses of dish options, rating trends, and price developments.
+                            This page provides insights into key metrics such as the total number of dishes. Additionally, there are weekly analyses of dish options, rating trends, and price developments.
                         {% endif %}
                     </p>
                 </div>
             </div>
 
-            <div class="mb-4 grid grid-cols-12 gap-4 items-center">
-                <div class="col-span-2 flex justify-center items-center">
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
                     <a href="/rating"  class="nav-link rating-link">
                         <img src="{{ url_for('static', filename='images/rating.png') }}" alt="Rating Icon">
                     </a>
                 </div>
-                <div class="col-span-10">
+                <div class="col-span-11">
                     <span class="text-lg font-bold">
                         {% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}
                     </span>
@@ -207,13 +203,13 @@
                 </div>
             </div>
             
-            <div class="mb-4 grid grid-cols-12 gap-4 items-center">
-                <div class="col-span-2 flex justify-center items-center">
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
                     <a href="/navigation"  class="nav-link navigation-link">
                         <img src="{{ url_for('static', filename='images/navigation.png') }}" alt="Navigation Icon">
                     </a>
                 </div>
-                <div class="col-span-10">
+                <div class="col-span-11">
                     <span class="text-lg font-bold">
                         {% if session.get('language') == 'de' %}Navigation{% else %}Navigation{% endif %}
                     </span>
@@ -227,45 +223,43 @@
                 </div>
             </div>
             
-            <div class="mb-4 grid grid-cols-12 gap-4 items-center">
-                <div class="col-span-2 flex justify-center items-center">
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
                     <a href="/login" class="nav-link login-link">
                         <img src="{{ url_for('static', filename='images/login.png') }}" alt="Login Icon">
                     </a>
                 </div>
-                <div class="col-span-10">
+                <div class="col-span-11">
                     <span class="text-lg font-bold">
                         {% if session.get('language') == 'de' %}Login{% else %}Login{% endif %}
                     </span>
                     <p class="text-gray-600 mb-2">
                         {% if session.get('language') == 'de' %}
-                            Diese Seite ermöglicht den Zugang zum Benutzerkonto. Nutzer können sich anmelden oder ein neues Konto erstellen. Alternativ besteht die Möglichkeit, sich über ein Google-Konto anzumelden.
+                            Diese Seite ermöglicht den Zugang zum Benutzerkonto. Nutzer können sich anmelden (alternativ mit Google Konto) oder ein neues Konto erstellen. 
                         {% else %}
-                            This page provides access to the user account. Users can log in or create a new account. Alternatively, users can sign in using a Google account.
+                            This page provides access to the user account. Users can log in (alternatively with a Google account) or create a new account. 
                         {% endif %}
                     </p>
                 </div>
             </div>
 
-            <div class="mb-4 grid grid-cols-12 gap-4 items-center">
-                <div class="col-span-2 flex justify-center items-center">
+            <div class="mb-2 grid grid-cols-12 gap-2 items-center">
+                <div class="col-span-1 flex justify-center items-center">
                     <a href="{% if username %}/user{% else %}/login{% endif %}" class="nav-link account-link">
                         <img src="{{ url_for('static', filename='images/account.png') }}" alt="Account Icon">
                     </a>
                 </div>
-                <div class="col-span-10">
+                <div class="col-span-11">
                     <span class="text-lg font-bold">
                         {% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}
                     </span>
                     <p class="text-gray-600 mb-2">
                         {% if session.get('language') == 'de' %}
                             Diese Seite ist auf den individuellen Nutzer zugeschnitten. Nach dem Login wird sie in der Sidebar angezeigt. 
-                            Nutzer können ihre persönliche Mensa-Statistik einsehen, einschließlich des Datums der Kontoerstellung und der Gesamtzahl ihrer abgegebenen Bewertungen. 
-                            Zudem sind ihre Lieblingsmensen, Lieblingsgerichte und ein persönliches Geschmacksprofil basierend auf den bisherigen Bewertungen abrufbar.
+                            Nutzer können ihre persönliche Mensa-Statistik einsehen. 
                         {% else %}
                             This page is tailored to the individual user. After logging in, it is displayed in the sidebar. 
-                            Users can view their personal Mensa statistics, including the date of account creation and the total number of reviews they have submitted. 
-                            They can also view their favorite Mensas, favorite dishes and a personal taste profile based on previous ratings.
+                            Users can view their personal Mensa statistics. 
                         {% endif %}
                     </p>
                 </div>
