@@ -19,3 +19,4 @@ deep_translator
 openai
 nltk
 numpy
+scikit-learn
