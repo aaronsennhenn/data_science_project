@@ -265,13 +265,14 @@ def rating():
     lang = session.get('language', 'en')
     session['language'] = lang
     session.permanent = True
-    username = session.get('username')
     on_rating_page = True
     
     with Session() as db_session:
         today = datetime.now().date()
         date = today.strftime('%Y-%m-%d')
         user_name = session.get('username')
+        if not user_name:
+            return redirect(url_for('login'))
 
         if request.method == 'POST':
             rating, menu_id = request.form.get('rating'), request.form.get('id')
@@ -287,7 +288,7 @@ def rating():
         random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(), lang, user_name, db_session)
         rating_count = get_total_ratings_by_user(db_session, user_name)
 
-        return render_template('rating.html', username=username, random_dish=random_dish, rating_count=rating_count)
+        return render_template('rating.html', username=user_name, random_dish=random_dish, rating_count=rating_count)
     
 
 
@@ -323,8 +324,8 @@ def menu():
         user_vector = get_user_vector(user_name, db_session)
 
         # if user has not rated dishes yet, redirect to rating page
-        if not user_vector:
-            return redirect(url_for('rating'))
+        #if not user_vector:
+        #    return redirect(url_for('rating'))
 
         # When user filters, get filtered values
         if request.method == 'POST':
@@ -393,7 +394,7 @@ def menu():
                         'rating_count':dish[12] or 0, # zero if is not rated yet 
                         'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
                         'is_top_recommendation_in_course': False,  # Initialize to False
-                        "studentPrice_imputed":dish[13],
+                        "studentPrice_imputed": 0 if dish[13] is None else dish[13],
                         "guestPrice_imputed":dish[14],
                         "studentPrice_imputed_formatted":format_price(dish[13]),
                         "guestPrice_imputed_formatted":format_price(dish[14])
