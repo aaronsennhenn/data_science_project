@@ -18,7 +18,7 @@
     <header class="w-full bg-white shadow-md py-2 px-8 relative z-10">
         <nav>
             <div class="nav-container flex justify-between items-center">
-                <a href="{{ url_for('index') }}" class="text-2xl font-bold text-indigo-600">
+                <a href="{{ url_for('index') }}" class="text-xl font-bold text-indigo-600">
                     MENSA APP.
                 </a>
                 
@@ -121,13 +121,13 @@
                     {% for course in course_types %}
                         <div class="grid-row">
                             <!-- Column for the course name -->
-                            <div class="dish-box">{{ course }}</div>
+                            <div class="dish-box word-wrap">{{ course }}</div>
                             <!-- Columns for each day -->
                             {% for day, course_dishes in dishes.items() %}
-                                <div class="dish-box">
+                                <div class="dish-box word-wrap">
                                     {% for dish in course_dishes %}
                                         {% if dish.course == course %}
-                                            <strong>{{dish.location}}</strong> <br> {{ dish.menu }} <br> Studentenpreis: <br> {{ dish.studentPrice }} € <br> Menu Score: <br> {{ dish.cosine_similarity }}
+                                            <strong class="location">{{dish.location}}</strong> <br> {{ dish.menu }} <br> Studentenpreis: <br> {{ dish.studentPrice }} € <br> Menu Score: <br> {{ dish.cosine_similarity }}
                                         {% endif %}
                                     {% endfor %}
                                 </div>
@@ -140,13 +140,13 @@
                     {% for course in course_types %}
                         <div class="grid-row">
                             <!-- Column for the course name -->
-                            <div class="dish-box">{{ course }}</div>
+                            <div class="dish-box word-wrap">{{ course }}</div>
                             <!-- Columns for each day -->
                             {% for day, course_dishes in dishes.items() %}
-                                <div class="dish-box">
+                                <div class="dish-box word-wrap">
                                     {% for dish in course_dishes %}
                                         {% if dish.course_eng == course %}
-                                            <strong>{{ dish.location }}</strong> <br> {{ dish.menuEng }} <br> Student Price: <br> {{ dish.studentPrice }} € <br> Menu Score: <br> {{ dish.cosine_similarity }}
+                                            <strong class="location">{{ dish.location }}</strong> <br> {{ dish.menuEng }} <br> Student Price: <br> {{ dish.studentPrice }} € <br> Menu Score: <br> {{ dish.cosine_similarity }}
                                         {% endif %}
                                     {% endfor %}
                                 </div>
@@ -224,7 +224,7 @@
             <!-- Second column for favorite mensas -->
             <div class="col-span-2 bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Lieblingsmensen{% else %}Favorite Mensas{% endif %}</h3>
-                <div class="flex justify-center items-center">
+                <div>
                     {{ mensa_user_chart | safe }}
                 </div>
             </div>    

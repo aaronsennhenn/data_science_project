@@ -263,7 +263,7 @@ def create_weekly_rating_plot(db_session,dates,lang):
     formatted_start_date = datetime.strptime(dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
     formatted_end_date = datetime.strptime(dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
 
-    title = f'Weekly Average Ratings for {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Wöchentliche Durchschnittsbewertungen für {formatted_start_date} bis {formatted_end_date}'
+    title = f'Weekly Average Ratings for <br>{formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Wöchentliche Durchschnittsbewertungen für {formatted_start_date} bis {formatted_end_date}'
     # Set plot title and axis labels
     fig.update_layout(
         height=300,
@@ -301,7 +301,7 @@ def create_weekly_top_mensa_chart(db_session,lang,week_dates):
     formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
     formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
 
-    title = f'Top 3 Mensas for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Mensen für {formatted_start_date} bis {formatted_end_date}'
+    title = f'Top 3 Mensas of <br>{formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Mensen für <br>{formatted_start_date} bis {formatted_end_date}'
 
     # Define the layout
     mensa_layout = go.Layout(
@@ -337,14 +337,24 @@ def create_weekly_top_dishes_chart(db_session,lang,week_dates):
     formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
     formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
 
-    title = f'Top 3 Dishes for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Gerichte von {formatted_start_date} bis {formatted_end_date}'
+    title = f'Top 3 Dishes of <br>{formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Top 3 Gerichte von <br>{formatted_start_date} bis {formatted_end_date}'
 
     # Define the layout
     dish_layout = go.Layout(
         title=dict(text=title),
-        xaxis=dict(title='Dish' if lang == 'en' else 'Menü',tickangle=-45),
-        yaxis=dict(title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'),
-        template='plotly')
+        xaxis=dict(
+            title='Dish' if lang == 'en' else 'Menü',
+            tickangle=-45,
+            automargin=True,
+            tickmode='array',
+            tickvals=list(range(len(dish_names))),
+            ticktext=dish_names
+        ),
+        yaxis=dict(
+            title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'
+        ),
+        template='plotly'
+    )
 
     # Create the figure
     fig = go.Figure(data=[dish_trace], layout=dish_layout)
@@ -453,7 +463,7 @@ def plot_pie_chart(db_session, week_dates, lang):
     formatted_start_date = datetime.strptime(week_dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
     formatted_end_date = datetime.strptime(week_dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
 
-    title = f'Taste Cluster Distribution for the week of {formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Geschmackscluster Verteilung für {formatted_start_date} bis {formatted_end_date}'
+    title = f'Taste Cluster Distribution for <br>{formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Geschmackscluster Verteilung für <br>{formatted_start_date} bis {formatted_end_date}'
 
     # Update layout for styling
     fig.update_layout(
@@ -473,8 +483,7 @@ def plot_pie_chart(db_session, week_dates, lang):
     return plot_html
 
 
-def top_mensa_for_user_chart(db_session,user_name,lang):
-
+def top_mensa_for_user_chart(db_session, user_name, lang):
     favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)        
 
     fig = go.Figure()
@@ -489,6 +498,7 @@ def top_mensa_for_user_chart(db_session,user_name,lang):
 
     # Update layout settings
     fig.update_layout(
+        autosize=True,
         xaxis={
             'title': {'text': 'Mensa', 'standoff': 20},
             'tickangle': -45,
@@ -500,5 +510,6 @@ def top_mensa_for_user_chart(db_session,user_name,lang):
         title='Top Mensas Chart'
     )
 
-    plot_html = pio.to_html(fig, full_html=False)
+    # Convert the figure to HTML with responsive configuration
+    plot_html = pio.to_html(fig, full_html=False, config={'responsive': True})
     return plot_html

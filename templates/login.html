@@ -16,7 +16,7 @@
     <header class="w-full bg-white shadow-md py-4 px-8 relative z-10">
         <nav>
             <div class="nav-container flex justify-between items-center">
-                <a href="{{ url_for('index') }}" class="text-2xl font-bold text-indigo-600">
+                <a href="{{ url_for('index') }}" class="text-xl font-bold text-indigo-600">
                     MENSA APP.
                 </a>
                 
@@ -102,9 +102,9 @@
         </h1>
         <p class="text-gray-600 mb-2 text-center leading-relaxed">
             {% if session.get('language') == 'de' %}
-                    Melden Sie sich an, um auf personalisierte Funktionen und Vorzüge zuzugreifen
+                    Melden Sie sich an, um weitere Gerichte zu bewerten um ihre persöhnliche Empfehlungen zu optimieren!
                 {% else %}
-                    Sign in to access personalized features and preferencess
+                    Sign up to rate other dishes to optimize your personal recommendations!
                 {% endif %}
         </p>        
         
