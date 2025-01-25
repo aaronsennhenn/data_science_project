@@ -68,8 +68,8 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
         yaxis_title=selected_price_type.capitalize(),
         legend=dict(
             orientation='h',  
-            yanchor='top',   
-            y=-0.2,           
+            yanchor='bottom',   
+            y=1.02,           
             xanchor='center',
             x=0.5   
         )
@@ -268,11 +268,13 @@ def create_weekly_rating_plot(db_session,dates,lang):
     fig.update_layout(
         height=300,
         title=title,
-        xaxis_title='Day of Week' if lang == 'en' else 'Wochentag',
+        xaxis_title='Day of Week' if lang == 'en' else 'Wochentag', 
         yaxis_title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung',
-        template='plotly'
+        template='plotly',
+        xaxis=dict(
+        tickangle=-45
+        )
     )
-
 
     # Show the figure
     plot_html = pio.to_html(fig, full_html=False)
@@ -304,7 +306,7 @@ def create_weekly_top_mensa_chart(db_session,lang,week_dates):
     # Define the layout
     mensa_layout = go.Layout(
         title=dict(text=title),
-        xaxis=dict(title='Mensa',tickangle=0),
+        xaxis=dict(title='Mensa',tickangle=-45),
         yaxis=dict(title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'),
         template='plotly')
 
@@ -340,7 +342,7 @@ def create_weekly_top_dishes_chart(db_session,lang,week_dates):
     # Define the layout
     dish_layout = go.Layout(
         title=dict(text=title),
-        xaxis=dict(title='Dish' if lang == 'en' else 'Menü',tickangle=0),
+        xaxis=dict(title='Dish' if lang == 'en' else 'Menü',tickangle=-45),
         yaxis=dict(title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung'),
         template='plotly')
 
