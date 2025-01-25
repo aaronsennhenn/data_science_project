@@ -2,7 +2,7 @@ from flask import request
 import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.colors import sequential
-from db.db_read import get_combined_dishes,get_ratings_of_the_week,get_top_three_mensas,get_top_three_dishes,get_dishes_and_rating_by_week,get_cluster_similarity_for_week
+from db.db_read import get_combined_dishes,get_ratings_of_the_week,get_top_three_mensas,get_top_three_dishes,get_dishes_and_rating_by_week,get_cluster_similarity_for_week,get_favorite_mensas_of_user
 import pandas as pd
 from datetime import datetime
 import json
@@ -12,6 +12,12 @@ import json
 colors = ['#4F46E5', '#6366F1', '#818CF8']
 
 def format_labels(labels):
+    def insert_br_every_n_words(label, n=3):
+        words = label.split()
+        return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
+    return [insert_br_every_n_words(label) for label in labels]
+
+def format_labels_mensas(labels):
     def insert_br_every_n_words(label, n=3):
         words = label.split()
         return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
@@ -460,4 +466,35 @@ def plot_donut_chart(db_session, week_dates, lang):
     # Display the figure
     plot_html = pio.to_html(fig, full_html=False)
 
+    return plot_html
+
+
+def top_mensa_for_user_chart(db_session,user_name,lang):
+
+    favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)        
+
+    fig = go.Figure()
+
+    # Add bar chart data to the figure
+    fig.add_trace(go.Bar(
+        x=format_labels_mensas([mensa[0] for mensa in favorite_mensas]),
+        y=[mensa[1] for mensa in favorite_mensas],
+        marker_color=['#4F46E5', '#6366F1', '#818CF8'],
+        name='Mensa Ratings'
+    ))
+
+    # Update layout settings
+    fig.update_layout(
+        xaxis={
+            'title': {'text': 'Mensa', 'standoff': 20},
+            'tickangle': -45,
+            'automargin': True
+        },
+        yaxis={
+            'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'
+        },
+        title='Top Mensas Chart'
+    )
+
+    plot_html = pio.to_html(fig, full_html=False)
     return plot_html

@@ -8,10 +8,8 @@ import json
 from db.utils import compute_cosine_similarity, format_price, format_price_column
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
-from charts.plotly import plot_donut_chart,create_weekly_top_dishes_chart,generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart, plot_average_ratings, create_weekly_rating_plot,create_weekly_top_mensa_chart,plot_rating_histogram
+from charts.plotly import top_mensa_for_user_chart,plot_donut_chart,create_weekly_top_dishes_chart,generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart, plot_average_ratings, create_weekly_rating_plot,create_weekly_top_mensa_chart,plot_rating_histogram
 import pandas as pd
-import plotly
-import plotly.io as pio
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 images_folder = os.path.join(current_dir, 'static', 'generated_images')
@@ -35,11 +33,7 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={'scope':'openid profile email'})
 
-def format_labels_mensas(labels):
-    def insert_br_every_n_words(label, n=3):
-        words = label.split()
-        return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
-    return [insert_br_every_n_words(label) for label in labels]
+
 
 @app.route('/set_language/<lang>')
 def set_language(lang):
@@ -182,41 +176,17 @@ def user_page():
         total_ratings = get_total_ratings_by_user(db_session, user_name)
         first_rating_date = get_first_rating_date_of_user(db_session, user_name)
         rated_dishes = get_dishes_of_user(db_session, user_name)
-        favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)        
         current_month_spending = get_current_month_spending(db_session, user_name , lang)
         past_6_month_spending = get_past_6_month_spending(db_session, user_name, lang)
-        favorite_mensas = get_favorite_mensas_of_user(db_session, user_name, lang)
         avg_rating_all = get_average_ratings(Session())
         avg_rating_user = get_average_ratings(Session(), user_name)
 
-        # Create top mensas chart
-        mensa_trace = {
-            'x': format_labels_mensas([mensa[0] for mensa in favorite_mensas]),
-            'y': [mensa[1] for mensa in favorite_mensas],
-            'type': 'bar',
-            'marker': {
-                'color': ['#4F46E5', '#6366F1', '#818CF8']
-            }
-        }
-        mensa_layout = {
-            'xaxis': {
-                'title': {
-                    'text': 'Mensa',
-                    'standoff': 20  
-                },
-                'tickangle': -45,
-                'automargin': True  
-            },
-            'yaxis': {'title': 'Durchschnittliche Bewertung' if lang == 'de' else 'Average Rating'}
-        }
-        mensa_user_chart = json.dumps({'data': [mensa_trace], 'layout': mensa_layout}, cls=plotly.utils.PlotlyJSONEncoder)
-
+        # generate chart to display top mensas for the user
+        mensa_user_chart = top_mensa_for_user_chart(db_session, user_name, lang)
        
-
         #Create tasteprofile radarchart
         cluster_df = get_cluster_similarity(db_session, user_name)
         country_chart = create_taste_radarchart(cluster_df.iloc[:-3], 'cluster_name', 'scaled')
-
 
         #Budget feature
         if request.method == 'POST':
@@ -230,8 +200,6 @@ def user_page():
             current_spending_formatted = format_price(current_spending)
             current_month = current_month_spending['month_name'].iloc[0]
             
-
-
         # get dishes for the week and compute user vector with user_name
         df = get_week_recommended_dishes(db_session, get_weekday_dates(), user_name, lang)
         
@@ -282,7 +250,6 @@ def user_page():
                            total_ratings=total_ratings,
                            first_rating_date=first_rating_date,
                            rated_dishes=rated_dishes,
-                           favorite_mensas=favorite_mensas,
                            mensa_user_chart=mensa_user_chart,
                            country_chart = country_chart,
                            regional_chart=average_ratings_plot,

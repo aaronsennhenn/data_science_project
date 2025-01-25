@@ -222,7 +222,9 @@
             <!-- Second column for favorite mensas -->
             <div class="col-span-2 bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col">
                 <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Lieblingsmensen{% else %}Favorite Mensas{% endif %}</h3>
-                <div class="flex justify-center items-center" id="top-mensa-user-chart" style="width: 100%; height: 300px;"></div>
+                <div class="flex justify-center items-center">
+                    {{ mensa_user_chart | safe }}
+                </div>
             </div>    
             <!-- Third column for rated dishes -->
             <div class="col-span-1 bg-white rounded-xl shadow-sm p-4 border border-gray-100">
@@ -274,9 +276,6 @@
         </div>
     </footer>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script>
-        Plotly.newPlot('top-mensa-user-chart', {{ mensa_user_chart | safe }}.data, {{ mensa_user_chart | safe }}.layout);
-    </script>
     <script>
         const menuToggle = document.getElementById('menu-toggle');
         const closeMenu = document.getElementById('close-menu');
