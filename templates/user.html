@@ -15,27 +15,28 @@
 
 <body class="min-h-screen flex flex-col bg-gray-50">
     <!-- Header -->
-    <header class="w-full bg-white shadow-md py-2 px-8 relative z-10">
-        <nav>
+    <header class="w-full bg-white shadow-md py-6 px-8 relative z-10">
+        <nav class="relative">
+            <!-- App title -->
             <div class="nav-container flex justify-between items-center">
-                <a href="{{ url_for('index') }}" class="text-xl font-bold text-indigo-600">
+                <a href="{{ url_for('index') }}" class="text-xl font-bold text-indigo-600 absolute left-1">
                     MENSA APP.
                 </a>
                 
                 <!-- Language Buttons - Centered -->
                 <div class="absolute left-1/2 transform -translate-x-1/2 flex gap-2">
                     <a href="{{ url_for('set_language', lang='en') }}" 
-                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'en' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                         EN
                     </a>
                     <a href="{{ url_for('set_language', lang='de') }}"
-                       class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
+                    class="px-3 py-1 rounded-md text-sm font-medium {% if session.get('language') == 'de' %}bg-gray-200{% else %}text-gray-700 hover:bg-gray-100{% endif %}">
                         DE
                     </a>
                 </div>
 
                 <!-- Menu Toggle -->
-                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <button id="menu-toggle" class="text-gray-500 hover:text-gray-700 focus:outline-none absolute right-1">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
