@@ -146,9 +146,9 @@
             <div class="flex-1">
                 <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">
                     {% if session.get('language') == 'de' %}
-                        Diät oder Fleischsorte:
+                        Ernährungsstil:
                     {% else %}
-                        Diet or Meat:
+                        Diet:
                     {% endif %}
                 </h3>
                 <div class="radio-group">
@@ -365,9 +365,9 @@
                                     Student Price:
                                 {% endif %}
                                 {% if dish.studentPrice != -1.00 %} 
-                                    {{dish.studentPrice}} € 
+                                    {{dish.studentPrice_formatted}} € 
                                 {% else %}
-                                    {{ dish.studentPrice_imputed }} € 
+                                    {{ dish.studentPrice_imputed_formatted }} € 
                                     <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                 {% endif %}
                             </div>
@@ -380,9 +380,9 @@
                                     Guest Price:
                                 {% endif %}
                                 {% if dish.guestPrice != -1 %} 
-                                    {{dish.guestPrice}} € 
+                                    {{dish.guestPrice_formatted}} € 
                                 {% else %}
-                                    {{ dish.guestPrice_imputed }} € 
+                                    {{ dish.guestPrice_imputed_formatted }} € 
                                     <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                 {% endif %}
                             </div>
@@ -724,9 +724,9 @@
                                     Student Price:
                                 {% endif %}
                                 {% if dish.studentPrice != -1.00 %} 
-                                    {{dish.studentPrice}} € 
+                                    {{dish.studentPrice_formatted}} € 
                                 {% else %}
-                                    {{ dish.studentPrice_imputed }} € 
+                                    {{ dish.studentPrice_imputed_formatted }} € 
                                     <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                 {% endif %}
                             </div>
@@ -739,9 +739,9 @@
                                     Guest Price:
                                 {% endif %}
                                 {% if dish.guestPrice != -1 %} 
-                                    {{dish.guestPrice}} € 
+                                    {{dish.guestPrice_formatted}} € 
                                 {% else %}
-                                    {{ dish.guestPrice_imputed }} € 
+                                    {{ dish.guestPrice_imputed_formatted }} € 
                                     <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                 {% endif %}
                             </div>
@@ -978,9 +978,9 @@
                                             Student Price:
                                         {% endif %}
                                         {% if dish.studentPrice != -1.00 %} 
-                                            {{dish.studentPrice}} € 
+                                            {{dish.studentPrice_formatted}} € 
                                         {% else %}
-                                            {{ dish.studentPrice_imputed }} € 
+                                            {{ dish.studentPrice_imputed_formatted }} € 
                                             <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                         {% endif %}
                                     </div>
@@ -993,9 +993,9 @@
                                             Guest Price:
                                         {% endif %}
                                         {% if dish.guestPrice != -1 %} 
-                                            {{dish.guestPrice}} € 
+                                            {{dish.guestPrice_formatted}} € 
                                         {% else %}
-                                            {{ dish.guestPrice_imputed }} € 
+                                            {{ dish.guestPrice_imputed_formatted }} € 
                                             <span style="color: red; font-size: 0.8em;">{% if session.get('language') == 'de' %}(geschätzter Preis){% else %}(estimated price){% endif %}</span>
                                         {% endif %}
                                     </div>

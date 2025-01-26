@@ -729,21 +729,21 @@ def get_dish_vector_for_week(db_session, week_dates):
     return df
 
 cluster_translation_dict = {
-    'asian': 'asiatisch',
-    'balkan': 'balkan',
-    'central european': 'mitteleuropäisch',
-    'french': 'französisch',
-    'german': 'deutsch',
-    'greek': 'griechisch',
-    'italian': 'italienisch',
-    'kreolisch': 'kreolisch',
-    'mediteran': 'mediterran',
-    'mexican': 'mexikanisch',
-    'orientalisch': 'orientalisch',
-    'thai': 'thailändisch',
-    'bavarian': 'bayerisch',
-    'other': 'andere',
-    'swabian': 'schwäbisch'
+    'Asian': 'Asiatisch',
+    'Balkan': 'Balkan',
+    'Central European': 'Mitteleuropäisch',
+    'French': 'Französisch',
+    'German': 'Deutsch',
+    'Greek': 'Griechisch',
+    'Italian': 'Italienisch',
+    'Creole': 'Kreolisch',
+    'Mediterranean': 'Mediterran',
+    'Mexican': 'Mexikanisch',
+    'Oriental': 'Orientalisch',
+    'Thai': 'Thailändisch',
+    'Bavarian': 'Bayerisch',
+    'Other': 'Andere',
+    'Swabian': 'Schwäbisch'
     }
 
 def get_cluster_similarity(db_session,user_name,lang):

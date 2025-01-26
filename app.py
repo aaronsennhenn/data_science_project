@@ -67,6 +67,8 @@ def navigation():
 # check username and password that user puts into form with db
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    lang = session.get('language', 'en')
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -78,7 +80,7 @@ def login():
                 session['username'] = username
                 return redirect(url_for("menu"))
             else:
-                error_message = "Your username or password is wrong!"
+                error_message = "Your username or password is wrong!" if lang == 'en' else "Dein Benutzername oder Passwort ist falsch!"
                 return render_template('login.html', error=error_message)
                 
     return render_template('login.html', username=session.get('username'))
