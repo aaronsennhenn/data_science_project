@@ -862,6 +862,9 @@ def get_weekly_recommendation_dict(db_session, user_name, lang):
         .groupby(["day_of_week", "course"], group_keys=False)  # Group without adding levels
         .head(1)  # Take top dish per group
     )
+    
+    # Calculate taste_score as cosine_similarity * 100, rounded to nearest integer
+    top_dishes['taste_score'] = (top_dishes['cosine_similarity'] * 100).round(0).astype(int)
 
 
     # Organize the final result into a dictionary by day
