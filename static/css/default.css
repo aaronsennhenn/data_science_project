@@ -1,9 +1,3 @@
-body {
-    font-family: 'Poppins', sans-serif;
-}
-.font-script { font-family: 'Dancing Script', cursive; 
-}
-
 header, footer {
     background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
 }
@@ -33,8 +27,8 @@ header, footer {
 }
 
 .content-wrapper {
-    background-color: rgba(255, 255, 255, 0.85);
-    border-radius: 1rem;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 

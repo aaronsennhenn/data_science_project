@@ -1,17 +1,10 @@
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #d8cbbb; /* Solid beige background */
-}
-.font-script {
-    font-family: 'Dancing Script', cursive;
-}
 .star {
     color: #FFD700; /* More yellow tone */
-    font-size: 1.5rem; /* Bigger stars */
+    font-size: 1rem; /* Bigger stars */
 }
 .review-card {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 20px;
     background-color: white;
 }
@@ -38,7 +31,7 @@ header, footer {
     background-color: #4A5568;
     color: white;
     padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
+    border-radius: 8px;
     transition: background-color 0.3s ease;
 }
 .btn-primary:hover {

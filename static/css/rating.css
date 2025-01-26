@@ -1,310 +1,297 @@
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #d8cbbb;
-  }
-  
-  .font-script {
-    font-family: 'Dancing Script', cursive;
-  }
-  
-  header, footer {
+header, footer {
     background-color: rgba(255, 255, 255, 0.9);
-  }
+}
   
-  .sidebar {
+.sidebar {
     transition: transform 0.3s ease-in-out;
-  }
-  
-  nav {
-    width: 100%;
-    padding: 0 2rem;
-    max-width: none !important;
-  }
-  
-  .nav-container {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-  }
-  
-  .menu-toggle:hover, .close-menu:hover {
-    cursor: pointer;
-  }
-  
-  button[type="submit"] {
-    background-color: #6366F1;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border: none;
-  }
-  
-  button[type="submit"]:hover {
-    background-color: #3F42C8;
-    transform: translateY(-1px);
-  }
-  
-  select:hover, input[type="date"]:hover {
-    border-color: #cbd5e0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  
-  select, input[type="date"] {
-    background-color: white;
-    color: #1a202c;
-    border: 1px solid #e2e8f0;
-    padding: 0.75rem;
-    border-radius: 8px;
-    width: 100%;
-    transition: all 0.3s ease;
-  }  
-  
-  .container {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 16px;
-  }
-  
-  h1 {
-    margin-top: 0.5rem; /* Space above the heading */
-  }
-  
-  h2 {
-    font-size: 2.5rem;
-    font-weight: 600;
-    text-align: center;
-    color: #1a202c;
-  }
-  
-  p {
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-    text-align: center;
-    color: #4a5568;
-  }
-  
-  .flex-1 {
-    flex: 1 1 0;
-    min-width: 200px;
-  }
-  
-  .radio-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  
-  .radio-group label {
-    background-color: white;
-    color: #4a5568;
-    border: 2px solid #4a5568;
-    padding: 8px 16px;
-    border-radius: 6px;
-    margin: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .radio-group input[type="checkbox"]:checked + label {
-    background-color: #6366F1;
-    color: white;
-    border-color: #6366F1;
-  }
-  
-  .radio-group input[type="checkbox"] {
-    display: none;
-  }
-  
-  #filter-form {
-    background-color: white;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    border-radius: 15px;
-    padding: 30px;
-    margin-top: 20px;
-  }
-  
-  .toggle-switch {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  
-  .toggle-switch label {
-    background-color: #6366F1;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .toggle-switch input[type="radio"]:checked + label {
-    background-color: #6366F1;
-  }
-  
-  .card-text {
-    text-align: left;
-  }
-  
-  .card {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-bottom: 20px;
-    height: 900px; /* Set a fixed height */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Distribute space between elements */
-  }
-  
-  .card-content {
-    flex-grow: 1; /* Allow content to grow and take available space */
-  }
-  
-  .card-footer {
-    margin-top: auto; /* Push footer to the bottom */
-  }
-  
-  .card-title.menu-line {
-    font-size: 1.875rem;
-  }
-  
-  .card-title.menu-name {
-    font-size: 1.5rem;
-  }
-  
-  .text-gray-500 {
-    color: #6b7280;
-  }
-  
-  .text-sm {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
-  
-  .rating {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-  }
-  
-  .rating input {
-    display: none;
-  }
-  
-  .rating label {
-    font-size: 32px;
-    color: #ddd;
-    cursor: pointer;
-  }
-  
-  .rating label:hover,
-  .rating label:hover ~ label,
-  .rating input:checked ~ label {
-    color: #FFD700;
-  }
-    
-  .submit-rating {
-    background-color: #6366F1;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 48px;
-  }
-
-  .submit-rating i {
-      font-size: 1.2em;
-  }
-
-  .submit-rating:hover {
-      background-color: #3F42C8;
-      transform: translateY(-1px);
-  }
-  
-  .icon-tooltip {
-    position: relative;
-    display: inline-block;
-  }
-  
-  .icon-tooltip img {
-    cursor: help;
-  }
-  
-  .icon-tooltip:hover::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 4px 8px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    z-index: 10;
-  }
-  .description-content,
-  .recipe-content {
-      transition: height 0.3s ease-out;
-      overflow: hidden;
-  }
-  
-
-  .rate-dishes-section {
-    padding: 16px;
-    margin-top: 16px;
-    width: 80%;
-    max-width: 1000px;
-    height: auto;
-    overflow-y: auto;
-    box-sizing: border-box;
-  }
-
-  .rate-dishes-section .content {
-      text-align: left;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-  }
-
-  .rating-count.red {
-      color: black; /* Adjust if needed red */
-  }
-
-  .rating-count.green {
-      color: black; /* Adjust if needed green */
-  }
-
-  .rate-more {
-    display: inline-block;
-    padding: 0.25rem 0.5rem; /* Adjust padding as needed */
-    margin-top: 0.5rem; /* Adjust margin as needed */
-    background-color: #edf2f7; /* bg-gray-200 */
-    color: #4a5568; /* text-gray-700 */
-    border-radius: 0.375rem; /* rounded */
 }
 
-  .rating-count-container {
-    display: inline-block;
-    background-color: #edf2f7; /* bg-gray-200 */
-    color: #4a5568; /* text-gray-700 */
-    border-radius: 0.375rem; /* rounded */
-    padding: 0.5rem; /* Adjust padding as needed */
-    margin-top: 1rem; /* mt-4 */
+nav {
+  width: 100%;
+  padding: 0 2rem;
+  max-width: none !important;
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.menu-toggle:hover, .close-menu:hover {
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  background-color: #6366F1;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+button[type="submit"]:hover {
+  background-color: #3F42C8;
+  transform: translateY(-1px);
+}
+
+select:hover, input[type="date"]:hover {
+  border-color: #cbd5e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+select, input[type="date"] {
+  background-color: white;
+  color: #1a202c;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  border-radius: 8px;
+  width: 100%;
+  transition: all 0.3s ease;
+}  
+
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+p {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #4a5568;
+}
+
+.flex-1 {
+  flex: 1 1 0;
+  min-width: 200px;
+}
+
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.radio-group label {
+  background-color: white;
+  color: #4a5568;
+  border: 2px solid #4a5568;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radio-group input[type="checkbox"]:checked + label {
+  background-color: #6366F1;
+  color: white;
+  border-color: #6366F1;
+}
+
+.radio-group input[type="checkbox"] {
+  display: none;
+}
+
+#filter-form {
+  background-color: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  padding: 30px;
+  margin-top: 20px;
+}
+
+.toggle-switch {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.toggle-switch label {
+  background-color: #6366F1;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-switch input[type="radio"]:checked + label {
+  background-color: #6366F1;
+}
+
+.card-text {
+  text-align: left;
+}
+
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  height: 900px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-content {
+  flex-grow: 1; 
+}
+
+.card-footer {
+  margin-top: auto; 
+}
+
+.card-title.menu-line {
+  font-size: 1.875rem;
+}
+
+.card-title.menu-name {
+  font-size: 1.5rem;
+}
+
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  margin-bottom: 5px;
+}
+
+.rating input {
+  display: none;
+}
+
+.rating label {
+  font-size: 32px;
+  color: #ddd;
+  cursor: pointer;
+}
+
+.rating label:hover,
+.rating label:hover ~ label,
+.rating input:checked ~ label {
+  color: #FFD700;
+}
+ 
+.submit-rating {
+  background-color: #6366F1;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+}
+
+.submit-rating i {
+    font-size: 1.2em;
+}
+
+.submit-rating:hover {
+    background-color: #3F42C8;
+    transform: translateY(-1px);
+}
+
+.icon-tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.icon-tooltip img {
+  cursor: help;
+}
+
+.icon-tooltip:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+}
+.description-content,
+.recipe-content {
+    transition: height 0.3s ease-out;
+    overflow: hidden;
+}
+
+
+.rate-dishes-section {
+  padding: 16px;
+  margin-top: 16px;
+  width: 80%;
+  max-width: 1000px;
+  height: auto;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.rate-dishes-section .content {
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.rating-count.red {
+    color: red; 
+    padding: 0.5rem 1rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+
+}
+
+.rating-count.black {
+    color: black; 
+    padding: 0.5rem 1rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+}
+
+.rate-more {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem; 
+  background-color: #edf2f7;
+  color: #4a5568; 
+  border-radius: 0.8px;
+}
+
+.rating-count-container {
+  display: inline-block;
+  background-color: #edf2f7; 
+  color: #4a5568; 
+  border-radius: 8px; 
+  padding: 0.5rem; 
+  margin-top: 1rem; 
 }
 
 .rating-count {
-    display: inline-block;
-    padding: 0.25rem 0.5rem; /* Adjust padding as needed */
+  display: inline-block;
+  padding: 0.5rem 1rem; 
 }

@@ -1,12 +1,3 @@
-body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #d8cbbb;
-}
-
-.font-script {
-  font-family: 'Dancing Script', cursive;
-}
-
 header, footer {
   background-color: rgba(255, 255, 255, 0.9);
 }
@@ -34,7 +25,7 @@ nav {
 button[type="submit"] {
   background-color: #6366F1;
   color: white;
-  padding: 12px 24px;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -67,17 +58,6 @@ select, input[type="date"] {
   padding: 16px;
 }
 
-h1 {
-  margin-top: 0.5rem; 
-}
-
-h2 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  text-align: center;
-  color: #1a202c;
-}
-
 p {
   font-size: 1.125rem;
   margin-bottom: 1rem;
@@ -99,9 +79,9 @@ p {
 .radio-group label {
   background-color: white;
   color: #4a5568;
-  border: 2px solid #4a5568;
-  padding: 8px 16px;
-  border-radius: 6px;
+  border: 2px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   margin: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -151,7 +131,7 @@ p {
 
 .card {
   background-color: white;
-  border-radius: 10px;
+  border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 20px;
   margin-bottom: 20px;
@@ -167,23 +147,6 @@ p {
 
 .card-footer {
   margin-top: auto; /* Push footer to the bottom */
-}
-
-.card-title.menu-line {
-  font-size: 1.875rem;
-}
-
-.card-title.menu-name {
-  font-size: 1.5rem;
-}
-
-.text-gray-500 {
-  color: #6b7280;
-}
-
-.text-sm {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
 }
 
 .rating {
@@ -212,7 +175,7 @@ p {
 .submit-rating {
   background-color: #6366F1;
   color: white;
-  padding: 12px 24px;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -243,7 +206,7 @@ p {
   padding: 4px 8px;
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 12px;
   white-space: nowrap;
   z-index: 10;
@@ -262,7 +225,7 @@ p {
     background-color: #f3f4f6;
     border: none;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -275,9 +238,9 @@ p {
  .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
-  max-width: 60px; /* Ensures it doesn't stretch */
+  width: 40px;
+  height: 25px;
+  max-width: 40px; /* Ensures it doesn't stretch */
   box-sizing: border-box; /* Avoids extra padding issues */
   margin: 0 10px 10px 0;
 }
@@ -313,10 +276,10 @@ p {
 .slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
+  height: 21px;
+  width: 21px;
+  left: 2px;
+  bottom: 2px;
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
@@ -331,9 +294,9 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
 }
 
 /* Rounded sliders */
@@ -361,7 +324,7 @@ input:checked + .slider:before {
 /* Rate Dishes Button */
 .rate-dishes-btn {
   display: block; /* Ensures it behaves like a block element */
-  padding: 12px 24px; /* Adds padding around the text */
+  padding: 0.5rem 1rem;
   background-color: #6366F1; /* Green background color */
   color: white; /* White text */
   border: none; /* Removes default border */
@@ -379,7 +342,7 @@ input:checked + .slider:before {
 
 
 .rate-more-dishes-button {
-  padding: 12px 6px; /* Adds padding around the text */
+  padding: 0.5rem 1rem;
   background-color: #6366F1; 
   color: white; /* White text */
   border: none; /* Removes default border */
@@ -423,7 +386,7 @@ input:checked + .slider:before {
   font-size: 1.25rem; /* Larger base font size for all text inside */
   line-height: 1.8; /* Improve readability with generous line spacing */
   padding: 20px; /* Ensure comfortable padding inside the popup */
-  border-radius: 10px; /* Rounded corners for aesthetics */
+  border-radius: 8px; /* Rounded corners for aesthetics */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
   width: auto;
   max-width: 70%; /* Ensure the content width stays manageable */
@@ -454,15 +417,14 @@ input:checked + .slider:before {
 .description-btn,
 .recipe-btn {
   display: inline-block;
-  padding: 12px 24px;
+  padding: 0.5rem 1rem;
   background-color: #1b1eaf;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 16px;
-  width: 290px;
-  margin: 5px 0;
+  min-width: 150px;
 }
 
 .description-btn:hover,
@@ -479,4 +441,31 @@ input:checked + .slider:before {
 
 .popup.active .overlay {
   display: block; /* Show overlay */
+}
+
+.dropdown-style {
+  background-color: white;
+  color: #1a202c;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  border-radius: 8px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.dropdown-style:hover {
+  border-color: #cbd5e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-style:focus {
+  border-color: black;
+  box-shadow: 0 0 0 1px black;
+}
+
+
+.date-input {
+  padding: 0.25rem;
+  height: 2.6rem;
+  line-height: 1.5rem; /* Adjust line-height if needed */
 }

@@ -55,40 +55,38 @@
                 </svg>
             </button>
             {% if username %}
-            <div class="flex items-center space-x-3 mb-2">
+            <div class="flex items-center space-x-3 mb-6">
                 <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-700">
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Logged in as:</p>
-                    <p class="text-lg font-bold text-gray-900">{{ username }}</p>
+                    <p class="text-sm font-medium text-gray-800">Logged in as:</p>
+                    <p class="text-sm font-bold text-gray-900">{{ username }}</p>
                 </div>
             </div>
             {% else %}
-            <p class="text-center text-gray-700 font-medium mb-2">You are not logged in.</p>
+            <p class="text-sm text-center text-gray-700 font-medium mb-6">You are not logged in.</p>
             {% endif %}
             <nav class="mt-8">
-                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
                 </a>
-                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/menu" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
                 </a>
-                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/analysis" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
                 </a>
-                <a href="/rating" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/rating" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}
                 </a>
-                <a href="/navigation" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/navigation" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Navigation{% else %}Navigation{% endif %}
                 </a>
-                <a href="/user" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">
-                    {% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}
-                </a> 
                 {% if username %}
-                <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
+                <a href="/user" class="text-sm block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">{% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}</a> 
+                <a href="{{ url_for('logout') }}" class="text-sm block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
+                    <a href="{{ url_for('login') }}" class="text-sm block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
                 {% endif %}
             </nav>
         </div>
@@ -97,8 +95,8 @@
     <!-- Main Content -->
     <main class="flex-grow flex flex-col items-center px-4 py-2">
         <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}</h1>
-            <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Kennzahlen, Preiseinblicke und Trends in Tübinger Mensen und Cafeterien{% else %}Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias{% endif %}</p>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}</h1>
+            <p class="text-sm text-gray-800 text-center">{% if session.get('language') == 'de' %}Kennzahlen, Preiseinblicke und Trends in Tübinger Mensen und Cafeterien{% else %}Key Metrics, Pricing Insights, and Trends in Tübingen's Mensas and Cafeterias{% endif %}</p>
         </div>
 
         <!-- Key Metrics Section -->
@@ -106,23 +104,23 @@
             <h2 class="text-xl font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Kennzahlen{% else %}Key Metrics{% endif %}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Start der Datenerhebung{% else %}Start of Data Inception{% endif %}</h3>
-                    <p class="text-2xl font-bold text-gray-900">{{ first_updated_date }}</p>
+                    <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Start der Datenerhebung{% else %}Start of Data Inception{% endif %}</h3>
+                    <p class="text-xl font-bold text-gray-900">{{ first_updated_date }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Gerichte{% else %}Total Menus{% endif %}</h3>
-                    <p class="text-2xl font-bold text-gray-900">{{ total_menus }}</p>
+                    <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Gerichte{% else %}Total Menus{% endif %}</h3>
+                    <p class="text-xl font-bold text-gray-900">{{ total_menus }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Mensen{% else %}Total Mensas{% endif %}</h3>
-                    <p class="text-2xl font-bold text-gray-900">{{ total_mensas }}</p>
+                    <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Mensen{% else %}Total Mensas{% endif %}</h3>
+                    <p class="text-xl font-bold text-gray-900">{{ total_mensas }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Bewertungen{% else %}Total Ratings{% endif %}</h3>
-                    <p class="text-2xl font-bold text-gray-900">{{ total_ratings }}</p>
+                    <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtanzahl Bewertungen{% else %}Total Ratings{% endif %}</h3>
+                    <p class="text-xl font-bold text-gray-900">{{ total_ratings }}</p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Analysiertes Gebiet{% else %}Covered Area{% endif %}</h3>
+                    <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Analysiertes Gebiet{% else %}Covered Area{% endif %}</h3>
                     <a href="https://www.google.com/maps/place/Tübingen" target="_blank" class="location-link">
                         Tübingen
                     </a>
@@ -179,7 +177,7 @@
                     <div class="p-4 rounded-lg col-span-3 flex flex-col space-y-4">
                         <!-- Dropdown for selecting the category -->
                         <div>
-                            <label for="category" class="block font-medium text-gray-700">Select Category:</label>
+                            <label for="category" class="block text-gray-500">Select Category:</label>
                             <select id="category" class="dropdown-style mt-1 block w-full">
                                 {% for category in categories %}
                                     <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
@@ -191,7 +189,7 @@
                 
                         <!-- Dropdown for selecting price type -->
                         <div>
-                            <label for="priceType" class="block font-medium text-gray-700">Price Type:</label>
+                            <label for="priceType" class="block text-gray-500">Price Type:</label>
                             <select id="priceType" class="dropdown-style mt-1 block w-full">
                                 <option value="studentPrice">{% if session.get('language') == 'de' %}Studentenpreis{% else %}Student Price{% endif %}</option>
                                 <option value="guestPrice">{% if session.get('language') == 'de' %}Gästepreis{% else %}Guest Price{% endif %}</option>
@@ -201,8 +199,8 @@
                         <!-- Checkbox for showing icons -->
                         <div>
                             <label for="showIcons" class="inline-flex items-center">
-                                <input type="checkbox" id="showIcons" value="true" checked class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500">
-                                <span class="ml-2 text-gray-700">Show Icons</span>
+                                <input type="checkbox" id="showIcons" value="true" checked class="h-4 w-4 text-indigo-600 border-gray-100 rounded focus:ring-indigo-500">
+                                <span class="ml-2 text-gray-500">Show Icons</span>
                             </label>
                         </div>
                     </div>
@@ -221,8 +219,8 @@
 </main>
     
 <!-- Footer -->
-<footer class="bg-white border-t border-gray-200 py-2">
-    <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+<footer class="bg-white border-t border-gray-200 py-3 px-8 relative z-10">
+    <div class="max-w-6xl mx-auto text-center text-gray-800">
         &copy; 2024 MENSA APP. All rights reserved.
     </div>
 </footer>
@@ -314,7 +312,6 @@
     $('#next-date-button').on('click', function() {
         updateRatingsPlot(week_dates, 'next');
     });
-
 </script>
 </body>
 </html>

@@ -58,54 +58,53 @@
                 <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-700">
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Logged in as:</p>
-                    <p class="text-lg font-bold text-gray-900">{{ username }}</p>
+                    <p class="text-sm font-medium text-gray-800">Logged in as:</p>
+                    <p class="text-sm font-bold text-gray-900">{{ username }}</p>
                 </div>
             </div>
             {% else %}
-            <p class="text-center text-gray-700 font-medium mb-6">You are not logged in.</p>
+            <p class="text-sm text-center text-gray-700 font-medium mb-6">You are not logged in.</p>
             {% endif %}
             <nav class="mt-8">
-                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
                 </a>
-                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/menu" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
                 </a>
-                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/analysis" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
                 </a>
-                <a href="/rating" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/rating" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}
                 </a>
-                <a href="/navigation" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/navigation" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Navigation{% else %}Navigation{% endif %}
                 </a>
-                <a href="/user" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">
-                    {% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}
-                </a> 
                 {% if username %}
-                <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
+                <a href="/user" class="text-sm block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">{% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}</a> 
+                <a href="{{ url_for('logout') }}" class="text-sm block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
+                    <a href="{{ url_for('login') }}" class="text-sm block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
                 {% endif %}
             </nav>
         </div>
     </div>
 
+
     <!-- Main Content -->
 <main class="flex-grow flex flex-col items-center px-4 py-2">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Account Analyse{% else %}Account Analysis{% endif %}</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Account Analyse{% else %}Account Analysis{% endif %}</h1>
         <!--<h2 class="text-xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Willkommen {{ username }} auf Ihrer persöhnlichen Mensa Statistik{% else %}Welcome to your personal mensa statistic {{ username }}{% endif %}!</h2> -->
-        <p class="text-gray-600 text-center">{% if session.get('language') == 'de' %}Benutzerkontoerstellung {% else %}Account Start {% endif %}{{ first_rating_date }}</p>
+        <p class="text-sm text-gray-800 text-center">{% if session.get('language') == 'de' %}Benutzerkontoerstellung {% else %}Account Start {% endif %}{{ first_rating_date }}</p>
     </div> 
 
     
     <!-- Weekly Schedule -->
-    <section class="mb-6 w-full">
+    <section class="mb-6 w-full text-sm">
         <h2 class="text-lg font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Ihr wöchentlicher Speiseplan{% else %}Your Weekly Dining Schedule{% endif %}</h2>
-        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 text-gray-900">
             <div class="grid-container" id="schedule">
                 <!-- Headers for days -->
                 <div class="grid-row">
@@ -169,17 +168,17 @@
             <div class="col-span-1 bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col">
                 <div>
                     <!-- Current Month -->
-                    <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In diesem Monat{% else %}This month{% endif %}</h3>
+                    <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In diesem Monat{% else %}This month{% endif %}</h3>
                     <!-- Month -->
                     <div class="mb-2">
-                        <p class="text-2xl text-gray-900">
+                        <p class="text-xl text-gray-900">
                             {{ current_month }}
                         </p>
                     </div>
 
                     <!-- Amount  -->
                     <div class="mb-2">
-                        <p class="text-4xl font-bold text-gray-900">
+                        <p class="text-xl font-bold text-gray-900">
                             {{ current_spending_formatted }} €
                         </p>
                     </div>                
@@ -189,10 +188,10 @@
                     <!-- Dropdown -->
                     <form method="POST" action="{{ url_for('user_page') }}">
                         <div class="mb-2" style="width: 16rem;">
-                            <label for="user-type" class="block text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">
+                            <label for="user-type" class="block text-sm text-gray-500 mb-2" style="font-size: 1.0em;">
                                 {% if session.get('language') == 'de' %}Bitte auswählen{% else %}Please select{% endif %}
                             </label>
-                            <select id="user-type" name="user_type" class="dropdown-style mt-1 block w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <select id="user-type" name="user_type" class="dropdown-style mt-1 block w-64 pl-3 pr-10 py-2 text-base border-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                                 <option value="guest" {% if user_type == 'guest' %}selected{% endif %}>{% if session.get('language') == 'de' %}Gast{% else %}Guest{% endif %}</option>
                                 <option value="student" {% if user_type == 'student' %}selected{% endif %}>{% if session.get('language') == 'de' %}Student{% else %}Student{% endif %}</option>
                             </select>
@@ -202,14 +201,14 @@
                         </button>
                     </form>
                     <!-- Small message at the bottom -->
-                    <p class="mt-2 text-sm text-gray-600" style="font-size: 1.0em;">
+                    <p class="mt-2 text-sm text-gray-500" style="font-size: 1.0em;">
                         {% if session.get('language') == 'de' %}Diese Zahlen basieren auf den Gerichten die Sie auf der Menu Seite bewertet haben.{% else %}These numbers are based on the dishes you have rated on the menu page.{% endif %}
                     </p>
                 </div> 
             </div>    
             <!-- Second and third columns for the plot -->
             <div class="col-span-3 bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In den letzten Monaten{% else %}In the past months{% endif %}</h3>
+                <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In den letzten Monaten{% else %}In the past months{% endif %}</h3>
                 <div>{{ past_6_month_spending_chart | safe }}</div>
             </div>   
         </div>
@@ -219,31 +218,31 @@
     <section class="mb-6 w-full">
         <h2 class="text-lg font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Ihre Favoriten{% else %}Your Favorites{% endif %}</h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <!-- First column for total number of submitted ratings -->
+            <!-- Total number of submitted ratings -->
             <div class="col-span-1 bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtzahl abgegebener Bewertungen{% else %}Total Number of submitted Ratings{% endif %}</h3>
-                <p class="text-4xl font-bold text-gray-900">{{ total_ratings }}</p>
+                <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Gesamtzahl abgegebener Bewertungen{% else %}Total Number of submitted Ratings{% endif %}</h3>
+                <p class="text-xl font-bold text-gray-900">{{ total_ratings }}</p>
             </div>   
-            <!-- Second column for favorite mensas -->
+            <!-- Favorite mensas -->
             <div class="col-span-2 bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Lieblingsmensen{% else %}Favorite Mensas{% endif %}</h3>
+                <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Lieblingsmensen{% else %}Favorite Mensas{% endif %}</h3>
                 <div>
                     {{ mensa_user_chart | safe }}
                 </div>
             </div>    
-            <!-- Third column for rated dishes -->
+            <!-- Rated dishes -->
             <div class="col-span-1 bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Abgegebene Bewertungen{% else %}Rated Dishes{% endif %}</h3>
+                <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Abgegebene Bewertungen{% else %}Rated Dishes{% endif %}</h3>
                 <div class="rated-dishes-container">
                     {% for dish in rated_dishes %}
-                        <div class="dish-rating mb-2 p-2 bg-white border border-gray-300 rounded relative">
-                            <button class="remove-dish-button absolute top-2 right-2 text-gray-600" data-id="{{ dish.menu_id }}" title="{% if session.get('language') == 'de' %}Löschen{% else %}Delete{% endif %}">
+                        <div class="dish-rating mb-2 p-2 bg-white border border-gray-100 rounded relative">
+                            <button class="remove-dish-button absolute top-2 right-2 text-gray-800" data-id="{{ dish.menu_id }}" title="{% if session.get('language') == 'de' %}Löschen{% else %}Delete{% endif %}">
                                 ×
                             </button>
-                            <p class="text-base-style">
+                            <p class="text-sm text-gray-900">
                                 {% if session.get('language') == 'de' %}Gericht:{% else %}Dish:{% endif %} {{ dish.menu }}
                             </p>
-                            <p class="text-base-style">
+                            <p class="text-sm text-gray-900">
                                 {% if session.get('language') == 'de' %}Bewertung:{% else %}Rating{% endif %} {{ dish.rating }}
                             </p>
                         </div>
@@ -258,13 +257,13 @@
         <h2 class="text-lg font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Ihr Geschmacksprofil{% else %}Your Taste-Profile{% endif %}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;"> {% if session.get('language') == 'de' %}Geschmacksvorlieben nach Küche{% else %}Taste Preferences by Cuisine{% endif %}</h3>
+                <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;"> {% if session.get('language') == 'de' %}Geschmacksvorlieben nach Küche{% else %}Taste Preferences by Cuisine{% endif %}</h3>
                 <div class="flex justify-center items-center">
                 {{ radar_chart | safe }}
                 </div>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                <h3 class="text-sm font-medium text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Ernährungsspezifische Präferenzen{% else %}Dietary Preferences{% endif %}</h3>
+                <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}Ernährungsspezifische Präferenzen{% else %}Dietary Preferences{% endif %}</h3>
                 <div class="flex justify-center items-center">
                     {{ average_ratings_plot | safe }}
                 </div>
@@ -275,8 +274,8 @@
 </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-4 relative z-10">
-        <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+    <footer class="bg-white border-t border-gray-200 py-3 px-8 relative z-10">
+        <div class="max-w-6xl mx-auto text-center text-gray-800">
             &copy; 2024 MENSA APP. All rights reserved.
         </div>
     </footer>

@@ -56,52 +56,51 @@
                 <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-700">
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Logged in as:</p>
-                    <p class="text-lg font-bold text-gray-900">{{ username }}</p>
+                    <p class="text-sm font-medium text-gray-800">Logged in as:</p>
+                    <p class="text-sm font-bold text-gray-900">{{ username }}</p>
                 </div>
             </div>
             {% else %}
-            <p class="text-center text-gray-700 font-medium mb-6">You are not logged in.</p>
+            <p class="text-sm text-center text-gray-700 font-medium mb-6">You are not logged in.</p>
             {% endif %}
             <nav class="mt-8">
-                <a href="/" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Start{% else %}Home{% endif %}
                 </a>
-                <a href="/menu" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/menu" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Speisekarte{% else %}Menu{% endif %}
                 </a>
-                <a href="/analysis" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/analysis" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Analyse{% else %}Analysis{% endif %}
                 </a>
-                <a href="/rating" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/rating" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Bewertungen{% else %}Rating{% endif %}
                 </a>
-                <a href="/navigation" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
+                <a href="/navigation" class="text-sm block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-200 hover:text-gray-900">
                     {% if session.get('language') == 'de' %}Navigation{% else %}Navigation{% endif %}
                 </a>
-                <a href="/user" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">
-                    {% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}
-                </a> 
                 {% if username %}
-                <a href="{{ url_for('logout') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
+                <a href="/user" class="text-sm block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">{% if session.get('language') == 'de' %}Benutzerkonto{% else %}Account{% endif %}</a> 
+                <a href="{{ url_for('logout') }}" class="text-sm block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Logout</a> 
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
+                    <a href="{{ url_for('login') }}" class="text-sm block py-2.5 px-4 rounded transition duration=200 hover:bg-gray-200 hover:text-gray-900">Login</a> 
                 {% endif %}
             </nav>
         </div>
     </div>
 
+
  <!-- Main Content -->
 <div class="flex-grow flex items-center justify-center px-4 py-2 relative z-10">
     <div class="content-wrapper max-w-4xl w-full p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2 text-center">
+        <h1 class="text-xl font-bold text-gray-900 mb-2 text-center">
             {% if session.get('language') == 'de' %}
                     Anmeldung Benutzerkonto
                 {% else %}
                     Account Access
                 {% endif %}
         </h1>
-        <p class="text-gray-600 mb-2 text-center leading-relaxed">
+        <p class="text-gray-800 mb-2 text-center leading-relaxed">
             {% if session.get('language') == 'de' %}
                     Melden Sie sich an, um weitere Gerichte zu bewerten um ihre persöhnliche Empfehlungen zu optimieren!
                 {% else %}
@@ -113,7 +112,7 @@
         <div class="mt-2 form-wrapper mx-auto max-w-md p-6 rounded-xl shadow-sm">
             <form id="auth-form" action="{{ url_for('login') }}" method="post" class="space-y-6">
                 <div>
-                    <label for="username" class="text-sm font-medium text-gray-700">
+                    <label for="username" class="text-sm text-gray-500">
                         {% if session.get('language') == 'de' %}
                             Nutzername
                         {% else %}
@@ -121,11 +120,11 @@
                         {% endif %}
                     </label>
                     <input type="text" id="username" name="username" required 
-                           class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500">
+                           class="mt-1 w-full px-4 py-2 border border-gray-100 rounded-md focus:ring-2 focus:ring-indigo-500">
                 </div>
                 
                 <div>
-                    <label for="password" class="text-sm font-medium text-gray-700">
+                    <label for="password" class="text-sm text-gray-500">
                         {% if session.get('language') == 'de' %}
                             Passwort
                         {% else %}
@@ -133,7 +132,7 @@
                         {% endif %}
                     </label>
                     <input type="password" id="password" name="password" required 
-                           class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500">
+                           class="mt-1 w-full px-4 py-2 border border-gray-100 rounded-md focus:ring-2 focus:ring-indigo-500">
                 </div>
 
                 <div class="flex flex-col space-y-4">
@@ -156,7 +155,7 @@
                 </div>
 
                 <div class="relative flex items-center justify-center">
-                    <div class="border-t border-gray-300 w-full"></div>
+                    <div class="border-t border-gray-100 w-full"></div>
                     <span class="px-4 text-sm text-gray-500">
                         {% if session.get('language') == 'de' %}
                         oder weiter mit
@@ -164,11 +163,11 @@
                         or continue with
                         {% endif %}
                     </span>
-                    <div class="border-t border-gray-300 w-full"></div>
+                    <div class="border-t border-gray-100 w-full"></div>
                 </div>
 
                 <button type="button" onclick="window.location.href='{{url_for('login_google')}}'"
-                        class="w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-300 flex items-center justify-center">
+                        class="w-full px-4 py-2 bg-white border border-gray-100 rounded-md text-gray-700 hover:bg-gray-50 transition duration-300 flex items-center justify-center">
                     <img src="{{ url_for('static', filename='images/google_logo.png') }}" alt="Google" class="h-5 w-5 mr-2">
                     {% if session.get('language') == 'de' %}
                     Mit Google fortfahren
@@ -189,8 +188,8 @@
 
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-4 relative z-10">
-        <div class="max-w-7xl mx-auto px-8 text-center text-gray-600">
+    <footer class="bg-white border-t border-gray-200 py-3 px-8 relative z-10">
+        <div class="max-w-6xl mx-auto text-center text-gray-800">
             &copy; 2024 MENSA APP. All rights reserved.
         </div>
     </footer>

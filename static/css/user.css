@@ -85,8 +85,8 @@
     color: #000000; /* Black text for readability */
     font-size: 1rem; /* Base font size for all text inside */
     line-height: 1.5; /* Improve readability with generous line spacing */
-    padding: 10px; /* Ensure comfortable padding inside the container */
-    border-radius: 10px; /* Rounded corners for aesthetics */
+    padding: 2px; /* Ensure comfortable padding inside the container */
+    border-radius: 8px; /* Rounded corners for aesthetics */
     max-height: 400px; /* Set a fixed height for the container */
     overflow-y: auto; /* Enable vertical scrolling */
     text-align: left; /* Align text to the left by default */
@@ -96,7 +96,7 @@
     background-color: white;
     color: #1a202c;
     border: 1px solid #e2e8f0;
-    padding: 0.75rem;
+    padding: 0.25rem;
     border-radius: 8px;
     width: 100%;
     transition: all 0.3s ease;
