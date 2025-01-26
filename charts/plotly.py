@@ -295,7 +295,7 @@ def create_weekly_rating_plot(db_session,dates,lang):
     formatted_start_date = datetime.strptime(dates[0], "%Y-%m-%d").strftime("%d.%m.%Y")
     formatted_end_date = datetime.strptime(dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
 
-    title = f'Weekly Average Ratings for <br>{formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Wöchentliche Durchschnittsbewertungen für {formatted_start_date} bis {formatted_end_date}'
+    title = f'Weekly Average Ratings for <br>{formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Wöchentliche Durchschnittsbewertungen für <br>{formatted_start_date} bis {formatted_end_date}'
     # Set plot title and axis labels
     fig.update_layout(
         height=300,
