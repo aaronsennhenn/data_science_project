@@ -295,3 +295,12 @@ p {
   display: inline-block;
   padding: 0.5rem 1rem; 
 }
+
+.hidden {
+    display: none;
+}
+
+#rating-feedback {
+    margin-right: auto; 
+    text-align: left; /* Ensures text is aligned properly */
+}
