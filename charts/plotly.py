@@ -89,7 +89,6 @@ def create_taste_radarchart(df, taste_label, similarity):
     #Create Radar Chart
     fig = go.Figure()
 
-    #Add player's data to the chart
     fig.add_trace(go.Scatterpolar(
         r=r, 
         theta=theta, 
