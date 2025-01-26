@@ -248,9 +248,15 @@ def rating():
 
         # get random dish that user has not rated before and that is not contained in todays selected
         random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(), lang, user_name, db_session)
+        
+        #Format prices
+        random_dish_dict = random_dish._asdict()  # Convert the Row to a dictionary
+        studentPrice_formatted = format_price(random_dish_dict['studentPrice'])
+        guestPrice_formatted = format_price(random_dish_dict['guestPrice'])
+        
         rating_count = get_total_ratings_by_user(db_session, user_name)
 
-        return render_template('rating.html', username=user_name, random_dish=random_dish, rating_count=rating_count)
+        return render_template('rating.html', username=user_name, random_dish=random_dish, rating_count=rating_count, studentPrice_formatted = studentPrice_formatted, guestPrice_formatted = guestPrice_formatted)
     
 
 
