@@ -267,7 +267,7 @@ def menu():
         # set default values
         mensa_name = request.args.get('selected_mensa', 'all')  # Changed default to 'all'
         today = datetime.now().date()
-        available_dates = [(today + timedelta(days=x)).strftime('%Y-%m-%d') for x in range(5)]
+        available_dates = [(today + timedelta(days=x)).strftime('%Y-%m-%d') for x in range(-3,6)]
         date = today.strftime('%Y-%m-%d')
         available_mensas = get_unique_mensas(db_session)
         selected_diet_meat = 'omnivore'
@@ -286,7 +286,6 @@ def menu():
         # if user has not rated dishes yet, redirect to rating page
         #if not user_vector:
         #    return redirect(url_for('rating'))
-        print("Before POST check:", recommendation_switch)
 
         # When user filters, get filtered values
         if request.method == 'POST':
