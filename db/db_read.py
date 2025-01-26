@@ -931,7 +931,8 @@ def get_current_month_spending(session: Session, user_name , lang='en'):
         Rating.user_name == user_name,
         Rating.on_rating_page == False,
         extract('year', Rating.timestamp) == current_year,
-        extract('month', Rating.timestamp) == current_month
+        extract('month', Rating.timestamp) == current_month,
+        Dish.studentPrice > 0
     ).one_or_none()
         
     df = pd.DataFrame([{
