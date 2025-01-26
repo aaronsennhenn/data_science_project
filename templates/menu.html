@@ -291,7 +291,7 @@
             </h2>
             {% if dishes.get('Hauptspeise') or dishes.get('Main Dish') %}
             {% for dish in dishes.get('Hauptspeise', []) or dishes.get('Main Dish', []) %}
-            <div class="card w-full">
+            <div class="card w-full"  style="position: relative;">
                 <div class="grid items-start w-full p-6">
                     <div class="col-span-1 space-y-4">
                         <!-- Dish recommendation -->
