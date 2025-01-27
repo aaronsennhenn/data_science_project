@@ -96,11 +96,29 @@
 <main class="flex-grow flex flex-col items-center px-4 py-2">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
         <h1 class="text-2xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Account Analyse{% else %}Account Analysis{% endif %}</h1>
-        <!--<h2 class="text-xl font-bold text-gray-900 mb-6 text-center">{% if session.get('language') == 'de' %}Willkommen {{ username }} auf Ihrer persöhnlichen Mensa Statistik{% else %}Welcome to your personal mensa statistic {{ username }}{% endif %}!</h2> -->
         <p class="text-sm text-gray-800 text-center">{% if session.get('language') == 'de' %}Benutzerkontoerstellung {% else %}Account Start {% endif %}{{ first_rating_date }}</p>
     </div> 
 
-    
+    <section class="mb-6 w-full text-sm">
+    <!-- Dropdown -->
+    <div class="text-gray-900">
+        <form method="POST" action="{{ url_for('user_page') }}">
+            <div class="mb-2 text-left" style="width: 16rem;">
+                <label for="user-type" class="block text-sm text-gray-500 mb-2" style="font-size: 1.0em;">
+                    {% if session.get('language') == 'de' %}Bitte auswählen{% else %}Please select{% endif %}
+                </label>
+                <select id="user-type" name="user_type" class="dropdown-style mt-1 block w-64 pl-3 pr-10 py-2 text-base border-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                    <option value="guest" {% if user_type == 'guest' %}selected{% endif %}>{% if session.get('language') == 'de' %}Gast{% else %}Guest{% endif %}</option>
+                    <option value="student" {% if user_type == 'student' %}selected{% endif %}>{% if session.get('language') == 'de' %}Student{% else %}Student{% endif %}</option>
+                </select>
+            </div>
+            <button type="submit" style="background-color: #6366F1; color: white; width: 16rem; padding: 0.5rem; border-radius: 0.375rem;">
+                {% if session.get('language') == 'de' %}Auswählen{% else %}Select{% endif %}
+            </button>
+        </form>
+        </div>
+    </section>     
+
     <!-- Weekly Schedule -->
     <section class="mb-6 w-full text-sm">
         <h2 class="text-lg font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Ihr wöchentlicher Speiseplan{% else %}Your Weekly Dining Schedule{% endif %}</h2>
@@ -187,21 +205,6 @@
                 </div>
 
                 <div class="mt-auto">
-                    <!-- Dropdown -->
-                    <form method="POST" action="{{ url_for('user_page') }}">
-                        <div class="mb-2" style="width: 16rem;">
-                            <label for="user-type" class="block text-sm text-gray-500 mb-2" style="font-size: 1.0em;">
-                                {% if session.get('language') == 'de' %}Bitte auswählen{% else %}Please select{% endif %}
-                            </label>
-                            <select id="user-type" name="user_type" class="dropdown-style mt-1 block w-64 pl-3 pr-10 py-2 text-base border-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option value="guest" {% if user_type == 'guest' %}selected{% endif %}>{% if session.get('language') == 'de' %}Gast{% else %}Guest{% endif %}</option>
-                                <option value="student" {% if user_type == 'student' %}selected{% endif %}>{% if session.get('language') == 'de' %}Student{% else %}Student{% endif %}</option>
-                            </select>
-                        </div>
-                        <button type="submit" style="background-color: #6366F1; color: white; width: 16rem; padding: 0.5rem; border-radius: 0.375rem;">
-                            {% if session.get('language') == 'de' %}Auswählen{% else %}Select{% endif %}
-                        </button>
-                    </form>
                     <!-- Small message at the bottom -->
                     <p class="mt-2 text-sm text-gray-500" style="font-size: 1.0em;">
                         {% if session.get('language') == 'de' %}Diese Zahlen basieren auf den Gerichten die Sie auf der Menu Seite bewertet haben.{% else %}These numbers are based on the dishes you have rated on the menu page.{% endif %}
