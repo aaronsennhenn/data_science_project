@@ -14,21 +14,61 @@ from collections import defaultdict
 
 
 
-def convert_dblist_to_df(db_list):
+def convert_dblist_to_df(db_list: List) -> pd.DataFrame:
+    """
+    Converts a list of database objects into a Pandas DataFrame.
+
+    Parameters:
+        db_list (list): A list of database objects, typically ORM instances (e.g., SQLAlchemy objects).
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the attributes of the objects in db_list as columns, with one row per object.
+    """
     dict_list = [vars(obj) for obj in db_list]
     for dictionary in dict_list:
         dictionary.pop('_sa_instance_state', None)
     df = pd.DataFrame(dict_list)        
     return df
         
-def get_user_by_username(session: Session, username: str):
-    return session.query(User).filter_by(username=username).first()
+def get_user_by_username(db_session: Session, username: str):
+    """
+    Retrieves row from the User table with the given username.
+
+    Parameters:
+        db_session (Session): The database session used to query the database.
+        username (str): The username of the user to retrieve.
+
+    Returns:
+        User: The user object corresponding to the given username, or None if no user is found.
+
+    """
+    return db_session.query(User).filter_by(username=username).first()
 
 
 def get_all_dishes(session: Session) -> List[Dish]:
+    """
+    Retrieve all dishes from the database.
+
+    Parameters:
+        session (Session): The database session to use for the query.
+
+    Returns:
+        List[Dish]: A list of all Dish objects in the database.
+
+    """
     return session.query(Dish).all()
 
-def get_average_ratings(db_session, user_name=None):
+def get_average_ratings(db_session: Session, user_name=None) -> dict:
+    """
+    Get the average rating for each icon category in the database.
+
+    Parameters:
+        db_session (Session): The database session to use for the query.
+        user_name (str): The name of the user to filter the ratings by. If None, all ratings are used.
+
+    Returns:
+        dict: A dictionary mapping each category to its average rating.
+    """
 
     # Query the database
     query = db_session.query(
@@ -57,13 +97,25 @@ def get_average_ratings(db_session, user_name=None):
 
     return average_ratings
 
-def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_diet_meat, selected_lang):
+def get_dishes_by_date_location_filtered(db_session:Session, date: str, mensa_name: str, selected_diet_meat: List[str], selected_lang: str) -> List[Tuple]:
+    """
+    Get all dishes for a given date and mensa, with optional filtering by diet and meat icons.
+
+    Parameters:
+        db_session (Session): The database session to use for the query.
+        date (str): The date to filter by, in the format "YYYY-MM-DD".
+        mensa_name (str): The name of the mensa to filter by, or "all" to include all mensas.
+        selected_diet_meat (List[str]): A list of diet and meat icons to filter by.
+        selected_lang (str): The language to use for the menu and course fields ("de" or "en").
+
+    Returns:
+        List[Tuple]: A list of tuples containing the columns of the Dish table for the filtered dishes.
+    """
 
     if mensa_name == "all":
         query = db_session.query(Dish).filter(Dish.menuDate == date, Dish.menu != "NA")
     else:
         query = db_session.query(Dish).filter(Dish.menuDate == date, Dish.location == mensa_name, Dish.menu != "NA")
-
 
     # join icons_clean for filtering
     query = query.outerjoin(FiltersClean, Dish.id == FiltersClean.menu_id).add_columns(FiltersClean.icons_clean.label("icons_clean"))
@@ -72,7 +124,6 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
     if selected_diet_meat:
         filters = [FiltersClean.icons_clean.ilike(f"%{icon}%") for icon in selected_diet_meat]
         query = query.filter(or_(*filters))
-
 
     # Join additional tables and add columns
     query = (
@@ -97,7 +148,6 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
         )
     )
 
-    
     # join the embedding column to the filtered dataframe
     query = query.outerjoin(Embedding, Dish.id == Embedding.menu_id).add_columns(Embedding.embedding)
 
@@ -120,6 +170,7 @@ def get_dishes_by_date_location_filtered(db_session, date, mensa_name, selected_
 
     )
 
+    # join the imputed prices
     query = query.outerjoin(PriceClean, Dish.id == PriceClean.menu_id).add_columns(PriceClean.studentPrice_imputed,PriceClean.guestPrice_imputed)
 
     return query.all()
@@ -995,9 +1046,9 @@ def get_cluster_similarity_for_week(db_session, week_dates,lang):
 
     if lang == 'de':
         centroid_df['cluster_name'] = centroid_df['cluster_name'].apply(lambda x: cluster_translation_dict[x])
-        centroid_df = centroid_df[~centroid_df['cluster_name'].isin(['deutsch','andere'])]
+        centroid_df = centroid_df[~centroid_df['cluster_name'].isin(['Deutsch','Andere'])]
     else:
-        centroid_df = centroid_df[~centroid_df['cluster_name'].isin(['german','other'])]
+        centroid_df = centroid_df[~centroid_df['cluster_name'].isin(['German','Other'])]
 
     # Get centroids
     centroids = np.vstack(centroid_df['centroid'])
@@ -1025,7 +1076,7 @@ def get_cluster_similarity_for_week(db_session, week_dates,lang):
 
         # If the max similarity is less than 0.75, assign 'other' as the cluster
         if max_similarity < 0.75:
-            cluster_name = 'other' if lang == 'en' else 'andere'
+            cluster_name = 'Other' if lang == 'en' else 'Andere'
         else:
             cluster_name = centroid_df.loc[max_idx, 'cluster_name']
 
