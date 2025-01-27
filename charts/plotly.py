@@ -47,19 +47,38 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
         unique_icons = filtered_df['icons_clean'].unique()
         for i, icon in enumerate(unique_icons):
             icon_data = filtered_df[filtered_df['icons_clean'] == icon]
+            icon_data['hover_text'] = (
+                "Menu: " + icon_data['menu']
+            )
             fig.add_scatter(
                 x=icon_data['menuDate'],
                 y=icon_data[selected_price_type],
                 mode='markers',
                 name=f'{icon}',
-                marker=dict(color=PLOT_COLORS[i % len(PLOT_COLORS)])
-            )
+                marker=dict(color=PLOT_COLORS[i % len(PLOT_COLORS)]),
+                text=icon_data['hover_text'],
+                hovertemplate=(
+                    '<b>Date:</b> %{x}<br>'+
+                    '<b>Price:</b> %{y}<br>'+
+                    '%{text}<extra></extra>'
+                )
+        )
+    
     else:
+        filtered_df['hover_text'] = (
+                "Menu: " + filtered_df['menu']
+            )
         fig.add_scatter(
             x=filtered_df['menuDate'],
             y=filtered_df[selected_price_type],
             mode='markers',
-            name='All Prices'
+            name='All Prices',
+            text=filtered_df['hover_text'],
+            hovertemplate=(
+                '<b>Date:</b> %{x}<br>'+
+                '<b>Price:</b> %{y}<br>'+
+                '%{text}<extra></extra>'
+            )
         )
 
     # Update layout
