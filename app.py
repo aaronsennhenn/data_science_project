@@ -127,17 +127,24 @@ def authorize_google():
     user_info = resp.json()
     username = user_info['email']
 
-    # create new user in db
-    user = User.query.filter_by(username=username).first()
+    with Session() as db_session:
+        user = get_user_name(db_session, username)
+        session['username'] = username
+        session['oauth_token'] = token
 
-    if not user:
-        user = User(username=username)
-        db.session.add(user)
-        db.session.commit()
-        db.session.close()
+        if user:          
+            user_vector = get_user_vector(username, db_session)
 
-    session['username'] = username
-    session['oauth_token'] = token
+            if user_vector:
+                return redirect(url_for('menu'))
+            else:
+                return redirect(url_for('rating'))
+        else:
+            write_to_user(username, None, engine, Session)
+
+            return redirect(url_for('rating'))
+
+
 
     return redirect(url_for('menu'))
 

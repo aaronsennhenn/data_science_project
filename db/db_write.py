@@ -289,7 +289,7 @@ def write_to_user(username: str, password: str, engine, Session):
 
     with Session() as db_session:
         user = User(username=username)
-        user.set_password(password)
+        user.set_password(password) if password is not None else None
         user.add_vector(vector = None)
         db_session.add(user)
         db_session.commit()
