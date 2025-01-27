@@ -542,11 +542,13 @@
                                 <div class="overlay"></div>
                                 <div class="content">
                                     <div class="close-btn" onclick="toggleDescriptionPopup({{ dish.id }})">&times;</div>
+                                    <div class="text-gray-800 font-medium mb-1">
                                     {% if session.get('language') == 'de' %}
                                         {{ dish.description_de if dish.description_de else 'Keine Beschreibung verfügbar' }}
                                     {% else %}
                                         {{ dish.description_en if dish.description_en else 'No description available' }}
                                     {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         
