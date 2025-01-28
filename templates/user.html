@@ -105,8 +105,15 @@
         <form method="POST" action="{{ url_for('user_page') }}">
             <div class="mb-2 text-left" style="width: 16rem;">
                 <label for="user-type" class="block text-sm text-gray-500 mb-2" style="font-size: 1.0em;">
-                    {% if session.get('language') == 'de' %}Bitte auswählen{% else %}Please select{% endif %}
+                    {% if session.get('language') == 'de' %}Bitte wählen Sie Ihren Status aus für Ihre Benutzerkontoanalyse!{% else %}Please select your status for your account analysis!{% endif %}
                 </label>
+                <h2 class="text-sm text-gray-800 text-left">
+                    {% if session.get('language') == 'de' %}
+                        Status:
+                    {% else %}
+                        Status:
+                    {% endif %}
+                </h2>
                 <select id="user-type" name="user_type" class="dropdown-style mt-1 block w-64 pl-3 pr-10 py-2 text-base border-gray-100 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                     <option value="guest" {% if user_type == 'guest' %}selected{% endif %}>{% if session.get('language') == 'de' %}Gast{% else %}Guest{% endif %}</option>
                     <option value="student" {% if user_type == 'student' %}selected{% endif %}>{% if session.get('language') == 'de' %}Student{% else %}Student{% endif %}</option>
@@ -182,13 +189,13 @@
 
     <!-- Budget -->
     <section class="mb-6 w-full">
-        <h2 class="text-lg font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Ihre Ausgaben{% else %}Your Budget{% endif %}</h2>
+        <h2 class="text-lg font-semibold text-gray-800 mb-2">{% if session.get('language') == 'de' %}Ihre Ausgaben{% else %}Your Spending{% endif %}</h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- First column for current month and amount -->
             <div class="col-span-1 bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex flex-col">
                 <div>
                     <!-- Current Month -->
-                    <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In diesem Monat{% else %}This month{% endif %}</h3>
+                    <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In diesem Monat{% else %}This Month{% endif %}</h3>
                     <!-- Month -->
                     <div class="mb-2">
                         <p class="text-xl text-gray-900">
@@ -213,7 +220,7 @@
             </div>    
             <!-- Second and third columns for the plot -->
             <div class="col-span-3 bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In den letzten Monaten{% else %}In the past months{% endif %}</h3>
+                <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">{% if session.get('language') == 'de' %}In den letzten Monaten{% else %}Past Months{% endif %}</h3>
                 <div>{{ past_6_month_spending_chart | safe }}</div>
             </div>   
         </div>

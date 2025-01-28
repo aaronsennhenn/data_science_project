@@ -177,7 +177,10 @@
                     <div class="p-4 rounded-lg col-span-3 flex flex-col space-y-4">
                         <!-- Dropdown for selecting the category -->
                         <div>
-                            <label for="category" class="block text-gray-500">Select Category:</label>
+                            <h2 class="text-sm text-gray-800 text-left mb-2">
+                                {% if session.get('language') == 'de' %}Bitte wählen Sie die gewünschte Kategorie und Preisart!{% else %}Please select for category and price type!{% endif %}
+                            </h2>
+                            <label for="category" class="block text-gray-500">Category:</label>
                             <select id="category" class="dropdown-style mt-1 block w-full">
                                 {% for category in categories %}
                                     <option value="{{ category }}" {% if category == selected_category %}selected{% endif %}>
