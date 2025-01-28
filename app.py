@@ -1,14 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import os
 from secret import *
-from db.db_write import remove_rating,update_user_vector, setup_database_connection, Dish, Base, User, Course, DishEng, write_to_rating, write_to_user
-from db.db_read import get_weekly_recommendation_dict,get_prevornext_weekday_dates,get_average_ratings, get_dishes_of_user,get_weekday_dates,get_week_recommended_dishes,get_cluster_similarity,get_combined_dishes,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_available_mensas, get_first_updated_date, get_dish_count_per_mensa, get_price_development, get_menu_line_distribution, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline_per_mensa, get_average_prices_per_menuline_per_mensa, get_lowest_prices_per_menuline, get_menu_with_lowest_price, get_meat_options, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_unique_menu_lines, get_descriptions, get_recipes, get_top_three_mensas, get_top_three_dishes, get_total_ratings_by_user, get_first_rating_date_of_user, get_favorite_mensas_of_user,get_unique_mensas, get_past_6_month_spending, get_current_month_spending
+from db.db_write import remove_rating,update_user_vector, setup_database_connection, Base, write_to_rating, write_to_user
+from db.db_read import get_weekly_recommendation_dict,get_prevornext_weekday_dates, get_dishes_of_user,get_weekday_dates,get_cluster_similarity,get_random_dishes,get_user_vector, get_dishes_by_date_location_filtered, get_total_mensas, get_first_updated_date, get_written_forms, get_user_name, get_total_ratings, get_total_menus, get_total_ratings_by_user, get_first_rating_date_of_user,get_unique_mensas, get_current_month_spending
 from datetime import datetime, timedelta
 import json
-from db.utils import compute_cosine_similarity, format_price, format_price_column
+from db.utils import compute_cosine_similarity, format_price
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
-from charts.plotly import top_mensa_for_user_chart,plot_pie_chart,create_weekly_top_dishes_chart,generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart, plot_average_ratings, create_weekly_rating_plot,create_weekly_top_mensa_chart,plot_rating_histogram
+from charts.plotly import top_mensa_for_user_chart,plot_pie_chart,create_weekly_top_dishes_chart,generate_price_chart, create_taste_radarchart, create_past_6_month_spending_chart, plot_average_ratings, create_weekly_rating_plot,create_weekly_top_mensa_chart
 import pandas as pd
 
 current_dir = os.path.dirname(os.path.abspath(__file__))

@@ -11,6 +11,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
+from datetime import datetime, timedelta
 
 
 
@@ -70,22 +71,22 @@ def get_average_ratings(db_session: Session, user_name=None) -> dict:
         dict: A dictionary mapping each category to its average rating.
     """
 
-    # Query the database
+    # Query FiltersClean and join Ratings
     query = db_session.query(
         FiltersClean.icons_clean,
         Rating.rating
     ).join(Rating, FiltersClean.menu_id == Rating.menu_id)
 
+    # if user_name is provided, filter by username
     if user_name:
         query = query.filter(Rating.user_name == user_name)
 
     raw_ratings = query.all()
 
-    # Process the results to handle multiple categories
+    # account for two categories inside one string
     category_ratings = defaultdict(list)
 
     for icons, rating in raw_ratings:
-        # Split the icons_clean field by ", " and assign the rating to each category
         categories = icons.split(", ")
         for category in categories:
             category_ratings[category].append(rating)
@@ -117,7 +118,7 @@ def get_dishes_by_date_location_filtered(db_session:Session, date: str, mensa_na
     else:
         query = db_session.query(Dish).filter(Dish.menuDate == date, Dish.location == mensa_name, Dish.menu != "NA")
 
-    # join icons_clean for filtering
+    # join icons_clean column for filtering
     query = query.outerjoin(FiltersClean, Dish.id == FiltersClean.menu_id).add_columns(FiltersClean.icons_clean.label("icons_clean"))
 
     # if user filters by meat or diet, apply filters on icons_clean column
@@ -138,7 +139,7 @@ def get_dishes_by_date_location_filtered(db_session:Session, date: str, mensa_na
             Description.description_de,
             Course.course,
             
-            # English columns (conditionally included)
+            # English columns
             DishEng.menuLineEng if selected_lang == "en" else None,
             DishEng.menuEng if selected_lang == "en" else None,
             Description.description_en if selected_lang == "en" else None,
@@ -148,10 +149,10 @@ def get_dishes_by_date_location_filtered(db_session:Session, date: str, mensa_na
         )
     )
 
-    # join the embedding column to the filtered dataframe
+    # join the embeddings column 
     query = query.outerjoin(Embedding, Dish.id == Embedding.menu_id).add_columns(Embedding.embedding)
 
-    # Compute average rating for menu_ids in the query
+    # Compute average rating for each dish
     avg_rating_subquery = (
         db_session.query(
             Rating.menu_id.label("menu_id"),
@@ -175,8 +176,20 @@ def get_dishes_by_date_location_filtered(db_session:Session, date: str, mensa_na
 
     return query.all()
 
-def get_random_dishes(selected_date, lang, user_name, db_session: Session):
-    
+def get_random_dishes(selected_date: datetime.date, lang: str, user_name: str, db_session: Session):
+    """
+    Retrieves one random dish that has not been rated by the user
+    and is not part of the menu on the given date.
+
+    Parameters:
+        selected_date (datetime.date): The date to exclude dishes from.
+        lang (str): The language preference ('de' for German, any other value for English).
+        user_name (str): The username of the user for whom to filter out rated dishes.
+        db_session (Session): The SQLAlchemy session used to execute the query.
+
+    Returns:
+        Row: A single database row representing the random dish
+    """
 
     # Query one random main dish that has not been rated by the user yet and is not on the selected date
     if lang == "de":
@@ -192,9 +205,10 @@ def get_random_dishes(selected_date, lang, user_name, db_session: Session):
                 Dish.guestPrice > 0
             )
             .order_by(func.random())
-            .limit(1)  # Limit to 1 random dish
+            .limit(1)
         )
     else:
+        # English version
         query = (
             select(DishEng.menu_id, DishEng.menuEng,Dish.studentPrice,Dish.guestPrice)
             .outerjoin(Dish, Dish.id == DishEng.menu_id)
@@ -208,45 +222,36 @@ def get_random_dishes(selected_date, lang, user_name, db_session: Session):
                 Dish.guestPrice > 0
             )
             .order_by(func.random())
-            .limit(1)  # Limit to 1 random dish
+            .limit(1)
         )
 
-    # Execute the query
-    result = db_session.execute(query).fetchone()
-    return result
-
-
-def get_image_path(dish_id: int, session: Session) -> str:
-    dish = session.query(Dish).filter_by(id=dish_id).first()
-    return dish.image_path if dish else None
+    return db_session.execute(query).fetchone()
 
 def get_user_vector(username: str, session: Session) -> List[float]:
+    """
+    Retrieves the user vector for a specific user.
+
+    Parameters:
+        username (str): The username of the user whose vector is to be retrieved.
+        session (Session): The SQLAlchemy session used to query the database.
+
+    Returns:
+        List[float]: The user's vector as a list of floats
+    """
     user = session.query(User).filter_by(username=username).first()
     return user.user_vector if user else None
 
-def get_meat_options(session: Session) -> List[str]:
-    return session.query(Dish.meats).distinct().all()
+def load_dishes_table_for_filter_cleaning(Session: Session, update_table: str) -> pd.DataFrame:
+    """
+    Loads dishes from the provided table that are not present in the specified update table. Is used for the cronjob to update all table daily that depend on the Dish table.
 
-def get_course_eng(session: Session, date, menuline, menu, location) -> str:
-    course = session.query(Course.course_eng).filter(
-        Course.menuDate == date,
-        Course.menuLine == menuline,
-        Course.menu == menu,
-        Course.location == location
-    ).first()
-    return course[0] if course else None
+    Parameters:
+        Session (Session): The SQLAlchemy session factory used to query the database.
+        update_table (str): The name of the table to update 
 
-def get_course(session: Session, date, menuline, menu, location) -> str:
-    course = session.query(Course.course).filter(
-        Course.menuDate == date,
-        Course.menuLine == menuline,
-        Course.menu == menu,
-        Course.location == location
-    ).first()
-    return course[0] if course else None
-
-    
-def load_dishes_table_for_filter_cleaning(Session, update_table):
+    Returns:
+        pandas.DataFrame: A DataFrame containing the dishes that are not present in the specified update table.
+    """
     if update_table == "FiltersClean":
         table = FiltersClean
     elif update_table == "Embedding":
@@ -286,208 +291,83 @@ def load_dishes_table_for_filter_cleaning(Session, update_table):
         # Return as a DataFrame
         return pd.DataFrame(data)
 
-
-from datetime import datetime, timedelta
-
-def get_next_five_days_data(session: Session) -> dict:
-    today = datetime.now().date()
-    date_range = [today + timedelta(days=x) for x in range(5)]
-
-    # MANUALLY FIX DATES OVER CHRISTMAS PERIOD BECAUSE MENSA IS CLOSED. MUST BE REMOVED AFTER CHRISTMAS
-    #date_range = [datetime(2024, 12, 17), datetime(2024, 12, 18), datetime(2024, 12, 19), datetime(2024, 12, 20)]
-    
-    results = {}
-    for date in date_range:
-        dishes = session.query(Dish).filter_by(menuDate=date).all()
-        locations = list(set(dish.location for dish in dishes))
-        results[date.strftime('%A, %Y-%m-%d')] = locations
-    
-    return results
-
 def get_unique_mensas(session: Session) -> List[str]:
+    """
+    Retrieves a list of unique mensa locations from the database.
+
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+
+    Returns:
+        List[str]: A list of unique mensa locations as strings.
+    """
     return [mensa.location for mensa in session.query(Dish.location).distinct()]
 
-# Get total number of mensas (Dish.location)
 def get_total_mensas(session: Session) -> int:
+    """
+    Calculates the total number of unique mensa locations in the database.
+
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+
+    Returns:
+        int: The total number of distinct mensa locations.
+    """
     return session.query(Dish.location).distinct().count()
 
-# Get total number of ratings (table rating)
 def get_total_ratings(session: Session) -> int:
+    """
+    Calculates the total number of unique ratings in the database.
+
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+
+    Returns:
+        int: The total count of distinct ratings.
+    """
     return session.query(Rating.id).distinct().count()
 
-# Get total number of menus (table menu)
 def get_total_menus(session: Session) -> int:
+    """
+    Calculates the total number of unique menus in the database.
+
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+
+    Returns:
+        int: The total count of distinct menus.
+    """
     return session.query(Dish.id).distinct().count()
 
-# Get list of available mensas (Dish.location)
-def get_available_mensas(session: Session) -> List[str]:
-    return [mensa.location for mensa in session.query(Dish.location).distinct()]
-
-# Get time window since when the Dish was last updated which can be seen in menuDate
 def get_first_updated_date(session: Session) -> datetime:
+    """
+    Retrieves the earliest dish date from the database.
+
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+
+    Returns:
+        datetime: The earliest `menuDate` found in the `Dish` table.
+    """
     return session.query(Dish.menuDate).order_by(Dish.menuDate.asc()).first()[0]
 
-# Get unique menu lines to sort menus into Main, Side dish or Dessert
-def get_unique_menu_lines(session: Session, date: str, location: str) -> List[str]:
-    dishes = session.query(Dish).filter_by(menuDate=date, location=location).all()
-    unique_menu_lines = list(set(dish.menuLine for dish in dishes if dish.menuLine))
-    return unique_menu_lines
 
-# Get number of dishes (Dish.menu) per each mensa (Dish.location)
-def get_dish_count_per_mensa(session: Session) -> dict:
-    results = {}
-    for mensa in get_available_mensas(session):
-        count = session.query(Dish).filter_by(location=mensa).count()
-        results[mensa] = count
-    return results
+def get_written_forms(db_session: Session) -> Tuple[dict, dict, dict, dict, dict, dict]:
+    """
+    Retrieves written forms for additives, allergens, and meats from the directory.
 
-#Get average prices per menu line (Dish.menuLine)
-def get_average_prices_per_menuline(session: Session) -> dict:
-    results = {}
-    menu_lines = session.query(Dish.menuLine).distinct().all()
-    
-    for menu_line in menu_lines:
-        menu_line = menu_line[0]  # Extract string from tuple
-        avg_prices = session.query(
-            func.avg(Dish.pupilPrice).label('avg_pupil'),
-            func.avg(Dish.studentPrice).label('avg_student'),
-            func.avg(Dish.guestPrice).label('avg_guest')
-        ).filter(Dish.menuLine == menu_line).first()
-        
-        results[menu_line] = {
-            'pupil': round(avg_prices.avg_pupil, 2) if avg_prices.avg_pupil else 0,
-            'student': round(avg_prices.avg_student, 2) if avg_prices.avg_student else 0,
-            'guest': round(avg_prices.avg_guest, 2) if avg_prices.avg_guest else 0
-        }
-    
-    return results
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
 
-# Get lowest prices per menu line (Dish.menuLine)
-def get_lowest_prices_per_menuline(session: Session) -> dict:
-    results = {}
-    menu_lines = session.query(Dish.menuLine).distinct().all()
-    
-    for menu_line in menu_lines:
-        menu_line = menu_line[0]
-        min_prices = session.query(
-            func.min(Dish.pupilPrice).label('min_pupil'),
-            func.min(Dish.studentPrice).label('min_student'),
-            func.min(Dish.guestPrice).label('min_guest')
-        ).filter(Dish.menuLine == menu_line).first()
-        
-        results[menu_line] = {
-            'pupil': round(min_prices.min_pupil, 2) if min_prices.min_pupil else 0,
-            'student': round(min_prices.min_student, 2) if min_prices.min_student else 0,
-            'guest': round(min_prices.min_guest, 2) if min_prices.min_guest else 0
-        }
-    
-    return results
-
-# Get average Menu Prices per Each Mensa (Dish.menu) over all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) but grouped by each menu line (Dish.menuLine)
-def get_average_prices_per_menuline_per_mensa(session: Session) -> dict:
-    results = {}
-    for mensa in get_available_mensas(session):
-        menu_lines = session.query(Dish.menuLine).filter_by(location=mensa).distinct().all()
-        results[mensa] = {}
-        
-        for menu_line in menu_lines:
-            menu_line = menu_line[0]
-            avg_price = session.query(
-                func.avg((Dish.pupilPrice + Dish.studentPrice + Dish.guestPrice) / 3)
-            ).filter(Dish.location == mensa, Dish.menuLine == menu_line).scalar()
-            
-            results[mensa][menu_line] = round(avg_price, 2) if avg_price else 0
-    return results
-
-# Get lowest Menu Prices per Each Mensa (Dish.menu) over all prices (Dish.pupilPrice Dish.studentPrice and Dish.guestPrice) but grouped by each menu line (Dish.menuLine)
-def get_lowest_prices_per_menuline_per_mensa(session: Session) -> dict:
-    results = {}
-    for mensa in get_available_mensas(session):
-        menu_lines = session.query(Dish.menuLine).filter_by(location=mensa).distinct().order_by(Dish.menuLine).all()
-        results[mensa] = {}
-        
-        for menu_line in menu_lines:
-            menu_line = menu_line[0]
-            lowest_price = session.query(
-                func.min((Dish.pupilPrice + Dish.studentPrice + Dish.guestPrice) / 3)
-            ).filter(Dish.location == mensa, Dish.menuLine == menu_line).scalar()
-            
-            results[mensa][menu_line] = round(lowest_price, 2) if lowest_price else 0
-    return results
-
-# Get menu and menu line and price of lowest price dish per each mensa (Dish.location)
-def get_menu_with_lowest_price(session: Session) -> dict:
-    results = {}
-    for mensa in get_available_mensas(session):
-        lowest_price_dish = session.query(
-            Dish.menu,
-            Dish.menuLine,
-            Dish.pupilPrice,
-            Dish.studentPrice,
-            Dish.guestPrice,
-            ((Dish.pupilPrice + Dish.studentPrice + Dish.guestPrice) / 3).label('avg_price')
-        ).filter_by(location=mensa
-        ).order_by(func.coalesce(((Dish.pupilPrice + Dish.studentPrice + Dish.guestPrice) / 3), float('inf'))
-        ).first()
-        
-        if lowest_price_dish:
-            results[mensa] = {
-                'menu': lowest_price_dish.menu,
-                'menu_line': lowest_price_dish.menuLine,
-                'pupilPrice': lowest_price_dish.pupilPrice,
-                'studentPrice': lowest_price_dish.studentPrice,
-                'guestPrice': lowest_price_dish.guestPrice,
-                'avg_price': lowest_price_dish.avg_price
-            }
-        else:
-            results[mensa] = None
-    return results
-
-# Get price development per menu line (Dish.menuLine)
-def get_price_development(session: Session) -> dict:
-    menu_lines = session.query(Dish.menuLine).distinct().all()
-    price_data = {}
-    
-    for menu_line in menu_lines:
-        menu_line = menu_line[0]
-        prices = session.query(
-            Dish.menuDate,
-            Dish.pupilPrice,
-            Dish.studentPrice,
-            Dish.guestPrice
-        ).filter(Dish.menuLine == menu_line).order_by(Dish.menuDate).all()
-        
-        price_data[menu_line] = {
-            'dates': [p.menuDate for p in prices],
-            'pupil_prices': [p.pupilPrice for p in prices],
-            'student_prices': [p.studentPrice for p in prices],
-            'guest_prices': [p.guestPrice for p in prices]
-        }
-    
-    return price_data
-
-# Get district count of menu line (Dish.menuLine) per each mensa (Dish.location) (such that with this information I can plot pie charts)
-def get_menu_line_distribution(session: Session) -> dict:
-    results = {}
-    today = datetime.now().date()
-    week_end = today + timedelta(days=7)
-    
-    for mensa in get_available_mensas(session):
-        menu_line_counts = session.query(
-            Dish.menuLine, 
-            func.count(Dish.menuLine)
-        ).filter(
-            Dish.location == mensa,
-            Dish.menuDate >= today,
-            Dish.menuDate < week_end
-        ).group_by(Dish.menuLine).all()
-        
-        results[mensa] = {menu_line: count for menu_line, count in menu_line_counts}
-    
-    return results
-
-# Get directory values of additives and allergens 
-def get_written_forms(session):
+    Returns:
+        tuple: A tuple containing six dictionaries:
+            - additives_dict: A dictionary mapping additives to their written forms.
+            - additives_dict_eng: A dictionary mapping additives to their English written forms.
+            - allergens_dict: A dictionary mapping allergens to their written forms.
+            - allergens_dict_eng: A dictionary mapping allergens to their English written forms.
+            - meats_dict: A dictionary mapping meats to their written forms.
+            - meats_dict_eng: A dictionary mapping meats to their English written forms.
+    """
     additives_dict = {}
     additives_dict_eng = {}
     allergens_dict = {}
@@ -495,7 +375,7 @@ def get_written_forms(session):
     meats_dict = {}
     meats_dict_eng = {}
     
-    directory_entries = session.query(Directory).all()
+    directory_entries = db_session.query(Directory).all()
     
     for entry in directory_entries:
         if entry.additives:
@@ -511,34 +391,38 @@ def get_written_forms(session):
     return additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng
 
 
-def get_user_name(db_session, username):
+def get_user_name(db_session: Session, username: str) -> str:
+    """
+    Retrieves a user record from the database based on the provided username.
+
+    Parameters:
+        db_session (Session): The SQLAlchemy session used to query the database.
+        username (str): The username of the user to retrieve.
+
+    Returns:
+        User: The user object if found, otherwise None.
+    """
     return db_session.query(User).filter_by(username=username).first()
 
-# Get descritoptions de and en based on menu_id and the corresponding description_de and description_en
-def get_descriptions(db_session):
-    descriptions = {}
-    description_entries = db_session.query(Description).all()
-    for entry in description_entries:
-        descriptions[entry.menu_id] = {
-            'description_de': entry.description_de,
-            'description_en': entry.description_en
-        }
-    return descriptions
 
-# Get recipes de and en based on menu_id and the corresponding recipe_de and recipe_en
-def get_recipes(db_session):
-    recipes = {}
-    recipe_entries = db_session.query(Recipe).all()
-    for entry in recipe_entries:
-        recipes[entry.menu_id] = {
-            'recipe_de': entry.recipe_de,
-            'recipe_en': entry.recipe_en
-        }
-    return recipes
+def get_ratings_of_the_week(db_session: Session, week_dates: List[str]) -> List[Rating]:
+    """
+    Retrieves the average ratings and rating counts for dishes over a specified week.
+    It calculates the average rating and the count of ratings for each dish, grouped by location, menu, and menu date.
 
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+        week_dates (List[str]): A list of date strings (in 'YYYY-MM-DD' format) representing the week for which to retrieve ratings.
 
-def get_ratings_of_the_week(session: Session, week_dates: List[str]) -> List[Rating]:
-    query = session.query(
+    Returns:
+        pandas.DataFrame: A DataFrame containing the following columns:
+            - 'location': The location where the dish is served.
+            - 'menu': The name of the dish.
+            - 'menuDate': The date the dish is available.
+            - 'avg_rating': The average rating of the dish, rounded to 2 decimal places.
+            - 'rating_count': The number of ratings for the dish on that date.
+    """
+    query = db_session.query(
         func.avg(Rating.rating).label('avg_rating'),
         func.count(Rating.id).label('rating_count'),
         Dish.location,
@@ -560,7 +444,22 @@ def get_ratings_of_the_week(session: Session, week_dates: List[str]) -> List[Rat
     return pd.DataFrame(result)
 
 def get_top_three_dishes(session: Session, lang, week_dates: List[str]) -> List[Tuple[str, float]]:
-    
+    """
+    Retrieves the top three rated dishes for a given week based on user ratings.
+    The function filters dishes that have ratings in the specified week and are categorized as "Hauptspeise" (main dishes).
+    It calculates the average rating and count of ratings for each dish.
+
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+        lang (str): The language preference for the dish names ('de' for German, other values for English).
+        week_dates (List[str]): A list of date strings (in 'YYYY-MM-DD' format) representing the week to filter dishes.
+
+    Returns:
+        List[dict]: A list of dictionaries containing the top three dishes, with the following keys:
+            - 'dish_name': The name of the dish (in the preferred language).
+            - 'avg_rating': The average rating of the dish, rounded to 2 decimal places.
+            - 'rating_count': The total number of ratings for the dish.
+    """
     # get dishes for the week
     top_dishes = session.query(
         Dish.menu,
@@ -578,7 +477,6 @@ def get_top_three_dishes(session: Session, lang, week_dates: List[str]) -> List[
         ).order_by(func.avg(Rating.rating).desc()
         ).limit(3).all()
     
-        # Format result
     result = [
         {
             'dish_name': dish.menu if lang == 'de' else dish.menuEng,
@@ -589,8 +487,20 @@ def get_top_three_dishes(session: Session, lang, week_dates: List[str]) -> List[
 
     return result
 
-#Get top three mensas of the week (ranked best first) - on y-axis the rating average and on x-axis the location (mensa)
 def get_top_three_mensas(db_session: Session,week_dates: List[str]) -> List[Tuple[str, float]]:
+    """
+    Retrieves the top three rated mensas for a given week based on the average user ratings of main dishes
+
+    Parameters:
+        db_session (Session): The SQLAlchemy session used to query the database.
+        week_dates (List[str]): A list of date strings (in 'YYYY-MM-DD' format) representing the week to filter dishes.
+
+    Returns:
+        List[dict]: A list of dictionaries containing the top three mensas, with the following keys:
+            - 'location': The name of the mensa (location).
+            - 'avg_rating': The average rating of the dishes served at that mensa, rounded to 2 decimal places.
+            - 'rating_count': The total number of ratings for the dishes served at that mensa.
+    """
 
     # get dishes for the week
     top_dishes = db_session.query(
@@ -620,6 +530,20 @@ def get_top_three_mensas(db_session: Session,week_dates: List[str]) -> List[Tupl
 
 
 def get_dishes_and_rating_by_week(db_session: Session, week_dates: List[str]):
+    """
+    Retrieves dishes and their ratings for a specific week.
+
+    Parameters:
+        db_session (Session): The SQLAlchemy session used to query the database.
+        week_dates (List[str]): A list of date strings (in 'YYYY-MM-DD' format) representing the week to filter dishes.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the following columns:
+            - 'menu_id': The unique ID of the dish.
+            - 'menu': The name of the dish.
+            - 'rating': The rating of the dish.
+            - 'location': The location (mensa) where the dish is served.
+    """
     query = db_session.query(
         Dish.menu,
         Dish.id,
@@ -639,35 +563,51 @@ def get_dishes_and_rating_by_week(db_session: Session, week_dates: List[str]):
     ]
     return pd.DataFrame(result)
 
-# Get total number of ratings a user submitted
-def get_total_ratings_by_user(session: Session, username: str) -> int:
-    return session.query(func.count(Rating.id)).filter(Rating.user_name == username).scalar()
+def get_total_ratings_by_user(db_session: Session, username: str) -> int:
+    """
+    Retrieves the total number of ratings submitted by a specific user.
 
-# Get date of first rating of user
-def get_first_rating_date_of_user(session: Session, username: str) -> str:
-    first_rating = session.query(func.min(Rating.timestamp)).filter(Rating.user_name == username).scalar()
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+        username (str): The username of the user whose ratings are to be counted.
+
+    Returns:
+        int: The total count of ratings submitted by the user.
+    """
+    return db_session.query(func.count(Rating.id)).filter(Rating.user_name == username).scalar()
+
+def get_first_rating_date_of_user(db_session: Session, username: str) -> str:
+    """
+    Retrieves the date of the first rating submitted by a specific user.
+
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+        username (str): The username of the user whose first rating date is to be fetched.
+
+    Returns:
+        str: The date of the first rating in 'YYYY-MM-DD' format, or None if no ratings exist.
+    """
+    first_rating = db_session.query(func.min(Rating.timestamp)).filter(Rating.user_name == username).scalar()
     if first_rating:
         return first_rating.strftime('%Y-%m-%d')
     return None
 
-# Get favorite dishes (top 3) of user over entire period
-def get_favorite_dishes_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3) -> List[Tuple[str, float]]:
-    favorite_dishes = session.query(
-        Dish.id,
-        Dish.menu,
-        DishEng.menuEng,
-        func.avg(Rating.rating).label('avg_rating')
-    ).join(Rating, Dish.id == Rating.menu_id
-    ).outerjoin(DishEng, Dish.id == DishEng.menu_id
-    ).filter(Rating.user_name == username
-    ).group_by(Dish.id, Dish.menu, DishEng.menuEng
-    ).order_by(func.avg(Rating.rating).desc()
-    ).limit(limit).all()
+def get_dishes_of_user(db_session: Session, username: str) -> List[dict]:
+    """
+    Retrieves a list of dishes rated by a specific user, along with their ratings.
 
-    return [(dish.menuEng if lang == 'en' and dish.menuEng else dish.menu, round(dish.avg_rating, 2)) for dish in favorite_dishes]
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+        username (str): The username of the user whose rated dishes are to be fetched.
 
-def get_dishes_of_user(session: Session, username: str):
-    rated_dishes = session.query(
+    Returns:
+        list: A list of dictionaries where each dictionary contains the following keys:
+            - 'menu_id': The unique ID of the dish.
+            - 'menu': The name of the dish in the default language.
+            - 'menuEng': The name of the dish in English.
+            - 'rating': The rating given by the user for that dish.
+    """
+    rated_dishes = db_session.query(
         Dish.id,
         Dish.menu,
         DishEng.menuEng,
@@ -682,9 +622,23 @@ def get_dishes_of_user(session: Session, username: str):
 
     return menu_list
 
-# Get favorite mensas (top 3) of user over entire period
-def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en', limit: int = 3) -> List[Tuple[str, float]]:
-    favorite_mensas = session.query(
+def get_favorite_mensas_of_user(db_session: Session, username: str, lang: str = 'en', limit: int = 3) -> List[Tuple[str, float]]:
+    """
+    Retrieves the top favorite locations for a specific user based on their average ratings.
+
+    Parameters:
+        session (Session): The SQLAlchemy session used to query the database.
+        username (str): The username of the user whose favorite mensas are to be fetched.
+        lang (str, optional): The preferred language for the mensa names ('en' for English, default is 'en').
+        limit (int, optional): The maximum number of favorite mensas to retrieve (default is 3).
+
+    Returns:
+        List[Tuple[str, float]]: A list of tuples, each containing:
+            - The name of the mensa (in the preferred language).
+            - The average rating for that mensa (rounded to 2 decimal places).
+    """
+
+    favorite_mensas = db_session.query(
         Dish.location,
         DishEng.locationEng,
         func.avg(Rating.rating).label('avg_rating')
@@ -698,6 +652,21 @@ def get_favorite_mensas_of_user(session: Session, username: str, lang: str = 'en
     return [(mensa.locationEng if lang == 'en' and mensa.locationEng else mensa.location, round(mensa.avg_rating, 2)) for mensa in favorite_mensas]
 
 def get_dishes_history(db_session):
+    """
+    Retrieves the history of dishes from the database and returns it as a DataFrame.
+
+    Parameters:
+        db_session (Session): The SQLAlchemy session used to query the database.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the dish history with the following columns:
+            - All relevant columns from the `DishHistory` table, including `menuDate`.
+
+    Notes:
+        - The function queries the `DishHistory` table to fetch all historical dish records.
+        - After fetching the data, it uses the `convert_dblist_to_df` function to convert the results into a pandas DataFrame.
+        - The `menuDate` column is converted to a pandas `datetime` format for easier date manipulation.
+    """
 
     dishes = db_session.query(DishHistory).all()
     df = convert_dblist_to_df(dishes)
@@ -708,13 +677,25 @@ def get_dishes_history(db_session):
 
 def get_combined_dishes(db_session: Session):
     """
-    Combine all rows from DishHistory and rows from Dish not in DishHistory.
-    Return the result as a pandas DataFrame.
+    Combines all rows from the DishHistory table with rows from the Dish table that are not already in the `DishHistory`.
+    The result is returned as a pandas DataFrame. This is needed for price prediction and for the price development plot.
+
+    Parameters:
+        db_session (Session): The SQLAlchemy session used to query the database.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the combined dishes with the following columns:
+            - 'menu': The name of the dish.
+            - 'menuDate': The date when the dish was served.
+            - 'menuLine': The category or line of the dish (e.g., "Hauptspeise").
+            - 'studentPrice': The price of the dish for students.
+            - 'guestPrice': The price of the dish for guests.
+            - 'icons_clean': Cleaned icons for the dish.
     """
-    # Query to select all rows from DishHistory
+    # Select all rows from DishHistory
     dish_history_query = select(DishHistory.menu, DishHistory.menuDate, DishHistory.menuLine, DishHistory.studentPrice,DishHistory.guestPrice,DishHistory.icons_clean)
 
-    # Query to select rows from Dish not in DishHistory
+    # Select rows from Dish not in DishHistory
     dish_not_in_history_query = select(
         Dish.menu, Dish.menuDate, Dish.menuLine, Dish.studentPrice,Dish.guestPrice,FiltersClean.icons_clean
     ).join(
@@ -733,39 +714,61 @@ def get_combined_dishes(db_session: Session):
         )
     )
 
-    # Combine both queries using UNION
+    # Combine both queries
     combined_query = union(dish_history_query, dish_not_in_history_query)
-
-    # Execute the combined query and fetch all results
     result = db_session.execute(combined_query).fetchall()
 
     # Convert the result to a pandas DataFrame
     df = pd.DataFrame(result, columns=["menu", "menuDate", "menuLine", "studentPrice", "guestPrice","icons_clean"])
     df['menuDate'] = pd.to_datetime(df['menuDate'],format='%Y-%m-%d')
 
-    # in the Dish table, the menuLines "Auswahlgericht" and "Auswahlgericht 2" can be combined
+    # in the Dish table, combine categories that belong together
     df.loc[df['menuLine'] == 'Auswahlgericht vegan 2', 'menuLine'] = 'Auswahlgericht vegan'
     df.loc[df['menuLine'] == 'Auswahlgericht veget. 2', 'menuLine'] = 'Auswahlgericht veget.'
     df.loc[df['menuLine'] == 'Auswahlgericht 2', 'menuLine'] = 'Auswahlgericht'
     df.loc[df['menuLine'] == 'mensaVital vegan 2', 'menuLine'] = 'mensaVital vegan'
     
-    # remove Pizza menuLine. Is this this was a mistake
+    # remove Pizza menuLine as this this was a mistake by the mensa online page
     df = df[df['menuLine'] != "Pizza"]
 
     return df
 
+def get_embedding_cluster(db_session: Session) -> pd.DataFrame:
+    """
+    Retrieves the embedding clusters from the database and converts them into a pandas DataFrame.
 
+    Parameters:
+        db_session (Session): The SQLAlchemy session used to query the database.
 
-
-def get_embedding_cluster(db_session):
+    Returns:
+        pandas.DataFrame: A DataFrame containing the embedding clusters with the following columns:
+            - All relevant columns from the `EmbeddingCluster` table, including the centroid.
+    """
+    # get cluster embeddings
     query = db_session.query(EmbeddingCluster).all()
+
+    # transform to DataFrame
     df = convert_dblist_to_df(query)
-    df['centroid'] = df['centroid'].apply(
-            lambda x: np.array(eval(x)) if isinstance(x, str) else np.array(x)
-        )
+
+    # convert centroid to numpy array
+    df['centroid'] = df['centroid'].apply(lambda x: np.array(eval(x)) if isinstance(x, str) else np.array(x))
+
     return df
 
 def get_dish_vector_for_week(db_session, week_dates):
+    """
+    Retrieves the dish vectors for the main dishes served during a specific week.
+
+    Parameters:
+        db_session (Session): The SQLAlchemy session used to query the database.
+        week_dates (List[str]): A list of dates representing the week for which the dish vectors are to be fetched.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the following columns:
+            - 'menu_id': The unique ID of the dish.
+            - 'embedding': The embedding vector associated with the dish.
+    """
+    # get dish_id and embedding for main dishes
     query = db_session.query(
         Dish.id,
         Embedding.embedding
@@ -774,11 +777,15 @@ def get_dish_vector_for_week(db_session, week_dates):
         ).join(Embedding, Dish.id == Embedding.menu_id
         ).join(Course, Dish.id == Course.menu_id).all()
 
+    # convert to DataFrame
     df = pd.DataFrame(query, columns=["menu_id", "embedding"])
+
+    # convert embedding to numpy array
     df['embedding'] = df['embedding'].apply(lambda x: np.array(eval(x)) if isinstance(x, str) else np.array(x))
     
     return df
 
+# map cluster names from English to German
 cluster_translation_dict = {
     'Asian': 'Asiatisch',
     'Balkan': 'Balkan',
@@ -797,7 +804,24 @@ cluster_translation_dict = {
     'Swabian': 'Schwäbisch'
     }
 
-def get_cluster_similarity(db_session,user_name,lang):
+def get_cluster_similarity(db_session: Session, user_name: str, lang: str) -> pd.DataFrame:
+    """
+    Computes the cosine similarity between a user's vector and the centroids of different embedding clusters.
+    The result is returned as a DataFrame with scaled similarity scores.
+
+    Parameters:
+        db_session (Session): The SQLAlchemy session used to query the database.
+        user_name (str): The username of the user whose vector will be compared to the cluster centroids.
+        lang (str): The language preference ('de' for German, otherwise English).
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the following columns:
+            - 'centroid': The centroid of the cluster.
+            - 'cosine_similarity': The cosine similarity between the user's vector and the cluster centroid.
+            - 'min_max_scaler': The normalized cosine similarity using MinMax scaling.
+            - 'scaled': A scaled similarity score, where values are centered around 0 (scaled between -1 and 1).
+            - 'cluster_name': The name of the cluster (translated to German if lang is 'de').
+    """
 
     # get user vector
     query = get_user_by_username(db_session,user_name)
@@ -819,13 +843,36 @@ def get_cluster_similarity(db_session,user_name,lang):
     # scale cosine similarity
     scaler = MinMaxScaler()
     centroid_df["min_max_scaler"] = scaler.fit_transform(centroid_df.cosine_similarity.values.reshape(-1,1))
-    centroid_df["scaled"] = centroid_df["cosine_similarity"].apply(lambda x: (x - 0.5) / 0.5)
 
+    # scale similarity: similarity of 1 is scaled to one, similarity of 0.5 is 0
+    centroid_df["scaled"] = centroid_df["cosine_similarity"].apply(lambda x: (x - 0.5) / 0.5)
 
     return centroid_df
 
 
-def get_week_recommended_dishes(db_session, week_dates, user_name, selected_lang):
+def get_week_recommended_dishes(db_session: Session, week_dates: str, user_name: str, selected_lang:str) -> pd.DataFrame:
+    """
+    Retrieve the recommended dishes for a specific week based on the user's preferences and the selected language.
+
+    This function queries the dishes available for the given week, excluding any dishes marked as "NA".
+    It joins several related tables (FiltersClean, Recipe, Description, DishEng, Course, Embedding, and PriceClean)
+    to gather additional details about each dish. It then computes the cosine similarity between the user's
+    preferences and the embedding for each dish, if a valid user vector is available.
+
+    Parameters:
+    - db_session: The SQLAlchemy session used to query the database.
+    - week_dates: A list of dates (in 'YYYY-MM-DD' format) representing the week.
+    - user_name: The username of the user for whom recommendations are being generated.
+    - selected_lang: The language for the dish descriptions and other text. Can be either 'de' (German) or 'en' (English).
+
+    Returns:
+    - A Pandas DataFrame containing the recommended dishes for the week with columns:
+      - Dish details: id, menu, menuLine, studentPrice, guestPrice, allergens, additives, location.
+      - Translations based on the selected language: menuLineEng, menuEng, description_en, recipe_en, course_eng.
+      - Additional details: icons_clean, recipe_de, description_de, embedding, course, studentPrice_imputed, guestPrice_imputed.
+      - If a user vector exists, a column `cosine_similarity` will be included, representing the similarity between
+        the user's vector and the dish's embedding.
+    """
 
     # get dishes for the week
     query = db_session.query(Dish).filter(
@@ -852,10 +899,7 @@ def get_week_recommended_dishes(db_session, week_dates, user_name, selected_lang
             Course.course,
             PriceClean.studentPrice_imputed,
             PriceClean.guestPrice_imputed,
-            *( 
-                [DishEng.menuLineEng, DishEng.menuEng, Description.description_en, Recipe.recipe_en, Course.course_eng]
-                if selected_lang == "en" else []
-            )
+            *([DishEng.menuLineEng, DishEng.menuEng, Description.description_en, Recipe.recipe_en, Course.course_eng] if selected_lang == "en" else [])
         )
     )
     # Convert to DataFrame
@@ -871,11 +915,26 @@ def get_week_recommended_dishes(db_session, week_dates, user_name, selected_lang
     return df
 
 def get_weekly_recommendation_dict(db_session, user_name, lang):
-        
+    """
+    Generate a weekly recommendation dictionary for the user, based on their preferences and the selected language.
+
+    This function retrieves recommended dishes for the week and calculates a score for each dish
+    based on cosine similarity between the user's vector and the dish's embedding. The result is formatted into a dictionary
+    where each day contains the top dish recommended for that day and course.
+
+    Parameters:
+    - db_session: The SQLAlchemy session used to query the database.
+    - user_name: The username of the user for whom recommendations are being generated.
+    - lang: The language in which the dish details should be returned. Can be either 'de' (German) or 'en' (English).
+
+    Returns:
+    - A dictionary containing the top recommended dish for each day of the week
+    """
+
     # get dishes for the week and compute user vector with user_name
     df = get_week_recommended_dishes(db_session, get_weekday_dates(), user_name, lang)
 
-    #Format prices
+    # format prices
     df = format_price_column(df, 'studentPrice', 'studentPrice_imputed')
     df = format_price_column(df, 'guestPrice', 'guestPrice_imputed')
 
@@ -883,19 +942,14 @@ def get_weekly_recommendation_dict(db_session, user_name, lang):
     day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     course_order = ['Hauptspeise', 'Beilage', 'Nachspeise']
 
-    df['day_of_week'] = pd.Categorical(
-        pd.to_datetime(df['Dish'].apply(lambda x: x.menuDate)).dt.day_name(),
-        categories=day_order,
-        ordered=True
-    )
-    df['course'] = pd.Categorical(
-        df['course'],
-        categories=course_order,
-        ordered=True
-    )
+    # Add day of week and course as categorical columns
+    df['day_of_week'] = pd.Categorical(pd.to_datetime(df['Dish'].apply(lambda x: x.menuDate)).dt.day_name(),categories=day_order,ordered=True)
 
+    # Add course as categorical column
+    df['course'] = pd.Categorical(df['course'],categories=course_order,ordered=True)
     df.drop(columns=["Dish"], inplace=True)
 
+    # Translate day of week to German if selected
     day_translation_dict = {
         'Monday': 'Montag',
         'Tuesday': 'Dienstag',
@@ -908,25 +962,16 @@ def get_weekly_recommendation_dict(db_session, user_name, lang):
         df['day_of_week'] = df['day_of_week'].apply(lambda x: day_translation_dict[x])
 
     # Get top dish for each day and course
-    top_dishes = (
-        df.sort_values('cosine_similarity', ascending=False)  # Sort by similarity first
-        .groupby(["day_of_week", "course"], group_keys=False)  # Group without adding levels
-        .head(1)  # Take top dish per group
-    )
+    top_dishes = (df.sort_values('cosine_similarity', ascending=False).groupby(["day_of_week", "course"], group_keys=False).head(1))
     
-    # Calculate taste_score as cosine_similarity * 100, rounded to nearest integer
+    # Calculate cosine similarity and scale to 0-100
     top_dishes['taste_score'] = (top_dishes['cosine_similarity'] * 100).round(0).astype(int)
-
 
     # Organize the final result into a dictionary by day
     top_dishes.sort_values(["day_of_week", "course"], inplace=True)
 
-
-    grouped_menu_data = {
-                    day: top_dishes[top_dishes["day_of_week"] == day]
-                    .to_dict(orient="records")
-                    for day in top_dishes["day_of_week"].unique()
-                }
+    # Group the data by day of the week
+    grouped_menu_data = {day: top_dishes[top_dishes["day_of_week"] == day].to_dict(orient="records") for day in top_dishes["day_of_week"].unique()}
 
     return grouped_menu_data
 
@@ -941,14 +986,14 @@ def get_prevornext_weekday_dates(start_date: str, direction: str) -> list:
     Returns:
     - list: List of week dates (Monday to Friday) as strings in "YYYY-MM-DD" format.
     """
-    # Parse the input date
+    # based on input start date
     current_monday = datetime.strptime(start_date, "%Y-%m-%d")
     
-    # Determine the offset based on the direction
+    # get the offset based on the direction. If user clicks on "back", get week dates for the previous week
     if direction == "back":
-        offset = -7  # Previous week
+        offset = -7
     else:
-        offset = 7  # Next week
+        offset = 7
     
     # Calculate the Monday of the target week
     target_monday = current_monday + timedelta(days=offset)
@@ -958,24 +1003,46 @@ def get_prevornext_weekday_dates(start_date: str, direction: str) -> list:
     
     return week_dates
 
-def get_weekday_dates():
-    today = datetime.today()
-    start_of_week = today - timedelta(days=today.weekday())  # Get Monday of the current week
+def get_weekday_dates() -> list:
+    """
+    Get the dates for the current week's weekdays (Monday to Friday).
 
-    weekdays = [(start_of_week + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]  # Monday to Friday
+    This function calculates the dates of the current week starting from Monday 
+    and returns them as a list of strings in the format "YYYY-MM-DD". The list 
+    includes dates for Monday to Friday.
+
+    Returns:
+    - A list of strings
+    """
+
+    today = datetime.today()
+    start_of_week = today - timedelta(days=today.weekday())
+
+    weekdays = [(start_of_week + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(5)]
     return weekdays
 
 
-def get_current_month_spending(session: Session, user_name , lang='en'):
-    
-    current_year = datetime.utcnow().year
-    current_month = datetime.utcnow().month
+def get_current_month_spending(session: Session, user_name:str, lang='en') -> pd.DataFrame:
+    """
+    Calculate the total spending for the current month by the user for different categories and return it as a DataFrame.
+
+    Parameters:
+    - session (Session): The SQLAlchemy session object for database interaction.
+    - user_name (str): The username of the user for whom the spending is calculated.
+    - lang (str): The language code for the month name ('en' or 'de'). Default is 'en'.
+
+    Returns:
+    - pd.DataFrame: A DataFrame containing the total spending for the current month
+    """
+
+    current_year = datetime.now().year
+    current_month = datetime.now().month
     current_month_name = get_month_name(current_month, lang)
 
     result = session.query(
         func.sum(Dish.studentPrice).label('total_student_spending'),
         func.sum(Dish.guestPrice).label('total_guest_spending'),
-        func.sum(Dish.pupilPrice).label('total_pupil_spending')
+        func.sum(Dish.pupilPrice).label('total_pupil_spending'),
     ).select_from(Rating).join(
         Dish, Rating.menu_id == Dish.id
     ).filter(
@@ -992,18 +1059,30 @@ def get_current_month_spending(session: Session, user_name , lang='en'):
         'month_name': current_month_name,
         'student': result.total_student_spending if result and result.total_student_spending else 0.0,
         'guest': result.total_guest_spending if result and result.total_guest_spending else 0.0,
-        'pupil': result.total_pupil_spending if result and result.total_pupil_spending else 0.0
+        'pupil': result.total_pupil_spending if result and result.total_pupil_spending else 0.0,
     }])  
         
     return df
 
 
 
-def get_past_6_month_spending(session: Session, user_name, lang='en'):
-    current_year = datetime.utcnow().year
-    current_month = datetime.utcnow().month
+def get_past_6_month_spending(session: Session, user_name: str, lang='en') -> pd.DataFrame:
+    """
+    Calculate the total spending for the past 6 months by the user and return it as a DataFrame.
 
-    # List to store data for the past 6 months
+    Parameters:
+    - session (Session): The SQLAlchemy session object for database interaction.
+    - user_name (str): The username of the user for whom the spending is calculated.
+    - lang (str): The language code for the month name ('en' or 'de'). Default is 'en'.
+
+    Returns:
+    - pd.DataFrame: A DataFrame containing the total spending for each of the past 6 months
+    """
+
+    current_year = datetime.now().year
+    current_month = datetime.now().month
+
+    # List to store data
     month_data = []
 
     for i in [0, 1, 2, 3, 4, 5]:
@@ -1022,10 +1101,10 @@ def get_past_6_month_spending(session: Session, user_name, lang='en'):
             Rating.user_name == user_name,
             Rating.on_rating_page == False,
             extract('year', Rating.timestamp) == year_offset,
-            extract('month', Rating.timestamp) == month_offset  # Adjust month for 1-12 range
+            extract('month', Rating.timestamp) == month_offset
         ).one_or_none()
 
-        # Append the data for the current month
+        # Append data for current month
         month_data.append({
             'year': year_offset,
             'month': month_offset,
@@ -1035,15 +1114,27 @@ def get_past_6_month_spending(session: Session, user_name, lang='en'):
             'pupil': result.total_pupil_spending if result and result.total_pupil_spending else 0.0
         })
 
-    #Create df
-    df = pd.DataFrame(month_data)
+    return pd.DataFrame(month_data)
 
-    return df
     
-def get_cluster_similarity_for_week(db_session, week_dates,lang):
+def get_cluster_similarity_for_week(db_session: Session, week_dates: List[str], lang: str) -> pd.DataFrame:
+    """
+    Compute the cluster similarity for dishes served during the selected week and return a DataFrame
+    with the count of dishes for each cluster.
+
+    Parameters:
+    - db_session (Session): The SQLAlchemy session object for interacting with the database.
+    - week_dates (list): List of date strings for the week (['2025-01-26', '2025-01-27', ...]).
+    - lang (str): The language code for cluster names
+
+    Returns:
+    - pd.DataFrame: A DataFrame containing the cluster names and the number of dishes assigned to each cluster.
+    """
+
     # Get centroid df
     centroid_df = get_embedding_cluster(db_session)
 
+    # remove German and Other clusters because we stick to schwäbisch and bayrisch which are part of the German cluster
     if lang == 'de':
         centroid_df['cluster_name'] = centroid_df['cluster_name'].apply(lambda x: cluster_translation_dict[x])
         centroid_df = centroid_df[~centroid_df['cluster_name'].isin(['Deutsch','Andere'])]
@@ -1060,7 +1151,7 @@ def get_cluster_similarity_for_week(db_session, week_dates,lang):
     cluster_names = []
     max_similarities = []
 
-    # Iterate over each row in df and compute cosine similarity. Safe the cluster with the largest similarity
+    # Iterate over each row in df and compute cosine similarity
     for _, row in df.iterrows():
         # Get the embedding for the current row
         dish_vector = row['embedding']
@@ -1071,10 +1162,9 @@ def get_cluster_similarity_for_week(db_session, week_dates,lang):
 
         # Get the cluster_name with the highest similarity
         max_idx = centroid_df['cosine_similarity'].idxmax()
-        # = centroid_df.loc[max_idx, 'cluster_name']
         max_similarity = centroid_df.loc[max_idx, 'cosine_similarity']
 
-        # If the max similarity is less than 0.75, assign 'other' as the cluster
+        # If the max similarity is less than 0.75, assign 'other' as the cluster. So only classify into category if similarity is larger than 0.75
         if max_similarity < 0.75:
             cluster_name = 'Other' if lang == 'en' else 'Andere'
         else:
@@ -1087,10 +1177,7 @@ def get_cluster_similarity_for_week(db_session, week_dates,lang):
     df['cluster_name'] = cluster_names
     df['max_similarity'] = max_similarities
 
-
-
     # get number of meals per cluster
     cluster_counts = df.groupby('cluster_name').size().reset_index(name='count')
-
 
     return cluster_counts
