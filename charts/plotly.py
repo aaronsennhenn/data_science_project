@@ -44,7 +44,7 @@ def format_labels_mensas(labels: list) -> list:
         return '<br>'.join([' '.join(words[i:i+n]) for i in range(0, len(words), n)])
     return [insert_br_every_n_words(label) for label in labels]
 
-def generate_price_chart(db_session, selected_category, selected_price_type, show_icons):
+def generate_price_chart(db_session, selected_category, selected_price_type, show_icons,lang):
     """
     Generates an interactive price chart for menu items using Plotly, based on the selected category 
     and price type. Optionally includes icons as a grouping factor.
@@ -68,6 +68,29 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     df = get_combined_dishes(db_session)
 
     df = df[(df["studentPrice"] > 0) & (df["guestPrice"] > 0) & (df["icons_clean"] != "nan")]
+
+    menuLine_translation_dict = {"Auswahlgericht":"Selection Dish",
+                                 "Beilagen vorport.":"Side Dishes preportioned",
+                                 "Tagesmenü vegetarisch":"Vegetarian Daily Menu",
+                                 "Tagesmenü vegan":"Vegan Daily Menu",
+                                 "Tagesmenü":"Daily Menu",
+                                 "Auswahlgericht vegan":"Vegan Selection Dish",
+                                 "Dessert vorport.":"Dessert preportioned",
+                                 "Angebot d. Tages vegan":"Vegan Offer Of the Day",
+                                 "Salat-/ Gemüsebuffet 100g":"Salad/Vegetable Buffet 100g",
+                                 "Auswahlgericht veget.":"Vegetarian Selection Dish",
+                                 "Angebot des Tages":"Offer Of The Day",
+                                 "mensaVital vegan":"MensaVital Vegan",
+                                 "Beilagen SB":"Side Dishes Self-Service",
+                                 "Dessert SB":"Dessert Self-Service",
+                                 "Angebot d. Tages veget.":"Vegetarian Offer Of the Day",
+                                 "mensaVital":"MensaVital",
+                                 "mensaVital vegetarisch":"MensaVital Vegetarian",
+                                 "Aktionsmenü":"Special Menu"}
+    
+    if lang == 'en':
+        df['menuLine'] = df['menuLine'].map(menuLine_translation_dict)
+
 
     # Default initial values
     if selected_category == "initial":

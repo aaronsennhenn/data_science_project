@@ -466,7 +466,7 @@ def analysis():
         initial_category = "initial"
         initial_price_type = 'studentPrice'
         show_icons_initial = True
-        plot_html,categories = generate_price_chart(db_session,initial_category,initial_price_type,show_icons_initial)
+        plot_html,categories = generate_price_chart(db_session,initial_category,initial_price_type,show_icons_initial,lang)
         
         # Create average rating plot per week
         week_dates = get_weekday_dates()
@@ -494,6 +494,7 @@ def analysis():
 # This route updates the price plot based on the selected category, price type and icon selection.
 @app.route('/update_price_plot', methods=['POST'])
 def update_price_plot():
+    lang = session.get('language', 'en')
     selected_category = request.json.get('category')
     selected_price = request.json.get('price')
     selected_icon = request.json.get('icon')
@@ -501,7 +502,7 @@ def update_price_plot():
     selected_icon = {"true": True, "false": False}.get(selected_icon.lower())
 
     with Session() as db_session:
-        plot_html,_ = generate_price_chart(db_session,selected_category,selected_price,selected_icon)
+        plot_html,_ = generate_price_chart(db_session,selected_category,selected_price,selected_icon,lang)
 
     return jsonify({'plot': plot_html})
 
