@@ -110,7 +110,7 @@
             </p>
             <div class="mt-6 text-center">
                 <a href="{% if username %}{{ url_for('user_page') }}{% else %}{{ url_for('login') }}{% endif %}" 
-                   class=" px-4 py-2 bg-indigo-500 text-white text-base font-medium rounded-lg shadow-md hover:bg-indigo-700 transition">
+                   class=" px-4 py-2 bg-indigo-500 text-white rounded-lg shadow-md hover:bg-indigo-700 transition">
                    {% if session.get('language') == 'de' %}
                         {% if username %}
                             Mein wöchentlicher Speiseplan
@@ -132,9 +132,9 @@
     <span class="flex-grow border-t border-gray-400"></span>
     <span class="mx-4">
         {% if session.get('language') == 'de' %}
-            Wählen Sie Ihren Standort
+            Standorte
         {% else %}
-            Choose Your Location
+            Locations
         {% endif %}
     </span>
     <span class="flex-grow border-t border-gray-400"></span>
