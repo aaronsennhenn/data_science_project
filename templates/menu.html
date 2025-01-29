@@ -554,17 +554,25 @@
                             <div class="popup" id="recipe-popup-{{ dish.id }}">
                                 <div class="overlay"></div>
                                 <div class="content">
+                                <!-- Disclaimer -->
+                                <div class="text-gray-600 italic mb-4 text-center">
+                                {% if session.get('language') == 'de' %}
+                                    KI-Generiertes Rezept zum Nachkochen. Zutaten des Rezepts entsprechen NICHT den tatsächlichen Zutaten.
+                                {% else %}
+                                    AI-Generated recipe for home cooks. The ingredients of the recipe do NOT match the actual ingredients.
+                                {% endif %}
+                                </div>
                                     <div class="close-btn" onclick="toggleRecipePopup({{ dish.id }})">&times;</div>
                                     {% if session.get('language') == 'de' and dish.recipe_de %}
                                         {% set recipe_parts = dish.recipe_de.split('Zutaten:') %}
                                         {% if recipe_parts|length > 1 %}
                                             <div class="space-y-6">
-                                                <div class="text-gray-800 font-medium mb-1">{{ recipe_parts[0] }}</div>
+                                                <div class="text-gray-800  mb-1">{{ recipe_parts[0] }}</div>
                                                 {% set ingredients_instructions = recipe_parts[1].split('Anleitung:') %}
                                                 {% if ingredients_instructions|length > 1 %}
                                                     <div class="mt-4">
                                                         <h5 class="font-medium mb-1">Zutaten:</h5>
-                                                        <ul class="list-disc pl-5 text-gray-800 font-medium mb-1">
+                                                        <ul class="list-disc pl-5 text-gray-800  mb-1">
                                                             {% for line in ingredients_instructions[0].split('\n') %}
                                                                 {% if line.strip().startswith('-') %}
                                                                     <li>{{ line.strip('- ') }}</li>
@@ -574,7 +582,7 @@
                                                     </div>
                                                     <div class="mt-4">
                                                         <h5 class="font-medium mb-1">Anleitung:</h5>
-                                                        <ol class="list-decimal pl-5 text-gray-800 font-medium mb-1">
+                                                        <ol class="list-decimal pl-5 text-gray-800  mb-1">
                                                             {% for line in ingredients_instructions[1].split('\n') %}
                                                                 {% if line.strip() and line.strip()[0].isdigit() %}
                                                                     <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
@@ -591,12 +599,12 @@
                                         {% set recipe_parts = dish.recipe_en.split('Ingredients:') %}
                                         {% if recipe_parts|length > 1 %}
                                             <div class="space-y-6">
-                                                <div class="text-gray-800 font-medium mb-1">{{ recipe_parts[0] }}</div>
+                                                <div class="text-gray-800  mb-1">{{ recipe_parts[0] }}</div>
                                                 {% set ingredients_instructions = recipe_parts[1].split('Instructions:') %}
                                                 {% if ingredients_instructions|length > 1 %}
                                                     <div class="mt-4">
                                                         <h5 class="font-medium mb-1">Ingredients:</h5>
-                                                        <ul class="list-disc pl-5 text-gray-800 font-medium mb-1">
+                                                        <ul class="list-disc pl-5 text-gray-800  mb-1">
                                                             {% for line in ingredients_instructions[0].split('\n') %}
                                                                 {% if line.strip().startswith('-') %}
                                                                     <li>{{ line.strip('- ') }}</li>
@@ -606,7 +614,7 @@
                                                     </div>
                                                     <div class="mt-4">
                                                         <h5 class="font-medium mb-1">Instructions:</h5>
-                                                        <ol class="list-decimal pl-5 text-gray-800 font-medium mb-1">
+                                                        <ol class="list-decimal pl-5 text-gray-800  mb-1">
                                                             {% for line in ingredients_instructions[1].split('\n') %}
                                                                 {% if line.strip() and line.strip()[0].isdigit() %}
                                                                     <li>{{ line.split('. ', 1)[1] if '. ' in line else line }}</li>
