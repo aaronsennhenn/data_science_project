@@ -1,4 +1,4 @@
-# for working
+# WORKING SCRIPT
 
 # allow port
 sudo ufw allow 1200
@@ -6,18 +6,16 @@ sudo ufw allow 1200
 # disallow port
 sudo ufw delete allow 1200
 
-
 # start service datascienceproject.service
 sudo systemctl start datascienceproject 
 
-#alternative
+# alternative
 ./update.sh
 
 # create symlink for nginx
 sudo ln -s /etc/nginx/sites-available/datascienceproject /etc/nginx/sites-enabled
 
-
-# Making a change
+# making a change
 # 1. 
 git pull
 
@@ -25,4 +23,3 @@ git pull
 ./update.sh
 
 # check if no errors
-

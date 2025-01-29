@@ -108,10 +108,12 @@
         {% if username %}
             <div class="rate-dishes-section">
                 <div class="content bg-white rounded-xl shadow-sm p-4 border border-gray-100 grid grid-cols-1 md:grid-cols-3 gap-1">
-                    <!-- Left Column -->
+                    <!-- Left Column -->                    
                     <div class="col-span-2">
+                        <!-- Dish -->
                         <p id="random-dish-name" class="card-title menu-name text-xl font-semibold text-gray-800 text-left mb-2">{{ random_dish[1] }}</p>
                         <br>
+                        <!-- Prices -->
                         <div class="text-sm text-gray-800">
                             {% if session.get('language') == 'de' %}
                                 Studentenpreis:
@@ -127,7 +129,6 @@
                             {% endif %}
                             {{guestPrice_formatted}} €
                         </div>
-                        
                         <!-- Ratings -->
                         <div class="rating mt-4"> 
                             <input type="radio" id="star5_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="5" />
@@ -141,7 +142,7 @@
                             <input type="radio" id="star1_{{ random_dish[0] }}" name="rating_{{ random_dish[0] }}" value="1" />
                             <label for="star1_{{ random_dish[0] }}">&#9733;</label>
                         </div>
-                        
+                        <!-- Submit -->
                         <div>
                         <button class="submit-rating mt-2" id="submit-rating" data-id="{{ random_dish[0] }}">
                             {% if session.get('language') == 'de' %}
@@ -150,7 +151,7 @@
                                 Submit Rating
                             {% endif %}
                         </button>
-                        
+                        <!-- Success message (Initially hidden) -->
                         <p id="rating-feedback" class="text-sm text-green-600 hidden">
                             {% if session.get('language') == 'de' %}
                                 Bewertung erhalten, klicken Sie auf weiter!
@@ -158,9 +159,8 @@
                                 Rating received, click next!
                             {% endif %}
                         </p>
-                        </div>
-                        
-                        
+                        </div>                        
+                        <!-- Rating Count -->
                         <br>
                         <div class="rating-count-container mt-4">    
                             {% if session.get('language') == 'de' %}
@@ -179,7 +179,7 @@
                                 {% endif %}
                             {% endif %}
                         </div>
-
+                        <!-- Success message (Initially hidden) -->
                         <p class="rating-feedback mt-2 text-sm text-green-600 hidden">
                             {% if session.get('language') == 'de' %}
                                 Bewertung erhalten!
@@ -191,6 +191,7 @@
 
                     <!-- Right Column -->
                     <div class="flex items-end justify-end col-span-1 h-full">
+                        <!-- Next button -->
                         <button class="submit-rating mt-2 w-full md:w-auto flex items-center justify-center px-6 py-3 text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition duration-300 ease-in-out" onclick="location.href='/rating';" title="{% if session.get('language') == 'de' %}Weiter{% else %}Next{% endif %}">
                             {% if session.get('language') == 'de' %}
                                 Weiter

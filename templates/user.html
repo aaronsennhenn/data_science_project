@@ -91,8 +91,7 @@
         </div>
     </div>
 
-
-    <!-- Main Content -->
+<!-- Main Content -->
 <main class="flex-grow flex flex-col items-center px-4 py-2">
     <div class="flex flex-col space-y-1 p-6 w-full max-w-12xl">
         <h1 class="text-2xl font-bold text-gray-900 mb-2 text-center">{% if session.get('language') == 'de' %}Account Analyse{% else %}Account Analysis{% endif %}</h1>
@@ -100,7 +99,7 @@
     </div> 
 
     <section class="mb-6 w-full text-sm">
-    <!-- Dropdown -->
+    <!-- Select status -->
     <div class="text-gray-900">
         <form method="POST" action="{{ url_for('user_page') }}">
             <div class="mb-2 text-left" style="width: 16rem;">
@@ -138,7 +137,6 @@
                         <div class="header">{{ day }}</div>
                     {% endfor %}
                 </div>
-
                 <!-- German -->
                 {% set language = session.get('language') %}
                 {% if language == "de" %}
@@ -285,25 +283,29 @@
 
 </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 py-3 px-8 relative z-10">
-        <div class="max-w-6xl mx-auto text-center text-gray-800">
-            &copy; 2024 MENSA APP. All rights reserved.
-        </div>
-    </footer>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script>
-        const menuToggle = document.getElementById('menu-toggle');
-        const closeMenu = document.getElementById('close-menu');
-        const sidebar = document.getElementById('sidebar');
+<!-- Footer -->
+<footer class="bg-white border-t border-gray-200 py-3 px-8 relative z-10">
+    <div class="max-w-6xl mx-auto text-center text-gray-800">
+        &copy; 2024 MENSA APP. All rights reserved.
+    </div>
+</footer>
 
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('translate-x-full');
-        });
+<!-- Scripts -->
+<!-- Menu Toggle -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const closeMenu = document.getElementById('close-menu');
+    const sidebar = document.getElementById('sidebar');
 
-        closeMenu.addEventListener('click', () => {
-            sidebar.classList.add('translate-x-full');
-        });
-    </script>  
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('translate-x-full');
+    });
+
+    closeMenu.addEventListener('click', () => {
+        sidebar.classList.add('translate-x-full');
+    });
+</script>  
+
 </body>
 </html>

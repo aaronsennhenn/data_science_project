@@ -11,7 +11,6 @@
     <link href="{{ url_for('static', filename='css/menu.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="{{ url_for('static', filename='js/menu.js') }}" defer></script>
-
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-50">
@@ -110,7 +109,9 @@
                 Choose your menu based on your preferences! 
             {% endif %}
         </h2>
+        <!-- Selection form -->
         <form action="{{ url_for('menu') }}" method="POST" class="flex flex-wrap gap-2" id="filter-form">
+            <!-- Select by mensa -->
             <div class="flex-1">
                 <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">
                     {% if session.get('language') == 'de' %}
@@ -132,7 +133,7 @@
                     {% endfor %}
                 </select>
             </div>
-
+             <!-- Select by date -->
             <div class="flex-1">
                 <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">
                     {% if session.get('language') == 'de' %}
@@ -143,6 +144,7 @@
                 </h3>
                 <input type="date" id="date_selector" name="selected_date" class="dropdown-style date-input" value="{{ selected_date }}" min="{{ available_dates[0] }}" max="{{ available_dates[-1] }}" />
             </div>
+             <!-- Select by diet -->
             <div class="flex-1">
                 <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">
                     {% if session.get('language') == 'de' %}
@@ -169,8 +171,8 @@
                     <input type="checkbox" id="meat_pork" name="selected_diet_meat" value="pork" />
                     <label for="meat_pork">{% if session.get('language') == 'de' %}Schwein{% else %}Pork{% endif %}</label>
                 </div>
-                
-            </div>       
+            </div>
+             <!-- Select by price type -->       
             <div class="flex-1">
                 <h3 class="text-sm text-gray-500 mb-2" style="font-size: 1.0em;">
                     {% if session.get('language') == 'de' %}
@@ -210,7 +212,6 @@
                         {% endif %}
                     </span>
                 </div>
-
                 <!-- Price Filter Switch -->
                 <div class="switch-item">
                     <label class="switch">
@@ -224,8 +225,7 @@
                             Price
                         {% endif %}
                     </span>
-                </div>
-        
+                </div>        
                 <!-- Rating Filter Switch -->
                 <div class="switch-item">
                     <label class="switch">
@@ -240,7 +240,6 @@
                         {% endif %}
                     </span>
                 </div>
-
                 <!-- Number of Ratings Filter Switch -->
                 <div class="switch-item">
                     <label class="switch">
@@ -256,8 +255,7 @@
                     </span>
                 </div>
             </div>
-            
-            
+             <!-- Submit selection -->
             <div class="w-full">
                 <button type="submit" class="bg-violet-500 text-white px-4 py-2 rounded-md shadow hover:bg-violet-600 transition">
                 {% if session.get('language') == 'de' %}
@@ -270,9 +268,7 @@
         </form>
     </div>
 
-
-
-<!-- Results section -->
+<!-- Result section -->
 <div class="container mt-8 w-full">
     {% if no_results %}
     <h3 class="text-sm text-center font-bold text-gray-900 mb-2" style="font-size: 1.0em;">
@@ -284,7 +280,7 @@
     </h3>
     {% else %}
     <div class="grid grid-cols-3 gap-4">
-        <!-- Main dish -->
+        <!-- Main dish section -->
         <div>
             <h2 class="text-xl font-bold text-[#6366F1] text-center mt-4 mb-2">
                 {% if session.get('language') == 'de' %}Hauptspeisen{% else %}Main Dishes{% endif %}
@@ -316,8 +312,7 @@
                             </h3>
                             {% else %}
                             <div class="flex-grow"></div>
-                            {% endif %}
-                        
+                            {% endif %}                        
                             <!-- Average Rating and Count -->
                             <div class="p-2 bg-gray-200 text-gray-800 rounded">
                                 <span>
@@ -341,7 +336,7 @@
                                 {% endif %}
                             </div>
                         </div>
-                        
+                        <!-- Menu category -->
                         <h3 class="text-lg font-bold text-left">
                             {% if session.get('language') == 'de' %}
                             {{ dish.menuLine }}
@@ -349,6 +344,7 @@
                             {{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}
                             {% endif %}
                         </h3>
+                        <!-- Dish -->
                         <h5 class="text-base font-bold text-left">
                             {% if session.get('language') == 'de' %}
                             {{ dish.menu }}
@@ -356,6 +352,7 @@
                             {{ dish.menuEng if dish.menuEng else dish.menu }}
                             {% endif %}
                         </h5>
+                        <!-- Prices -->
                         <div class="text-sm text-gray-800">
                             {% if selected_price == 'studentPrice'%}
                             <div>
@@ -388,6 +385,7 @@
                             </div>
                             {% endif %}
                         </div>
+                        <!-- Icons -->
                         <div class="flex gap-2 mb-1">
                             {% if 'fish' in dish.icons %}
                             <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}">
@@ -495,7 +493,6 @@
                                 {% endif %}
                             </p>
                         </div>
-                       
                         
                         <div class="flex items-center justify-between gap-2">
                             <!-- Ratings -->
@@ -628,12 +625,12 @@
                                 </div>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
             </div>
             {% endfor %}
             {% else %}
+            <!-- Message if no dish is available -->
             <p class="text-center text-gray-800">
                 {% if session.get('language') == 'de' %}
                 Keine Hauptspeise verfügbar für diese Auswahl
@@ -643,7 +640,7 @@
             </p>
             {% endif %}
         </div>
-        <!-- Side Dish -->
+        <!-- Side Dish Section -->
         <div>
             <h2 class="text-xl font-bold text-[#6366F1] text-center mt-4 mb-1">
                 {% if session.get('language') == 'de' %}Beilagen{% else %}Side Dishes{% endif %}
@@ -701,6 +698,7 @@
                                 {% endif %}
                             </div>
                         </div>
+                        <!-- Menu category -->
                         <h3 class="text-lg font-bold text-left">
                             {% if session.get('language') == 'de' %}
                             {{ dish.menuLine }}
@@ -708,6 +706,7 @@
                             {{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}
                             {% endif %}
                         </h3>
+                        <!-- Dish -->
                         <h5 class="text-base font-bold text-left">
                             {% if session.get('language') == 'de' %}
                             {{ dish.menu }}
@@ -715,6 +714,7 @@
                             {{ dish.menuEng if dish.menuEng else dish.menu }}
                             {% endif %}
                         </h5>
+                        <!-- Prices -->
                         <div class="text-sm text-gray-800">
                             {% if selected_price == 'studentPrice'%}
                             <div>
@@ -747,6 +747,7 @@
                             </div>
                             {% endif %}
                         </div>
+                        <!-- Icons -->
                         <div class="flex gap-2 mb-1">
                             {% if 'fish' in dish.icons %}
                             <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}">
@@ -880,22 +881,22 @@
                         </p>
                         </div>
 
-                    <div class="flex gap-2 mb-1">
-                        <!-- Submit Rating Button -->
-                        <button class="submit-rating" id="submit-rating-{{ dish.id }}" data-id="{{ dish.id }}">
-                            {% if session.get('language') == 'de' %}
-                            Bewertung senden
-                            {% else %}
-                            Submit Rating
-                            {% endif %}
-                        </button>
-                    </div>
-                    
+                        <div class="flex gap-2 mb-1">
+                            <!-- Submit Rating Button -->
+                            <button class="submit-rating" id="submit-rating-{{ dish.id }}" data-id="{{ dish.id }}">
+                                {% if session.get('language') == 'de' %}
+                                Bewertung senden
+                                {% else %}
+                                Submit Rating
+                                {% endif %}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
             {% endfor %}
             {% else %}
+            <!-- Message if no dish is available -->
             <p class="text-center text-gray-800">
                 {% if session.get('language') == 'de' %}
                 Keine Beilage verfügbar für diese Auswahl
@@ -906,7 +907,7 @@
             {% endif %}
         </div>
 
-        <!-- Dessert -->
+        <!-- Dessert Section-->
         <div>
             <h2 class="text-xl font-bold text-[#6366F1] text-center mt-4 mb-1">
                 {% if session.get('language') == 'de' %}Nachspeisen{% else %}Desserts{% endif %}
@@ -964,6 +965,7 @@
                                         {% endif %}
                                     </div>
                                 </div>  
+                                 <!-- Menu category -->
                                 <h3 class="text-lg font-bold text-left">
                                     {% if session.get('language') == 'de' %}
                                         {{ dish.menuLine }}
@@ -971,6 +973,7 @@
                                         {{ dish.menuLineEng if dish.menuLineEng else dish.menuLine }}
                                     {% endif %}
                                 </h3>
+                                 <!-- Dish -->
                                 <h5 class="text-base font-bold text-left">
                                     {% if session.get('language') == 'de' %}
                                         {{ dish.menu }}
@@ -978,7 +981,7 @@
                                         {{ dish.menuEng if dish.menuEng else dish.menu }}
                                     {% endif %}
                                 </h5>                                
-                                <!-- show either student or guest price -->                    
+                                <!-- Prices -->                    
                                 <div class="text-sm text-gray-800">
                                     {% if selected_price == 'studentPrice'%}
                                     <div>
@@ -1010,9 +1013,8 @@
                                         {% endif %}
                                     </div>
                                     {% endif %}
-                                </div>
-                                                                             
-                                <!-- Icons on selected meats-->
+                                </div>                                         
+                                <!-- Icons-->
                                 <div class="flex gap-2 mb-1">
                                     {% if 'fish' in dish.icons %}
                                         <span class="icon-tooltip" data-tooltip="{% if session.get('language') == 'de' %}Fisch{% else %}Fish{% endif %}">
@@ -1162,6 +1164,7 @@
                     </div>
                 {% endfor %}
             {% else %}
+                <!-- Message if no dish is available -->
                 <p class="text-center text-gray-800">
                     {% if session.get('language') == 'de' %}
                         Kein Dessert verfügbar für diese Auswahl
@@ -1175,11 +1178,14 @@
     {% endif %}
 </div>               
 </main>
+
 <footer class="bg-white border-t border-gray-200 py-3 px-8 relative z-10">
     <div class="max-w-6xl mx-auto text-center text-gray-800">
         &copy; 2024 MENSA APP. All rights reserved.
     </div>
 </footer>
+
+<!-- Scripts -->
 <script>
     const menuToggle = document.getElementById('menu-toggle');
     const closeMenu = document.getElementById('close-menu');

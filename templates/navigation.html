@@ -102,6 +102,7 @@
             {% endif %}
         </h1>
         <div class="w-full">
+            <!-- Preliminary messages -->
             <p class="text-sm text-gray-800 mb-2">
             {% if session.get('language') == 'de' %}
                 Wir sind eine engagierte Gruppe von Studenten, die eine Leidenschaft für gutes Essen teilen und den Wunsch haben, das Essenserlebnis für Studenten in Tübingen zu verbessern.
@@ -117,8 +118,9 @@
                 The language can be switched between German and English at any time.  
             {% endif %}
             </p>
+            <!-- Explanations of each page -->   
             <h2 class="text-xl font-semibold text-gray-800 mb-2 text-center">{% if session.get('language') == 'de' %}Seitenübersicht{% else %}Page Overview{% endif %}</h2>
-                       
+            <!-- Home page -->           
             <div class="mb-2 grid grid-cols-12 gap-2 items-center">
                 <div class="col-span-1 flex justify-center items-center">
                     <a href="/" class="nav-link home-link">
@@ -138,11 +140,11 @@
                     </p>
                 </div>
             </div>
-            
+            <!-- Menu page -->   
             <div class="mb-2 grid grid-cols-12 gap-2 items-center">
                 <div class="col-span-1 flex justify-center items-center">
                     <a href="/menu"  class="nav-link menu-link">
-                        <img src="{{ url_for('static', filename='images/menu.png') }}" alt="Home Icon" class="w-16 h-16">
+                        <img src="{{ url_for('static', filename='images/menu.png') }}" alt="Menu Icon" class="w-16 h-16">
                     </a>
                 </div>
                 <div class="col-span-11">
@@ -164,7 +166,7 @@
                     </p>
                 </div>
             </div>
-
+            <!-- Analysis page --> 
             <div class="mb-2 grid grid-cols-12 gap-2 items-center">
                 <div class="col-span-1 flex justify-center items-center">
                     <a href="/analysis"  class="nav-link analysis-link">
@@ -184,7 +186,7 @@
                     </p>
                 </div>
             </div>
-
+            <!-- Rating page --> 
             <div class="mb-2 grid grid-cols-12 gap-2 items-center">
                 <div class="col-span-1 flex justify-center items-center">
                     <a href="/rating"  class="nav-link rating-link">
@@ -204,7 +206,7 @@
                     </p>
                 </div>
             </div>
-            
+            <!-- Navigation page --> 
             <div class="mb-2 grid grid-cols-12 gap-2 items-center">
                 <div class="col-span-1 flex justify-center items-center">
                     <a href="/navigation"  class="nav-link navigation-link">
@@ -224,7 +226,7 @@
                     </p>
                 </div>
             </div>
-            
+            <!-- Login page --> 
             <div class="mb-2 grid grid-cols-12 gap-2 items-center">
                 <div class="col-span-1 flex justify-center items-center">
                     <a href="/login" class="nav-link login-link">
@@ -244,7 +246,7 @@
                     </p>
                 </div>
             </div>
-
+            <!-- Account (user) page --> 
             <div class="mb-2 grid grid-cols-12 gap-2 items-center">
                 <div class="col-span-1 flex justify-center items-center">
                     <a href="{% if username %}/user{% else %}/login{% endif %}" class="nav-link account-link">
@@ -277,6 +279,7 @@
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script>
         const menuToggle = document.getElementById('menu-toggle');
         const closeMenu = document.getElementById('close-menu');
@@ -290,5 +293,6 @@
             sidebar.classList.add('translate-x-full');
         });
     </script>
+
 </body>
 </html>
