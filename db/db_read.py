@@ -1,3 +1,7 @@
+"""
+This Script containts all functions that read from the database
+"""
+
 from sqlalchemy.orm import Session
 from .db_write import Dish, Directory, setup_database_connection, User, Rating, Course, Description, Recipe, Embedding, FiltersClean, DishEng, Taste, Ingredient, DishHistory,PriceClean,EmbeddingCluster
 from typing import List

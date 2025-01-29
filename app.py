@@ -1,3 +1,9 @@
+"""
+This is the main script that runs the web application. It contains the routes for the different pages of the web application. Furthermore, it calls all the functions that are needed 
+to create the visualizations and display data dynamically in our web app. 
+"""
+
+
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import os
 from secret import *
@@ -24,8 +30,8 @@ app.secret_key = APP_SECRET_KEY
 
 engine, Session = setup_database_connection(USER, PASSWORD, HOST, PORT)
 
-oauth = OAuth(app)      # google login service
-db = SQLAlchemy(app)    # database service 
+oauth = OAuth(app)
+db = SQLAlchemy(app)
 google = oauth.register(
     name='google',
     client_id=CLIENT_ID,
@@ -64,7 +70,7 @@ def navigation():
    username = session.get('username')  # Get the username from the session
    return render_template('navigation.html', username=username)  # Pass username to the template
                                    
-# check username and password that user puts into form with db
+# This is our login logic. It checks if a username exists in the db. If it does, it checks if the password is correct. If it is, the user is logged in and redirected to the menu page.
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     lang = session.get('language', 'en')
@@ -85,6 +91,7 @@ def login():
                 
     return render_template('login.html', username=session.get('username'))
 
+# This is our registration logic. An new user is created in the database with the given username and password. If the username is already used, an error message is displayed.
 @app.route("/register", methods=["POST"])
 def register():
     username = request.form['username']
@@ -102,7 +109,7 @@ def register():
         return redirect(url_for('rating'))
 
 
-# login for google
+# This is a google login route using google api.
 @app.route('/login/google')
 def login_google():
     lang = session.get('language', 'en')
@@ -115,7 +122,7 @@ def login_google():
         app.logger.error(f"Error during login:{str(e)}")
         return "Error occurred during login", 500
 
-# authorization form for google
+# Login logic using google api. If the user is already in the database, the user is redirected to the menu page. If not, the user is redirected to the rating page.
 @app.route("/authorize/google")
 def authorize_google():
     lang = session.get('language', 'en')
@@ -144,10 +151,9 @@ def authorize_google():
 
             return redirect(url_for('rating'))
 
-
-
     return redirect(url_for('menu'))
 
+# This route logs the user out and redirects to the index page.
 @app.route("/logout")
 def logout():
     lang = session.get('language', 'en')
@@ -156,7 +162,9 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('index'))
 
-
+# This route renders the user page. It displays the user's information, such as the total number of ratings, the first rating date, the rated dishes, the top mensas, 
+# the taste profile, the weekly dish recommendation, and the average ratings of all users and the user. 
+# all plots are dynamically updated if the user removes a rating from the rating table.
 @app.route('/user', methods=['GET','POST'])
 def user_page():
     lang = session.get('language', 'en')
@@ -165,18 +173,18 @@ def user_page():
     user_name = session.get('username')
     selected_user_type = 'student'
 
-
     # if user is not logged in, redirect to login page
     if not user_name:
         return redirect(url_for('login'))
     
     with Session() as db_session:
 
-        # if user is logged in but has not rated dishes yet, redirect to rating page
+        # if user is logged in but has not rated dishes yet, redirect to rating page so that the user can rate dishes
         user_vector = get_user_vector(user_name, db_session)
         if not user_vector:
             return redirect(url_for('rating'))
         
+        # update plots and user vector when the user removes a rating
         if request.method == 'POST':
             menu_id = request.form.get('menu_id')       # if user removes a rating, delete the rating from the database
             selected_user_type = request.form.get('user_type') if request.form.get('user_type') else 'student'  # get student or guest
@@ -192,7 +200,6 @@ def user_page():
         first_rating_date = get_first_rating_date_of_user(db_session, user_name)
         rated_dishes = get_dishes_of_user(db_session, user_name)
         current_month_spending = get_current_month_spending(db_session, user_name , lang)
-
 
         # generate chart to display top mensas for the user
         mensa_user_chart = top_mensa_for_user_chart(db_session, user_name, lang)
@@ -213,7 +220,6 @@ def user_page():
         # Create plot for average ratings of all users and user
         average_ratings_plot = plot_average_ratings(db_session, user_name,lang)
 
-        
     return render_template('user.html', 
                            username=user_name, 
                            total_ratings=total_ratings,
@@ -228,7 +234,7 @@ def user_page():
                            current_month = current_month,
                            user_type = selected_user_type)
                            
-
+# This route renders the rating page. It displays a random dish that the user has not rated yet. The user can rate the dish and the rating is saved in the database.
 @app.route('/rating', methods=['GET','POST'])
 def rating():
     lang = session.get('language', 'en')
@@ -243,6 +249,7 @@ def rating():
         if not user_name:
             return redirect(url_for('login'))
 
+        # safe rating to database and load a new dish if user has rated a dish
         if request.method == 'POST':
             rating, menu_id = request.form.get('rating'), request.form.get('id')
             print(rating, menu_id)
@@ -256,8 +263,8 @@ def rating():
         # get random dish that user has not rated before and that is not contained in todays selected
         random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(), lang, user_name, db_session)
         
-        #Format prices
-        random_dish_dict = random_dish._asdict()  # Convert the Row to a dictionary
+        # Format prices
+        random_dish_dict = random_dish._asdict()
         studentPrice_formatted = format_price(random_dish_dict['studentPrice'])
         guestPrice_formatted = format_price(random_dish_dict['guestPrice'])
         
@@ -266,7 +273,7 @@ def rating():
         return render_template('rating.html', username=user_name, random_dish=random_dish, rating_count=rating_count, studentPrice_formatted = studentPrice_formatted, guestPrice_formatted = guestPrice_formatted)
     
 
-
+# This route renders the menu page. It displays the menu of the selected mensa and date. The user can filter the menu by diet, price, and rating. The user can also rate the dishes.
 @app.route('/menu', methods=['GET','POST'])
 def menu():
     lang = session.get('language', 'en')
@@ -280,7 +287,7 @@ def menu():
         additives_dict, additives_dict_eng, allergens_dict, allergens_dict_eng, meats_dict, meats_dict_eng  = get_written_forms(db_session)
  
         # set default values
-        mensa_name = request.args.get('selected_mensa', 'all')  # Changed default to 'all'
+        mensa_name = request.args.get('selected_mensa', 'all')
         today = datetime.now().date()
         available_dates = [(today + timedelta(days=x)).strftime('%Y-%m-%d') for x in range(-3,6)]
         date = today.strftime('%Y-%m-%d')
@@ -293,16 +300,11 @@ def menu():
         rating_count_switch = None
         rating_switch = None
         
-
         # if user is logged in, get user_id
         user_name = session.get('username')
         user_vector = get_user_vector(user_name, db_session)
 
-        # if user has not rated dishes yet, redirect to rating page
-        #if not user_vector:
-        #    return redirect(url_for('rating'))
-
-        # When user filters, get filtered values
+        # When user filters, get filtered values, also safe ratings to db and update user_vector
         if request.method == 'POST':
             mensa_name = request.form.get('selected_mensa')
             date_temp = request.form.get('selected_date')
@@ -334,17 +336,11 @@ def menu():
             if selected_price_temp:
                 selected_price = selected_price_temp
 
-        
-        if user_name:
-            random_dish = get_random_dishes(datetime.strptime(date, '%Y-%m-%d').date(),lang,user_name,db_session) # initialize random dish
-        else:
-            random_dish = (None,None)
-
         # filter dishes column and merge additional information. Also apply filter of the user directly in the sql query
         dishes = get_dishes_by_date_location_filtered(db_session, datetime.strptime(date, '%Y-%m-%d').date(), mensa_name, selected_diet_meat, session.get('language'))
-        
-        menu_data = []
 
+        # store all dishes in a list of dictionaries so that it can be passed to the HTML template
+        menu_data = []
         for dish in dishes:
             menu_data.append({
                         'id': dish[0].id,
@@ -370,7 +366,7 @@ def menu():
                         'average_rating':dish[11] or 0, # zero if dish is not rated yet
                         'rating_count':dish[12] or 0, # zero if is not rated yet 
                         'recommendation_score': compute_cosine_similarity(dish[10],user_vector) if user_vector else 0,
-                        'is_top_recommendation_in_course': False,  # Initialize to False
+                        'is_top_recommendation_in_course': False,
                         "studentPrice_imputed": 0 if dish[13] is None else dish[13],
                         "guestPrice_imputed":dish[14],
                         "studentPrice_imputed_formatted":format_price(dish[13]),
@@ -378,7 +374,7 @@ def menu():
                         })
         
 
-        # Implement sorting based on switches
+        # Implement sort by based on switches
         if recommendation_switch:
             menu_data = sorted(menu_data, key=lambda x: x.get('recommendation_score', 0), reverse=True)
         elif price_switch:
@@ -400,12 +396,16 @@ def menu():
 
         # find dish with highest recommendation score for each course type and set flag
         for course_key, dishes in grouped_menu_data.items():
-            if dishes:  # Ensure there are dishes for the course
+
+        # Ensure there are dishes for the course
+            if dishes:  
+
                 # Find the dish with the highest recommendation score
-                top_dish = max(dishes, key=lambda x: x['recommendation_score'])
+                top_dish = max(dishes, key=lambda x: x['recommendation_score']) 
                 
                 # Check if the highest recommendation score is greater than 0
                 if top_dish['recommendation_score'] > 0:
+
                     # Set the flag only for the top dish in the current course
                     for dish in dishes:
                         dish['is_top_recommendation_in_course'] = dish == top_dish
@@ -438,10 +438,10 @@ def menu():
                          recommendation_switch=recommendation_switch,
                          price_switch=price_switch,
                          rating_switch=rating_switch,
-                         rating_count_switch=rating_count_switch,
-                         random_dish=random_dish)
+                         rating_count_switch=rating_count_switch)
 
-
+# This route renders the analysis page. It displays the total number of mensas, ratings, and menus. It also displays the first updated date of the database.
+# It updates all plots based on the selected week dates.
 @app.route('/analysis')
 def analysis():
     lang = session.get('language', 'en')
@@ -491,11 +491,9 @@ def analysis():
                              week_dates=week_dates,
                              pie_chart=pie_chart)
     
+# This route updates the price plot based on the selected category, price type and icon selection.
 @app.route('/update_price_plot', methods=['POST'])
 def update_price_plot():
-    """
-    This function updates the price plot based on the selected category, price type and icon selection.
-    """
     selected_category = request.json.get('category')
     selected_price = request.json.get('price')
     selected_icon = request.json.get('icon')
@@ -507,12 +505,9 @@ def update_price_plot():
 
     return jsonify({'plot': plot_html})
 
-
+# This route updates the ratings plot based on the selected week dates.
 @app.route('/update_ratings_plot', methods=['POST'])
 def update_ratings_plot():
-    """
-    This function updates the ratings plot based on the selected week dates.
-    """
     lang = session.get('language', 'en')
     direction = request.json.get('direction')
     week_dates = request.json.get('week_dates')
@@ -526,6 +521,7 @@ def update_ratings_plot():
 
     return jsonify({'ratings_plot':ratings_plot,'week_dates':changed_dates,'mensa_plot':mensa_plot,'dish_plot':dish_plot,'pie_chart':pie_chart})
 
+# Run the web app on port 5001
 if __name__ == "__main__":
     with app.app_context():
         Base.metadata.create_all(engine)

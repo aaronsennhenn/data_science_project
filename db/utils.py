@@ -1,3 +1,8 @@
+"""
+This script contains helper functions that are used by other scripts in the project such as translation, cosine similarity, and price imputation.
+"""
+
+
 from deep_translator import GoogleTranslator
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
@@ -16,11 +21,30 @@ warnings.simplefilter(action='ignore', category=pd.errors.SettingWithCopyWarning
 
 
 def translate_text_all_capitalized(text: str) -> str:
+    """
+    Translates a given German text into English and capitalizes the first letter of each word in the translated text.
+
+    Args:
+        text (str): The German text to be translated.
+
+    Returns:
+        str: The translated text with each word's first letter capitalized.
+    """
     translator = GoogleTranslator(source='de', target='en')
     translated_text = translator.translate(text)
     return translated_text.title()
 
 def translate_text_first_word_capitalized(text: str) -> str:
+    """
+    Translates a given German text into English and capitalizes only the first letter 
+    of the first word in the translated text.
+
+    Args:
+        text (str): The German text to be translated.
+
+    Returns:
+        str: The translated text with only the first word capitalized.
+    """
     translator = GoogleTranslator(source='de', target='en')
     translated = translator.translate(text)
     return translated.capitalize()
@@ -41,7 +65,8 @@ def compute_cosine_similarity(user_vector_str, dish_embedding_str):
 
     if user_vector_str:
 
-        # Convert string inputs to NumPy arrays
+        # Convert string inputs to NumPy arrays. Unfortunatly, we stored the embedding vector as a list in string format. 
+        # In hindsight, it would have been better to store it as a json or different data format
         user_vector = np.array(ast.literal_eval(user_vector_str))
         dish_embedding = np.array(ast.literal_eval(dish_embedding_str))
 
@@ -54,7 +79,21 @@ def compute_cosine_similarity(user_vector_str, dish_embedding_str):
 
     return round(score,3)
 
-def correct_icons(dish_name,menuLine):
+def correct_icons(dish_name: str,menuLine: str) -> str:
+    """
+    This function is used to clean the icons column that we obtain from scraping the mensa website. Often times it is missing. We correct it by 
+    first checking if the dish name contains any of the keywords that are associated with the icons. If not, we use OpenAI to classify the dish into the
+    correct category.
+
+    Args:
+        dish_name (str): The name of the dish to be classified.
+        menuLine (str): The menu category or description associated with the dish.
+
+    Returns:
+        str or float: Returns "vegan" if the dish is classified as vegan, "vegetarian" if it is vegetarian,
+                      or NaN if it cannot be classified.
+    
+    """
     if not dish_name:
         return np.nan
     
@@ -93,17 +132,14 @@ def correct_icons(dish_name,menuLine):
 
 
 
-# functions for missing price prediction
+# functions for missing price prediction. For the regression columns, OLS is applied. For the other columns, majority voting is used to capture the time dependent price.
 regression_columns = ["Auswahlgericht",'Auswahlgericht vegan',"Auswahlgericht veget.","Angebot des Tages",'mensaVital vegan','mensaVital','mensaVital vegetarisch']
 other_columns = ["Beilagen vorport.","Tagesmenü vegetarisch", 'Tagesmenü vegan', 'Tagesmenü','Dessert vorport.','Salat-/ Gemüsebuffet 100g' ,'Dessert SB','Beilagen SB','Aktionsmenü','Angebot d. Tages veget.',"Angebot d. Tages vegan"]
 
 
-
-
 def impute_with_majority_vote(group, price_column, window=10):
     """
-    Imputes missing prices in a group by taking the majority vote of the last `window` non-missing prices.
-    Only imputes the `price_predicted` column for rows with missing prices.
+    Imputes missing prices of "other_columns" using majority voting of the most recent prices as no variance is included in those prices.
     """
     # Reset index to ensure proper positional slicing
     group = group.reset_index(drop=True)
@@ -128,30 +164,48 @@ def impute_with_majority_vote(group, price_column, window=10):
 
     return group
 
-def impute_missing_prices(df,price_column):
+def impute_missing_prices(df: pd.DataFrame,price_column: str) -> pd.DataFrame:
+    """
+    Imputes missing prices in a DataFrame using OLS for menu categories with variance and majority voting for others without variance.
 
+    Args:
+        df (pd.DataFrame): The input DataFrame containing menu information, including dates, menu categories, 
+                           ingredients, and prices.
+        price_column (str): The name of the column containing the prices to be imputed.
+
+    Returns:
+        pd.DataFrame: A DataFrame with missing prices imputed, containing both regression-based predictions and 
+                      majority-vote-based imputations for different menu categories.
+    """
+
+    # Check if 'menuDate' is a datetime column
     if not is_datetime64_any_dtype(df['menuDate']): df['menuDate'] = pd.to_datetime(df['menuDate'])
 
     # Check if 'icons_clean' column exists
     if 'icons_clean' not in df.columns: df.rename(columns={'icons': 'icons_clean'}, inplace=True)
-
     df.sort_values("menuDate",inplace=True)
+
     # add flag if price is missing.
     df['missingPrices'] = ((df[price_column] == 0) | (df[price_column] == -1)).astype(int)
-    df['days'] = (df['menuDate'] - df['menuDate'].min()).dt.days  # Days since the start
+
+    # Add days since the first date
+    df['days'] = (df['menuDate'] - df['menuDate'].min()).dt.days 
 
     # get regression rows
     regress_df = df[df['menuLine'].isin(regression_columns)]
 
     # Convert ingredients and menuLine into binary features
-    regress_df['icons_clean'] = regress_df['icons_clean'].fillna('') # replace na values with empty string
+    regress_df['icons_clean'] = regress_df['icons_clean'].fillna('')
 
+    # Create a ColumnTransformer to vectorize the 'icons_clean' and 'menuLine' columns
     transformer = ColumnTransformer(
         transformers=[
             ('icons_clean_vectorizer', CountVectorizer(tokenizer=lambda x: x.split(', ')), 'icons_clean'),
             ('menuLine_vectorizer', CountVectorizer(tokenizer=lambda x: [x]), 'menuLine')
         ]
     )
+
+    # fit and transform ColumnTransformer
     ingredient_features = transformer.fit_transform(regress_df).toarray()
 
     # Convert to numpy arrays
@@ -190,7 +244,16 @@ def impute_missing_prices(df,price_column):
 
 
 def format_price(price):
-    
+    """
+    Formats a price value for displaying it properly on the menu page
+
+    Args:
+        price (float or str): The price value to be formatted. Can be a float or a string.
+
+    Returns:
+        str: The formatted price string with a comma as the decimal separator.
+             If the input is not a float or string, the original value is returned unchanged.
+    """
     if isinstance(price, float):
         return f"{price:,.2f}".replace('.', ',')
     
@@ -200,17 +263,29 @@ def format_price(price):
     return price
 
 
-def format_price_column(df, price_column, price_imputed_column):
+def format_price_column(df: pd.DataFrame, price_column: str, price_imputed_column: str) -> pd.DataFrame:
+    """
+    Formats a price column in a DataFrame, replacing missing prices (indicated by -1) with imputed prices 
+    and ensuring the prices are formatted with a comma as the decimal separator.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the price column and imputed price column.
+        price_column (str): The name of the column containing the original prices.
+        price_imputed_column (str): The name of the column containing imputed prices to use for missing values.
+
+    Returns:
+        pd.DataFrame: The updated DataFrame with the formatted price column.
+    """
     formatted_prices = []    
     
-    # Check if its -1
+    # Check if its -1. Missing prices are stored as -1 by the scraper
     for price, imputed_price in zip(df[price_column], df[price_imputed_column]):
         if price == -1 or (isinstance(price, str) and price.strip() == '-1'):
             price = imputed_price
         
         #Format the price   
         if isinstance(price, float):
-            formatted_price = f"{price:,.2f}".replace('.', ',')  # Format float to 0,00 style
+            formatted_price = f"{price:,.2f}".replace('.', ',')
         elif isinstance(price, str):
             try:
                 formatted_price = price.replace('.', ',')
@@ -221,14 +296,25 @@ def format_price_column(df, price_column, price_imputed_column):
         
         formatted_prices.append(formatted_price)
         
-    #Append and switch  
+    # Append to df
     df[price_column] = formatted_prices
             
     return df
 
 
-#Formatting month numbers to names
-def get_month_name(month_number, lang='en'):
+def get_month_name(month_number: int, lang='en') -> str:
+    """
+    Converts a month number to its corresponding month name in the specified language.
+
+    Args:
+        month_number (int): The numeric representation of the month (1-12).
+        lang (str): The language code for the desired month name
+
+    Returns:
+        str: The month name corresponding to the given month number and language.
+             Returns "Unknown" if the month number is not between 1 and 12 or the language is not supported.
+    """
+    
     month_names = {
         'en': {
             1: "January", 2: "February", 3: "March", 4: "April",

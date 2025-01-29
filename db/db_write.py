@@ -1,3 +1,9 @@
+"""
+This Script containts all functions that write to the database.
+"""
+
+
+
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
