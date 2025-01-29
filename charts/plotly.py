@@ -374,15 +374,14 @@ def create_weekly_rating_plot(db_session,dates,lang):
     """
 
     ratings = get_ratings_of_the_week(db_session, dates)
-    # If no ratings are found, return None
 
+    # If no ratings are found, return None
     if ratings.empty:
         return None
     
     ratings['day_of_week'] = pd.to_datetime(ratings['menuDate']).dt.day_name()
     day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
     
-
     ratings['day_of_week'] = pd.Categorical(
         ratings['day_of_week'],
         categories=day_order,
@@ -397,8 +396,8 @@ def create_weekly_rating_plot(db_session,dates,lang):
     fig = go.Figure()
 
     ratings['hover_text'] = (
-    "Menu: " + ratings['menu'] + "<br>" +
-    "Location: " + ratings['location']
+    "Menü: " + ratings['menu'] if lang == 'de' else "Menu: " + ratings['menuEng'] + "<br>" +
+    "Mensa: " + ratings['location'] 
 )
     # Add scatter trace
     fig.add_trace(go.Scatter(

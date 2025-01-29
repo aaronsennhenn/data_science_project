@@ -252,7 +252,7 @@
                                 ×
                             </button>
                             <p class="text-sm text-gray-900">
-                                {% if session.get('language') == 'de' %}Gericht:{% else %}Dish:{% endif %} {{ dish.menu }}
+                                {% if session.get('language') == 'de' %}Gericht: {{ dish.menu }} {% else %}Dish: {{ dish.menuEng }}{% endif %} 
                             </p>
                             <p class="text-sm text-gray-900">
                                 {% if session.get('language') == 'de' %}Bewertung:{% else %}Rating{% endif %} {{ dish.rating }}

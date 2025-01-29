@@ -431,15 +431,18 @@ def get_ratings_of_the_week(db_session: Session, week_dates: List[str]) -> List[
         func.count(Rating.id).label('rating_count'),
         Dish.location,
         Dish.menu,
+        DishEng.menuEng,
         Dish.menuDate
         ).join(Dish, Rating.menu_id == Dish.id
+        ).join(DishEng, Dish.id == DishEng.menu_id
         ).filter(Dish.menuDate.in_(week_dates)
-        ).group_by(Dish.id,Dish.location,Dish.menuDate).all()
+        ).group_by(Dish.id,Dish.menu,DishEng.menuEng,Dish.location,Dish.menuDate).all()
 
     result = [
         {
             'location': rating.location,
             'menu': rating.menu,
+            'menuEng': rating.menuEng,
             'menuDate': rating.menuDate,
             'avg_rating': round(rating.avg_rating, 2),
             'rating_count': rating.rating_count
