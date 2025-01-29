@@ -88,86 +88,86 @@
             </nav>
         </div>
     </div>
-
- <!-- Main Content -->
-<div class="flex-grow flex items-center justify-center px-4 py-2 relative z-10">
-    <div class="content-wrapper max-w-4xl w-full p-2 bg-white rounded-xl shadow-sm border border-gray-100">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2 text-center">
-            {% if session.get('language') == 'de' %}
-                Ihr digitaler Mensa-Guide
-            {% else %}
-                Your Digital Mensa Guide
-            {% endif %}
-        </h1>
-        <p class="text-sm text-gray-800 mb-2 text-center leading-relaxed">
-            {% if session.get('language') == 'de' %}
-                Entdecken Sie die vielfältigen kulinarischen Angebote in den Cafeterien und Mensen Tübingens.
-                Erkunden Sie die Mensa-Szene Tübingens und gewinnen Sie Einblicke in Menümuster, Preise und aktuelle Trends.
-            {% else %}
-                Discover the diverse culinary offerings across Tübingen's cafeterias and mensas.
-                Explore Tübingen's mensa scene, uncovering menu patterns, pricing insights, and emerging trends.
-            {% endif %}
-        </p>        
-        
-        <!-- Locations Section -->
-        <div class="mt-2 relative">
-            <h2 class="text-xl font-semibold text-gray-800 mb-2 text-center">
+    
+    <!-- Main Section -->
+    <div class="flex items-center justify-center px-4 py-6 relative z-10">
+        <div class="bg-white bg-opacity-80 max-w-4xl w-full p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+            <h1 class="text-4xl font-semibold text-black mb-6">
                 {% if session.get('language') == 'de' %}
-                    Standorte
+                    Ihr digitaler Mensa-Guide
                 {% else %}
-                    Locations
+                    Your Digital Mensa Guide
                 {% endif %}
-            </h2>
-                <!-- Container for the image -->
+            </h1>
+            <p class="text-base text-gray-800 max-w-3xl leading-relaxed mb-6 text-center mx-auto">
+                {% if session.get('language') == 'de' %}
+                    Entdecken Sie die vielfältigen kulinarischen Angebote in den Cafeterien und Mensen Tübingens.
+                    Nutzen Sie unsere Empfehlungsfunktion, um die besten Gerichte für Ihren Geschmack auf einen Blick zu sehen.
+                {% else %}
+                    Discover the diverse culinary offerings across Tübingen's cafeterias and mensas.
+                    Use our recommendation feature to quickly see the dishes that suit you best at a glance.
+                {% endif %}
+            </p>
+            <div class="mt-6 text-center">
+                <a href="{% if username %}{{ url_for('user_page') }}{% else %}{{ url_for('login') }}{% endif %}" 
+                   class=" px-4 py-2 bg-indigo-500 text-white text-base font-medium rounded-lg shadow-md hover:bg-indigo-700 transition">
+                   {% if session.get('language') == 'de' %}
+                        {% if username %}
+                            Mein wöchentlicher Speiseplan
+                        {% else %}
+                            Jetzt Gerichtsempfehlungen erhalten!
+                        {% endif %}
+                    {% else %}
+                        {% if username %}
+                            My weekly dining schedule
+                        {% else %}
+                            Get meal recommendations now!
+                        {% endif %}
+                    {% endif %}                        
+                </a>
+            </div>
+            
+            <div class="pt-12 space-y-6 relative">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center flex items-center justify-center">
+    <span class="flex-grow border-t border-gray-400"></span>
+    <span class="mx-4">
+        {% if session.get('language') == 'de' %}
+            Wählen Sie Ihren Standort
+        {% else %}
+            Choose Your Location
+        {% endif %}
+    </span>
+    <span class="flex-grow border-t border-gray-400"></span>
+</h2>
                 <div class="relative max-w-2xl mx-auto">
-                    <!-- The map image -->
-                    <img src="{{ url_for('static', filename='images/map_2.png') }}" 
-                         alt="Map with Dining Facilities" 
-                         class="w-full h-auto rounded-lg">
-                    
-                    <!-- Markers on the map -->
+                    <img src="{{ url_for('static', filename='images/map_3.png') }}" alt="Map with Dining Facilities" class="w-full h-auto rounded-lg">
                     {% for mensa_name, coordinates in mensa_coordinates.items() %}
-                        <a href="{{ url_for('menu', selected_mensa=mensa_name) }}"
-                           class="absolute"
-                           style="top: {{ coordinates.top }}%; left: {{ coordinates.left }}%;">
-                            <!-- Marker Image -->
-                            <img src="{{ url_for('static', filename='images/marker.png') }}" 
-                                 alt="Marker for {{ mensa_name }}" 
-                                 class="w-8 h-8 marker">
-                            <!-- Mensa Name -->
-                            <span 
-                                class="absolute text-xs bg-white text-gray-800 px-2 py-1 rounded shadow-lg mensa-label"
-                                style="top: {{ coordinates.text_offset }}px; left: 120%; white-space: nowrap;">
-                                {{ mensa_name }}
-                            </span>
+                        <a href="{{ url_for('menu', selected_mensa=mensa_name) }}" class="absolute" style="top: {{ coordinates.top }}%; left: {{ coordinates.left }}%;">
+                            <img src="{{ url_for('static', filename='images/marker.png') }}" alt="Marker for {{ mensa_name }}" class="w-8 h-8 marker">
+                            <span class="absolute text-xs bg-white text-gray-800 px-2 py-1 rounded shadow-lg mensa-label" style="top: {{ coordinates.text_offset }}px; left: 120%; white-space: nowrap;">{{ mensa_name }}</span>
                         </a>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 py-3 px-8 relative z-10">
         <div class="max-w-6xl mx-auto text-center text-gray-800">
             &copy; 2024 MENSA APP. All rights reserved.
         </div>
     </footer>
-
-    <!-- Scripts -->
     <script>
         const menuToggle = document.getElementById('menu-toggle');
         const closeMenu = document.getElementById('close-menu');
         const sidebar = document.getElementById('sidebar');
-    
+
         menuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('translate-x-full');
         });
-    
+
         closeMenu.addEventListener('click', () => {
             sidebar.classList.add('translate-x-full');
         });
     </script>
-
 </body>
 </html>
