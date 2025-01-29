@@ -100,7 +100,8 @@ def generate_price_chart(db_session, selected_category, selected_price_type, sho
     filtered_df = df[df['menuLine'] == selected_category]
 
     # Define the colors
-    PLOT_COLORS = sequential.dense
+    PLOT_COLORS = sequential.Viridis
+    
 
     # Create the Plotly figure
     fig = go.Figure()
@@ -360,7 +361,7 @@ def create_past_6_month_spending_chart(db_session, user_name, user_type, lang):
 
 day_translation_dict = {'Monday': 'Montag','Tuesday': 'Dienstag','Wednesday': 'Mittwoch','Thursday': 'Donnerstag','Friday': 'Freitag'}
 
-def create_weekly_rating_plot(db_session,dates,lang):
+def create_weekly_rating_plot(db_session, dates, lang):
     """
     Creates a scatter plot displaying the weekly average ratings for a set of menu items over the specified date range.
 
@@ -372,7 +373,6 @@ def create_weekly_rating_plot(db_session,dates,lang):
     Returns:
         str: The HTML representation of the Plotly scatter plot, which can be embedded in a webpage.
     """
-
     ratings = get_ratings_of_the_week(db_session, dates)
 
     # If no ratings are found, return None
@@ -396,19 +396,27 @@ def create_weekly_rating_plot(db_session,dates,lang):
     fig = go.Figure()
 
     ratings['hover_text'] = (
-    "Menü: " + ratings['menu'] if lang == 'de' else "Menu: " + ratings['menuEng'] + "<br>" +
-    "Mensa: " + ratings['location'] 
-)
-    # Add scatter trace
+        "Menü: " + ratings['menu'] if lang == 'de' else "Menu: " + ratings['menuEng'] + "<br>" +
+        "Mensa: " + ratings['location'] 
+    )
+
+    # Add scatter trace with Viridis color scale
     fig.add_trace(go.Scatter(
         x=ratings['day_of_week'],        
         y=ratings['avg_rating'],          
         mode='markers',                 
-        marker=dict(size=10, color='blue'),  
+        marker=dict(
+            size=10, 
+            color=ratings['avg_rating'],  # Use avg_rating for color scale
+            colorscale='Viridis',         # Apply the Viridis color scale
+            colorbar=dict(
+                titleside='right'
+            )
+        ),  
         text=ratings['hover_text'],             
         hovertemplate='<b>Day of Week:</b> %{x}<br>' +
-                    '<b>Average Rating:</b> %{y}<br>' +
-                    '%{text}<extra></extra>'  
+                      '<b>Average Rating:</b> %{y}<br>' +
+                      '%{text}<extra></extra>'  
     ))
 
     # Format the dates to "DD.MM.YYYY"
@@ -416,6 +424,7 @@ def create_weekly_rating_plot(db_session,dates,lang):
     formatted_end_date = datetime.strptime(dates[-1], "%Y-%m-%d").strftime("%d.%m.%Y")
 
     title = f'Weekly Average Ratings for <br>{formatted_start_date} to {formatted_end_date}' if lang == 'en' else f'Wöchentliche Durchschnittsbewertungen für <br>{formatted_start_date} bis {formatted_end_date}'
+    
     # Set plot title and axis labels
     fig.update_layout(
         height=300,
@@ -424,13 +433,14 @@ def create_weekly_rating_plot(db_session,dates,lang):
         yaxis_title='Average Rating' if lang == 'en' else 'Durchschnittliche Bewertung',
         template='plotly',
         xaxis=dict(
-        tickangle=-45
+            tickangle=-45
         )
     )
 
     # Show the figure
     plot_html = pio.to_html(fig, full_html=False)
     return plot_html
+
         
 
 def create_weekly_top_mensa_chart(db_session,lang,week_dates):
@@ -614,7 +624,7 @@ def plot_pie_chart(db_session, week_dates, lang):
             labels=labels, 
             values=values, 
             hoverinfo='label+percent+value',
-            marker=dict(colors=sequential.dense)  
+            marker=dict(colors=sequential.Viridis)  
         )]
     )
     # Format the dates to "DD.MM.YYYY"
