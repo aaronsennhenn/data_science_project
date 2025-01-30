@@ -21,6 +21,15 @@ client = OpenAI()
 
 #Utility function to clean text
 def preprocess_text(text):
+    """
+    Proprocesses text and removes stopword. Neccesary for embedding extraction.
+
+    Parameters:
+        text: Input string
+
+    Returns:
+        text.strip(): The processed text
+    """
 
     text = re.sub(r"\[.*?\]", "", text).strip() # remove special characters
     text = text.lower()  # Convert to lowercase
@@ -38,6 +47,16 @@ def preprocess_text(text):
 
 #Function to extract ingredients
 def ingredient_extraction(df, column):
+    """
+    Makes OpenAI API call to generate a list of ingredients based on the dish name.
+
+    Parameters:
+        df: The dataframe containing the dish names
+        column: Traget column for the dish names
+
+    Returns:
+        df: Now contains two new columns for english and german output
+    """
     ingredients_de_list = []
     ingredients_en_list = []
     tokens_list = []
@@ -123,9 +142,15 @@ def ingredient_extraction(df, column):
 ###Gives out strings
 def embedding_extraction(df, column):
     """
-    This function extracts texts-embeddings from dish names. 
-    Beforehand the german stopwords are removed from the dish name string.
-    """   
+    Makes OpenAI API call to generate embeddings based on the dish name.
+
+    Parameters:
+        df: The dataframe containing the dish names
+        column: Traget column containing the dish names
+
+    Returns:
+        df: Same as above, now contains column for the embeddings
+    """  
     
     gpt_embedding_list = []  
 
@@ -160,9 +185,16 @@ def embedding_extraction(df, column):
 #Descriptions
 def generate_description(df, column, menuLine):
     """
-    This function generates generates descriptions in english and german language for a given dish. If the dish menuLine happens to be in the dish_filter
-    e.g. 'Salat-/ Gemüsebuffet 100g', no description is generated and "No recipe available." is appended instead.
-    """     
+    Makes OpenAI API call to generate descriptions based on the dish name.
+
+    Parameters:
+        df: The dataframe containing the dish names
+        column: Traget column containing the dish names
+        menuLine: The datfarme column containg the category of the dish e.g. Desert
+
+    Returns:
+        df: Same as above, now contains columns for the descriptions
+    """    
     
     
     description_en_list = []
@@ -248,6 +280,16 @@ def generate_description(df, column, menuLine):
 
 
 def classify_dish_taste(df, column):
+    """
+    Makes OpenAI API call to classify the atste of a dish based on the dish name.
+
+    Parameters:
+        df: The dataframe containing the dish names
+        column: Traget column containing the dish names
+
+    Returns:
+        df: Same as above, now contains column for the taste classification in: Fatty, Light and sweet
+    """ 
 
     taste_en_list = []
     taste_de_list = []
@@ -314,10 +356,18 @@ def classify_dish_taste(df, column):
     return df
 
 
-def generate_recipe(df, column, menuLine):   
+def generate_recipe(df, column, menuLine):
     """
     This function generates generates recipes in english and german language for a given dish. If the dish menuLine happens to be in the dish_filter
     e.g. 'Salat-/ Gemüsebuffet 100g', no recipe is generated and "No recipe available." is appended instead.
+
+    Parameters:
+        df: The dataframe containing the dish names
+        column: Traget column containing the dish names
+        menuLine: The datfarme column containg the category of the dish e.g. Desert
+
+    Returns:
+        df: Same as above, now contains columns for the recipes
     """    
         
     recipe_en_list = []
@@ -406,8 +456,15 @@ def generate_recipe(df, column, menuLine):
 
 def classify_missing_filters(dish_name):
     """
-    This function classifies the dish into the predefined filter categories. It is only applied to those main dishes, where the mensa website information is lacking and where our correction does not work
+    Utilizes OpenAI API. This function classifies the dish into the predefined filter categories. It is only applied to those main dishes, where the mensa website information is lacking and where our correction does not work
     No need to run this function in the 'all_prompts' function.
+    
+    Parameters:
+        dish_name: Single dish name
+
+    Returns:
+        result_string: The chosen classification
+    
     """
     
     # Create prompt to classify missing filter category

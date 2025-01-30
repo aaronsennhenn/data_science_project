@@ -1,7 +1,7 @@
 """
-This Script containts all functions that write to the database.
+This Script containts all functions that write to the database. 
+It also contains database table classes that are used in the SQL Alchemy framework.
 """
-
 
 
 from sqlalchemy.orm import sessionmaker
@@ -156,6 +156,19 @@ class Course(Base):
     course_eng = Column(String, nullable=True)
 
 def setup_database_connection(user, password, host, port):
+    """
+    Establishes connection to the database.
+
+    Parameters:
+        user: Database username
+        password: Databse password
+        host: Server host
+        port: Server port
+        
+    Returns:
+        engine: Database engine
+        Session: The database session used to query the database.
+    """
     try:
         connection_string = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/postgres"
         engine = create_engine(connection_string)
@@ -167,6 +180,18 @@ def setup_database_connection(user, password, host, port):
         sys.exit(1)
 
 def write_to_db(filtered_df: pd.DataFrame, engine, Session):
+    """
+    Writes scraped dish data to the dishes table.
+
+    Parameters:
+        filtered_df: Contains all the newly scraped data, rady to be written to the table.        
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
+
     Dish.metadata.create_all(engine)
 
     with Session() as db_session:
@@ -214,6 +239,17 @@ def write_to_db(filtered_df: pd.DataFrame, engine, Session):
 
 # Save translations of dishes in a separate table (api calls avoided)
 def write_to_dishes_eng(engine, Session):
+    """
+    Querys German data from the dishes table and saves it to the dishes_eng table if it doesn"t exist there yet.
+
+    Parameters:
+       Session: The database session used to query the database.
+       engine: Database engine
+        
+    Returns:
+        -
+    """
+    
     DishEng.metadata.create_all(engine)
     
     with Session() as db_session:
@@ -227,7 +263,7 @@ def write_to_dishes_eng(engine, Session):
             
             if not existing:
                 dish_eng = DishEng(
-                    menu_id=dish.id,  # Add this line to include the menu_id
+                    menu_id=dish.id,  
                     menuDate=dish.menuDate,
                     menuLineEng=translate_text_all_capitalized(dish.menuLine),
                     menuEng=translate_text_first_word_capitalized(dish.menu),
@@ -241,6 +277,20 @@ def write_to_dishes_eng(engine, Session):
 
 
 def write_to_rating(menu_id: int, rating: int, user_name: int, on_rating_page: bool, engine, Session):
+    """
+    Writes a submitted rating to the Rtaing table. Keeps track if its submitted on the Rating frontend or Menu frontend.
+
+    Parameters:
+        menu_id (int): The dish ID
+        rating (int): The rating from 1 to 5
+        usrname_name (int): The username of the user doing the rating
+        on_rating_page (bool): Indicates where on the frontend the rating has been submitted. If True - on the Rating page
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
     Rating.metadata.create_all(engine)
 
     with Session() as db_session:
@@ -260,6 +310,18 @@ def write_to_rating(menu_id: int, rating: int, user_name: int, on_rating_page: b
         db_session.commit()
 
 def remove_rating(menu_id, user_name, engine, Session):
+    """
+    Removes ratings from the rating table.
+
+    Parameters:
+        menu_id (int): The dish ID
+        usrname_name (int): The username of the user doing the rating
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
     Rating.metadata.create_all(engine)
 
     with Session() as db_session:
@@ -274,6 +336,17 @@ def remove_rating(menu_id, user_name, engine, Session):
         db_session.commit()
 
 def write_to_filters_clean(icons_df: pd.DataFrame, engine, session):
+    """
+    Writes the icons to the filtersclean table.
+
+    Parameters:
+        icon_df (pd.DataFrame): The dataframe containig icon strings for every dish.
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
     FiltersClean.metadata.create_all(engine) 
 
     for _, row in icons_df.iterrows():
@@ -291,6 +364,18 @@ def write_to_filters_clean(icons_df: pd.DataFrame, engine, session):
 
 
 def write_to_user(username: str, password: str, engine, Session):
+    """
+    Writes new user to the user table.
+
+    Parameters:
+        user (str): The Username
+        password (str): The user's password
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
     User.metadata.create_all(engine)
 
     with Session() as db_session:
@@ -302,6 +387,17 @@ def write_to_user(username: str, password: str, engine, Session):
 
 
 def write_to_ingredient(dishes_df: pd.DataFrame, engine, session):
+    """
+    Writes ingredients to the ingredient table.
+
+    Parameters:
+        dishes_df (pd.DataFrame): The dataframe containig the english and german ingredients.
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """    
     Ingredient.metadata.create_all(engine)
 
     for _, row in dishes_df.iterrows():
@@ -321,6 +417,17 @@ def write_to_ingredient(dishes_df: pd.DataFrame, engine, session):
 
 
 def write_to_description(dishes_df: pd.DataFrame, engine, session):
+    """
+    Writes genrated descriptions to the description table.
+
+    Parameters:
+        dishes_df (pd.DataFrame): The dataframe containig the english and german descriptions.
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
     Description.metadata.create_all(engine)
 
     for _, row in dishes_df.iterrows():
@@ -339,6 +446,17 @@ def write_to_description(dishes_df: pd.DataFrame, engine, session):
 
 
 def write_to_embedding(dishes_df: pd.DataFrame, engine, session):
+    """
+    Writes genrated embeddings to the embedding table.
+
+    Parameters:
+        dishes_df (pd.DataFrame): The dataframe containig the emeddings.
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
     Embedding.metadata.create_all(engine)
 
     for _, row in dishes_df.iterrows():
@@ -357,6 +475,17 @@ def write_to_embedding(dishes_df: pd.DataFrame, engine, session):
 
 
 def write_to_recipe(dishes_df: pd.DataFrame, engine, session):
+    """
+    Writes genrated recipes to the recipe table.
+
+    Parameters:
+        dishes_df (pd.DataFrame): The dataframe containig the english and german recipes.
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
     Recipe.metadata.create_all(engine)
 
     for _, row in dishes_df.iterrows():
@@ -375,6 +504,18 @@ def write_to_recipe(dishes_df: pd.DataFrame, engine, session):
 
 
 def write_to_taste(dishes_df: pd.DataFrame, engine, session):
+    """
+    Writes genrated tastes to the taste table.
+
+    Parameters:
+        dishes_df (pd.DataFrame): The dataframe containig the english and german tastes.
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
+    
     Taste.metadata.create_all(engine)
 
     for _, row in dishes_df.iterrows():
@@ -391,8 +532,19 @@ def write_to_taste(dishes_df: pd.DataFrame, engine, session):
             print(f"Error message: {str(e)}")
             continue
 
-# create a new table called directory, that includes the abbreviations saved in additives and allergens and their corresponding written out form
+
 def write_to_directory(engine, Session):
+    """
+    create a new table called directory, that includes the abbreviations saved in additives and allergens and their corresponding written out form
+
+    Parameters:
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
+    
     Directory.metadata.create_all(engine)
     
     additives_map = {
@@ -486,6 +638,17 @@ def write_to_directory(engine, Session):
 
 
 def write_to_course(engine, db_session):
+    """
+    create a new table called course, that includes all course types in correct german and english translation.
+
+    Parameters:
+        Session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
+    
     Course.metadata.create_all(engine)
     
     dishes = db_session.query(Dish).all()
@@ -607,7 +770,19 @@ def update_user_vector(username, engine, db_session):
 
         
 def write_imputed_price_to_filtersclean(df, db_session, price_column, engine):
-    # this function writes the imputed prices to the PriceClean table
+    """
+    This function writes the imputed prices to the PriceClean table
+
+    Parameters:
+        df: The dataframe with dish data
+        price_column: The target price column within the dataframe
+        db_session: The database session used to query the database.
+        engine: Database engine
+        
+    Returns:
+        -
+    """
+    
     PriceClean.metadata.create_all(engine)
 
     # Filter rows where "missingPrices" is 1
