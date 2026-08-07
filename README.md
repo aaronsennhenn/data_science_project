@@ -1,17 +1,19 @@
-# Data Science Project 
-This repository contains the code and documentation for our platform MENSA APP., which shall enhance the dining experience for students in Tübingen. 
-The project focuses on designing and implementing a comprehensive workflow for exploring and analyzing cafeteria and mensa menus.
+# MENSA APP – Data-Driven Cafeteria Platform
 
-🔹 Key Features:
+MENSA APP is a full-stack web application for collecting, processing, and presenting cafeteria menu data for students in Tübingen. The system combines automated data acquisition, structured persistence, analytical processing, and an interactive multilingual interface.
 
-✅ Data Acquisition – Collecting up-to-date menus from mensas and cafeterias at Tübingen
+## 🎥 Demo
 
-✅ Data Processing – Cleaning and structuring menu data for analysis
+[▶ Watch the project demo](https://github.com/aaronsennhenn/data_science_project/releases/tag/mensa_app_demo)
 
-✅ Analysis & Visualization – Identifying menu patterns, pricing trends, and rating insights
+## System Architecture
 
-✅ User Interaction – Enabling students to browse menus, read and share ratings
-
-✅ Multilingual Support – Switch seamlessly between German and English
-
-This project connects students with the best dining options through data-driven insights and community engagement. 🚀
+```mermaid
+flowchart LR
+    A["Cafeteria Data Sources"] --> B["Automated Web Scraper"]
+    B --> C["Cleaning and Normalization"]
+    C --> D["PostgreSQL Database"]
+    D --> E["Flask Application"]
+    E --> F["Web Interface"]
+    F --> G["Ratings and Analytics"]
+```
